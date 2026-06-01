@@ -38,19 +38,24 @@ actually built rather than generic boilerplate.
 
 ## How to use
 
-**Prerequisites (required).** This stack depends on two MCP tools that must be available in your
-Claude environment — they are mandatory, not optional (see `CLAUDE.md` §1):
+**Prerequisites (required).** `CLAUDE.md` §1 makes three pieces of tooling non-negotiable for this
+stack. Make them available in your Claude environment:
 
-- **Quarkus Agents MCP** — all Quarkus work goes through it. Install the official plugin:
+- **Quarkus Agents MCP** (mandatory) — all Quarkus work goes through it. Install the official plugin:
   ```
   /plugin marketplace add quarkusio/quarkus-agent-mcp
   /plugin install quarkus-agent@quarkus-tools
   ```
-- **context7** — all library/framework documentation lookups go through it:
+- **context7** (mandatory) — all library/framework documentation lookups go through it:
   ```
   claude mcp add context7 -- npx -y @upstash/context7-mcp
   ```
   (Append `--api-key <KEY>` for higher rate limits.)
+- **superpowers skills** — invoked wherever applicable to the task. Install the plugin:
+  ```
+  /plugin marketplace add obra/superpowers-marketplace
+  /plugin install superpowers@superpowers-marketplace
+  ```
 
 Set up both pieces — the conventions and the skill — then test it. They install differently: the
 skill ships as a plugin, but `CLAUDE.md` must live in your project (a plugin cannot deliver it).
