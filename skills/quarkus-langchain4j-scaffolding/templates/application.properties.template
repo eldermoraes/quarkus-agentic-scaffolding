@@ -1,0 +1,47 @@
+# ============================================================================
+# Quarkus + LangChain4j configuration
+#
+# Provider: Ollama, local-first. Requires a running Ollama (`ollama serve`,
+# default endpoint http://localhost:11434) and the model pulled locally:
+#   ollama pull llama3.2
+#   ollama pull llama3.2:1b
+# Models with >= 3B parameters follow system prompts more reliably; llama3.2 (3B)
+# is a good default for structured output and agents.
+# ============================================================================
+
+# --- Ollama endpoint (uncomment to override the default) ---
+# quarkus.langchain4j.ollama.base-url=http://localhost:11434
+
+# --- Default chat model ---
+quarkus.langchain4j.ollama.chat-model.model-id=llama3.2
+quarkus.langchain4j.ollama.chat-model.temperature=0.7
+quarkus.langchain4j.timeout=120s
+
+# --- Named "smaller" model: cheap/fast subtasks (classification, query rewriting). ---
+# Select it with @RegisterAiService(modelName = "smaller") or @ModelName("smaller").
+# Use temperature 0 for deterministic, structured results.
+quarkus.langchain4j.ollama.smaller.chat-model.model-id=llama3.2:1b
+quarkus.langchain4j.ollama.smaller.chat-model.temperature=0
+quarkus.langchain4j.ollama.smaller.chat-model.num-predict=1024
+quarkus.langchain4j.ollama.smaller.timeout=60s
+
+# --- Observability: log prompts and responses during development. ---
+quarkus.langchain4j.log-requests=true
+quarkus.langchain4j.log-responses=true
+
+# --- Dev Services off: a real Ollama endpoint is configured above. ---
+quarkus.langchain4j.devservices.enabled=false
+
+# ============================================================================
+# Cloud models (alternative to local). Requires an Ollama cloud account.
+#   quarkus.langchain4j.ollama.chat-model.model-id=deepseek-v4-pro:cloud
+#   quarkus.langchain4j.ollama.smaller.chat-model.model-id=gpt-oss:20b-cloud
+# ============================================================================
+
+# ============================================================================
+# RAG (Easy RAG) — uncomment when the quarkus-langchain4j-easy-rag extension and
+# an in-process embedding model (langchain4j-embeddings-all-minilm-l6-v2) are on
+# the classpath. Documents in this folder are ingested into an in-memory store on
+# startup; the in-process embedding model is detected automatically (no config).
+# ============================================================================
+# quarkus.langchain4j.easy-rag.path=src/main/resources/rag

@@ -1,0 +1,252 @@
+/*
+ * Declarative multi-agent workflow (LangChain4j Agentic) for Quarkus.
+ *
+ * Requires the quarkus-langchain4j-agentic extension.
+ *
+ * Example: a support-ticket triage. Two sub-agents analyze a ticket IN PARALLEL
+ * (category + priority); a synthesizer combines their findings into a final report;
+ * a streaming bridge runs the blocking workflow on a virtual thread and emits progress
+ * over a Mutiny Multi; a WebSocket exposes it.
+ *
+ * This is a multi-file template. Split each section into the file named in its header,
+ * under one root package (here org.acme). Replace prompts and types with your domain.
+ */
+
+/* ===================== File: dto/TicketInput.java ===================== */
+package org.acme.dto;
+
+public record TicketInput(String ticket) {}
+
+/* ===================== File: dto/CategoryReport.java ===================== */
+package org.acme.dto;
+
+public record CategoryReport(String category, String reason) {}
+
+/* ===================== File: dto/PriorityReport.java ===================== */
+package org.acme.dto;
+
+public record PriorityReport(String level, String reason) {}
+
+/* ===================== File: dto/TriageReport.java ===================== */
+package org.acme.dto;
+
+public record TriageReport(CategoryReport category, PriorityReport priority, String recommendation) {}
+
+/* ===================== File: dto/ProgressUpdate.java ===================== */
+package org.acme.dto;
+
+/** Event/step type streamed to the client. A sealed hierarchy is a good fit as this grows. */
+public record ProgressUpdate(String state, TriageReport result, String error) {
+    public static ProgressUpdate started()              { return new ProgressUpdate("STARTED", null, null); }
+    public static ProgressUpdate done(TriageReport r)   { return new ProgressUpdate("DONE", r, null); }
+    public static ProgressUpdate error(String message)  { return new ProgressUpdate("ERROR", null, message); }
+}
+
+/* ===================== File: ai/CategoryAnalyzer.java ===================== */
+package org.acme.ai;
+
+import org.acme.dto.CategoryReport;
+import dev.langchain4j.agentic.Agent;
+import dev.langchain4j.service.SystemMessage;
+import dev.langchain4j.service.UserMessage;
+import dev.langchain4j.service.V;
+import io.quarkiverse.langchain4j.RegisterAiService;
+import jakarta.enterprise.context.ApplicationScoped;
+
+@ApplicationScoped
+@RegisterAiService(modelName = "smaller")
+public interface CategoryAnalyzer {
+
+    @SystemMessage("You classify support tickets. Return the category and a one-sentence reason.")
+    @UserMessage("Ticket:\n{ticket}")
+    @Agent(name = "category", description = "Classifies the ticket category", outputKey = "category")
+    CategoryReport analyze(@V("ticket") String ticket);
+}
+
+/* ===================== File: ai/PriorityAnalyzer.java ===================== */
+package org.acme.ai;
+
+import org.acme.dto.PriorityReport;
+import dev.langchain4j.agentic.Agent;
+import dev.langchain4j.service.SystemMessage;
+import dev.langchain4j.service.UserMessage;
+import dev.langchain4j.service.V;
+import io.quarkiverse.langchain4j.RegisterAiService;
+import jakarta.enterprise.context.ApplicationScoped;
+
+@ApplicationScoped
+@RegisterAiService(modelName = "smaller")
+public interface PriorityAnalyzer {
+
+    @SystemMessage("You assess support-ticket priority as LOW, MEDIUM, or HIGH with a one-sentence reason.")
+    @UserMessage("Ticket:\n{ticket}")
+    @Agent(name = "priority", description = "Assesses the ticket priority", outputKey = "priority")
+    PriorityReport analyze(@V("ticket") String ticket);
+}
+
+/* ===================== File: ai/Synthesizer.java ===================== */
+package org.acme.ai;
+
+import org.acme.dto.TriageReport;
+import dev.langchain4j.agentic.Agent;
+import dev.langchain4j.service.SystemMessage;
+import dev.langchain4j.service.UserMessage;
+import dev.langchain4j.service.V;
+import io.quarkiverse.langchain4j.RegisterAiService;
+import jakarta.enterprise.context.ApplicationScoped;
+
+@ApplicationScoped
+@RegisterAiService
+public interface Synthesizer {
+
+    @SystemMessage("You combine analyses into one actionable recommendation for a support agent.")
+    @UserMessage("Category: {category}\nPriority: {priority}\nWrite a short recommendation.")
+    @Agent(name = "synthesis", description = "Synthesizes the final triage recommendation", outputKey = "triageFinal")
+    TriageReport synthesize(@V("category") Object category, @V("priority") Object priority);
+}
+
+/* ===================== File: workflow/WorkersParallel.java ===================== */
+package org.acme.workflow;
+
+import org.acme.ai.CategoryAnalyzer;
+import org.acme.ai.PriorityAnalyzer;
+import dev.langchain4j.agentic.declarative.ParallelAgent;
+import dev.langchain4j.service.V;
+
+/** Runs the two analyzers concurrently (declarative parallelism — no manual threads here). */
+public interface WorkersParallel {
+
+    @ParallelAgent(outputKey = "workers", subAgents = { CategoryAnalyzer.class, PriorityAnalyzer.class })
+    Object run(@V("ticket") String ticket);
+}
+
+/* ===================== File: workflow/TriageAgent.java ===================== */
+package org.acme.workflow;
+
+import org.acme.ai.Synthesizer;
+import org.acme.dto.CategoryReport;
+import org.acme.dto.PriorityReport;
+import org.acme.dto.TriageReport;
+import dev.langchain4j.agentic.declarative.Output;
+import dev.langchain4j.agentic.declarative.SequenceAgent;
+import dev.langchain4j.agentic.scope.AgenticScope;
+import dev.langchain4j.service.V;
+
+/** Sequence: parallel analysis -> synthesis. @Output assembles the result from the scope. */
+public interface TriageAgent {
+
+    @SequenceAgent(outputKey = "triageFinal", subAgents = { WorkersParallel.class, Synthesizer.class })
+    TriageReport triage(@V("ticket") String ticket);
+
+    @Output
+    static TriageReport assemble(AgenticScope scope) {
+        TriageReport partial = (TriageReport) scope.readState("triageFinal");
+        return new TriageReport(
+                (CategoryReport) scope.readState("category"),
+                (PriorityReport) scope.readState("priority"),
+                partial.recommendation());
+    }
+}
+
+/* ===================== File: workflow/TriageBridge.java ===================== */
+package org.acme.workflow;
+
+import org.acme.dto.ProgressUpdate;
+import org.acme.dto.TriageReport;
+import io.smallrye.mutiny.Multi;
+import io.smallrye.mutiny.subscription.MultiEmitter;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+
+/**
+ * Streaming bridge: reactive types stay at the edge. The blocking agent workflow runs on a
+ * virtual thread; progress is emitted into a Mutiny Multi for the WebSocket.
+ */
+@ApplicationScoped
+public class TriageBridge {
+
+    @Inject
+    TriageAgent triageAgent;
+
+    public Multi<ProgressUpdate> triage(String ticket) {
+        return Multi.createFrom().emitter(emitter ->
+                Thread.startVirtualThread(() -> run(ticket, emitter)));
+    }
+
+    private void run(String ticket, MultiEmitter<? super ProgressUpdate> emitter) {
+        try {
+            emitter.emit(ProgressUpdate.started());
+            TriageReport report = triageAgent.triage(ticket);
+            emitter.emit(ProgressUpdate.done(report));
+            emitter.complete();
+        } catch (Exception e) {
+            emitter.fail(e);
+        }
+    }
+}
+
+/* ===================== File: web/TriageSocket.java ===================== */
+package org.acme.web;
+
+import org.acme.dto.ProgressUpdate;
+import org.acme.dto.TicketInput;
+import org.acme.workflow.TriageBridge;
+import io.quarkus.websockets.next.OnError;
+import io.quarkus.websockets.next.OnTextMessage;
+import io.quarkus.websockets.next.WebSocket;
+import io.smallrye.mutiny.Multi;
+import jakarta.inject.Inject;
+import org.jboss.logging.Logger;
+
+@WebSocket(path = "/ws/triage")
+public class TriageSocket {
+
+    private static final Logger LOG = Logger.getLogger(TriageSocket.class);
+
+    @Inject
+    TriageBridge bridge;
+
+    @OnTextMessage
+    public Multi<ProgressUpdate> onMessage(TicketInput input) {
+        return bridge.triage(input.ticket());
+    }
+
+    @OnError
+    public ProgressUpdate onError(Throwable t) {
+        LOG.error("Triage failed", t);
+        return ProgressUpdate.error(t.getMessage());
+    }
+}
+
+/*
+ * ===================== Variant: supervisor (router) =====================
+ * When a coordinator should pick which specialist agent(s) handle the request, use
+ * @SupervisorAgent instead of @SequenceAgent/@ParallelAgent:
+ *
+ *   import dev.langchain4j.agentic.declarative.SupervisorAgent;
+ *   import dev.langchain4j.agentic.declarative.SupervisorRequest;
+ *   import dev.langchain4j.agentic.supervisor.SupervisorResponseStrategy;
+ *   import dev.langchain4j.service.V;
+ *
+ *   public interface DispatchSupervisor {
+ *
+ *       @SupervisorAgent(
+ *               outputKey = "supervisorOutput",
+ *               subAgents = { CategoryAnalyzer.class, PriorityAnalyzer.class },
+ *               responseStrategy = SupervisorResponseStrategy.LAST,
+ *               maxAgentsInvocations = 2)
+ *       String handle(@V("ticket") String ticket);
+ *
+ *       @SupervisorRequest
+ *       static String request(@V("ticket") String ticket) {
+ *           return "Route this ticket to the most appropriate analyzer(s):\n\n" + ticket;
+ *       }
+ *   }
+ *
+ * ===================== Variant: map one agent over a list =====================
+ * To run a single agent over each element of a list in parallel, use @ParallelMapperAgent:
+ *
+ *   import dev.langchain4j.agentic.declarative.ParallelMapperAgent;
+ *   @ParallelMapperAgent(subAgent = CategoryAnalyzer.class, outputKey = "results")
+ *   java.util.List<CategoryReport> analyzeEach(@V("tickets") java.util.List<String> tickets);
+ */

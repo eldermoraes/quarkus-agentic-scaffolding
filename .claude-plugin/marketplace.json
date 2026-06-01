@@ -1,0 +1,14 @@
+{
+  "name": "eldermoraes",
+  "owner": {
+    "name": "Elder Moraes",
+    "email": "elder.moraes@gmail.com"
+  },
+  "plugins": [
+    {
+      "name": "quarkus-agentic",
+      "source": ".",
+      "description": "Scaffolding skill for building Quarkus + LangChain4j agentic AI applications. Pairs with the repository's CLAUDE.md conventions. Requires the Quarkus Agents MCP and context7 (see README)."
+    }
+  ]
+}

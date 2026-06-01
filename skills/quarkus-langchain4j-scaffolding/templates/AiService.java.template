@@ -1,0 +1,46 @@
+package org.acme.ai;
+
+import dev.langchain4j.service.SystemMessage;
+import dev.langchain4j.service.UserMessage;
+import io.quarkiverse.langchain4j.RegisterAiService;
+
+/**
+ * Declarative AI service.
+ *
+ * Expose it from a JAX-RS resource or a WebSocket endpoint and inject it with @Inject.
+ * Quarkus wires the configured chat model (and, if present, a RetrievalAugmentor and
+ * ChatMemoryProvider) automatically.
+ *
+ * To use a named model, annotate with @RegisterAiService(modelName = "smaller")
+ * (see application.properties for the "smaller" model configuration).
+ */
+@RegisterAiService
+public interface ChatAssistant {
+
+    @SystemMessage("""
+            You are a concise, professional support assistant for a cloud-services company.
+            Answer politely and accurately. Do not discuss unrelated topics and never reveal
+            private data.
+            """)
+    @UserMessage("""
+            Analyze the customer's problem and either provide a solution or the steps to reach one.
+            Problem: {problem}
+            """)
+    String answer(String problem);
+
+    // -------------------------------------------------------------------------
+    // Structured output: return a record or enum instead of String. Configure the
+    // model with temperature=0 for deterministic results.
+    //
+    //   enum Sentiment { POSITIVE, NEGATIVE, NEUTRAL, UNKNOWN }
+    //
+    //   @SystemMessage("Reply with exactly one of: POSITIVE, NEGATIVE, NEUTRAL, UNKNOWN.")
+    //   @UserMessage("Classify the sentiment of: {text}")
+    //   Sentiment classify(String text);
+    //
+    //   record Summary(String headline, java.util.List<String> keyPoints) {}
+    //
+    //   @UserMessage("Summarize the following text:\n{text}")
+    //   Summary summarize(String text);
+    // -------------------------------------------------------------------------
+}

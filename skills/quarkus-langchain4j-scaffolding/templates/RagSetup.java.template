@@ -1,0 +1,112 @@
+package org.acme.rag;
+
+import dev.langchain4j.service.SystemMessage;
+import dev.langchain4j.service.UserMessage;
+import io.quarkiverse.langchain4j.RegisterAiService;
+
+/*
+ * RAG setup — start with EASY RAG (the default), escalate to a manual pipeline only if needed.
+ *
+ * ---------------------------------------------------------------------------
+ * DEFAULT: Easy RAG (no retriever code required)
+ * ---------------------------------------------------------------------------
+ * 1. Add the extension + an in-process embedding model (see pom.xml.template):
+ *      io.quarkiverse.langchain4j:quarkus-langchain4j-easy-rag
+ *      dev.langchain4j:langchain4j-embeddings-all-minilm-l6-v2
+ * 2. Configure the documents folder (see application.properties.template):
+ *      quarkus.langchain4j.easy-rag.path=src/main/resources/rag
+ * 3. Drop your documents into that folder. They are ingested into an in-memory
+ *    embedding store on startup, and the produced RetrievalAugmentor is applied to
+ *    AI services automatically.
+ *
+ * That is the whole setup. The AI service below needs no RAG-specific code — retrieved
+ * context is injected into its prompt automatically.
+ */
+@RegisterAiService
+public interface RagAssistant {
+
+    @SystemMessage("""
+            You are a helpful assistant. Answer using the retrieved context.
+            If the answer is not in the context, say you do not know.
+            """)
+    @UserMessage("{question}")
+    String ask(String question);
+}
+
+/*
+ * ---------------------------------------------------------------------------
+ * OPT-IN: manual RetrievalAugmentor (use only when Easy RAG is not enough)
+ * ---------------------------------------------------------------------------
+ * Drop the easy-rag extension and produce the pieces yourself. This gives control over the
+ * embedding store, retriever settings (maxResults, minScore), and ingestion. Put this in its
+ * own RagConfig class.
+ *
+ *   package org.acme.rag;
+ *
+ *   import dev.langchain4j.data.segment.TextSegment;
+ *   import dev.langchain4j.model.embedding.EmbeddingModel;
+ *   import dev.langchain4j.rag.DefaultRetrievalAugmentor;
+ *   import dev.langchain4j.rag.RetrievalAugmentor;
+ *   import dev.langchain4j.rag.content.retriever.EmbeddingStoreContentRetriever;
+ *   import dev.langchain4j.store.embedding.EmbeddingStore;
+ *   import dev.langchain4j.store.embedding.inmemory.InMemoryEmbeddingStore;
+ *   import jakarta.enterprise.context.ApplicationScoped;
+ *   import jakarta.enterprise.inject.Produces;
+ *   import jakarta.inject.Singleton;
+ *
+ *   @ApplicationScoped
+ *   public class RagConfig {
+ *
+ *       @Produces
+ *       @Singleton
+ *       public EmbeddingStore<TextSegment> embeddingStore() {
+ *           return new InMemoryEmbeddingStore<>();
+ *       }
+ *
+ *       @Produces
+ *       @Singleton
+ *       public RetrievalAugmentor retrievalAugmentor(EmbeddingStore<TextSegment> store,
+ *                                                     EmbeddingModel embeddingModel) {
+ *           EmbeddingStoreContentRetriever retriever = EmbeddingStoreContentRetriever.builder()
+ *                   .embeddingStore(store)
+ *                   .embeddingModel(embeddingModel)
+ *                   .maxResults(5)
+ *                   .build();
+ *           return DefaultRetrievalAugmentor.builder()
+ *                   .contentRetriever(retriever)
+ *                   .build();
+ *       }
+ *   }
+ *
+ * Ingest documents once at startup (the in-process embedding model satisfies EmbeddingModel):
+ *
+ *   import dev.langchain4j.data.document.Document;
+ *   import dev.langchain4j.data.document.loader.FileSystemDocumentLoader;
+ *   import dev.langchain4j.data.document.splitter.DocumentSplitters;
+ *   import dev.langchain4j.store.embedding.EmbeddingStoreIngestor;
+ *   import io.quarkus.runtime.Startup;
+ *   import jakarta.enterprise.context.ApplicationScoped;
+ *   import jakarta.inject.Inject;
+ *   import java.nio.file.Path;
+ *
+ *   @ApplicationScoped
+ *   public class IngestionService {
+ *
+ *       @Inject EmbeddingStore<TextSegment> embeddingStore;
+ *       @Inject EmbeddingModel embeddingModel;
+ *
+ *       @Startup
+ *       void ingest() {
+ *           Document document = FileSystemDocumentLoader.loadDocument(Path.of("src/main/resources/rag/your-doc.txt"));
+ *           EmbeddingStoreIngestor.builder()
+ *                   .documentSplitter(DocumentSplitters.recursive(500, 50))
+ *                   .embeddingModel(embeddingModel)
+ *                   .embeddingStore(embeddingStore)
+ *                   .build()
+ *                   .ingest(document);
+ *       }
+ *   }
+ *
+ * For PDFs, add langchain4j-document-parser-apache-pdfbox and pass an ApachePdfBoxDocumentParser
+ * to loadDocument(...).
+ */
