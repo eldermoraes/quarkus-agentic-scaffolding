@@ -7,7 +7,10 @@
   "plugins": [
     {
       "name": "quarkus-agentic",
-      "source": ".",
+      "source": {
+        "source": "github",
+        "repo": "eldermoraes/quarkus-agentic-scaffolding"
+      },
       "description": "Scaffolding skill for building Quarkus + LangChain4j agentic AI applications. Pairs with the repository's CLAUDE.md conventions. Requires the Quarkus Agents MCP and context7 (see README)."
     }
   ]
