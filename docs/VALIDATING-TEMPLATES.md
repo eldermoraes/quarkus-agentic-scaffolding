@@ -25,10 +25,12 @@ before shipping a release, and whenever you touch a template.
    )
    ```
 
-2. **Reconcile the version.** Read `quarkus.platform.version` from the generated `pom.xml`. If it is
-   newer than the value in `pom.xml.template`, update the template (it is a reference baseline only).
-   Also confirm the generated pom still imports `quarkus-langchain4j-bom` under
-   `io.quarkus.platform` at the platform version — the template assumes this.
+2. **Reconcile dependencies.** `pom.xml.template` no longer pins a platform version — `quarkus_create`
+   owns the shell. Instead, confirm the generated `pom.xml` imports both `quarkus-bom` and
+   `quarkus-langchain4j-bom` under `io.quarkus.platform`, and that the extension list above still
+   resolves. Then confirm the **non-extension** deps in `pom.xml.template`
+   (`langchain4j-embeddings-all-minilm-l6-v2`, `langchain4j-document-parser-apache-pdfbox`) still
+   resolve via the BOM with no explicit `<version>`.
 
 3. **Materialize the templates** into `src/main/java/org/acme/` and `src/main/resources/`:
    - copy `AiService.java.template` → `ai/ChatAssistant.java`
@@ -62,6 +64,11 @@ When you only need to know *"does the template Java still compile against the cu
 
 ## Last validated
 
+- **0.6.0 (2026-06-03):** platform `3.36.1`. After slimming `pom.xml.template` to a dependency
+  reference: regenerated the shell via `quarkus_create` (core + agents + RAG — all extensions
+  resolved) and confirmed the two non-extension deps now listed in the template
+  (`langchain4j-embeddings-all-minilm-l6-v2`, `langchain4j-document-parser-apache-pdfbox`) resolve
+  via `quarkus-langchain4j-bom` with **no** `<version>` (1.14.1-beta24). `BUILD SUCCESS`.
 - **0.5.0 (2026-06-03):** platform `3.36.1`, `maven.compiler.release` 25. Generated a throwaway
   project with the `rest-jackson` extension list and compiled all 14 materialized template files
   (`BUILD SUCCESS`, `javac [... release 25]`) — confirms `quarkus-rest-jackson` resolves on the
