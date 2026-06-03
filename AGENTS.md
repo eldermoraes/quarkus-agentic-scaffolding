@@ -1,7 +1,7 @@
-# Quarkus + LangChain4j + AI Stack — Project Conventions
+# Quarkus + LangChain4j + AI Stack - Project Conventions
 # Version: 0.3.0
 
-These conventions apply whenever code is written, reviewed, or configured in a Quarkus +
+These conventions apply whenever Codex writes, reviews, or configures code in a Quarkus +
 LangChain4j project. They are always-on. Procedural scaffolding steps and starter code live in
 the `quarkus-langchain4j-scaffolding` skill and its templates, not here.
 
@@ -13,14 +13,14 @@ These tools are prerequisites for this project, not suggestions. Do not work aro
 if a required tool is unavailable, stop and report it rather than falling back to model memory or a
 generic web search.
 
-- **Quarkus Agents MCP — required for every Quarkus task.** Project creation, extension selection,
+- **Quarkus Agents MCP - required for every Quarkus task.** Project creation, extension selection,
   configuration, version checks, API usage, and troubleshooting MUST go through the Quarkus Agents
   MCP. Never create a Quarkus project or add an extension by hand, and never answer a Quarkus
   question from model memory before consulting it.
-- **context7 — required for external library and framework documentation.** Before relying on
-  memory or web search for any library or framework API — LangChain4j included — you MUST look it
+- **context7 - required for external library and framework documentation.** Before relying on
+  memory or web search for any library or framework API - LangChain4j included - you MUST look it
   up with `context7` first.
-- **superpowers skills — use whenever applicable.** Invoke the relevant `superpowers` skill
+- **superpowers skills - use whenever applicable.** Invoke the relevant `superpowers` skill
   capabilities for the task at hand.
 
 ---
@@ -29,7 +29,7 @@ generic web search.
 
 - **Java 25 is the minimum language level**, not a ceiling. Compile with
   `maven.compiler.release` set to at least 25 and adopt newer language levels freely. Document
-  any project that must pin an older level and explain why (see §6).
+  any project that must pin an older level and explain why (see section 6).
 - **Default to Virtual Threads for I/O-bound and blocking concurrent work.** Platform threads
   are acceptable only when the runtime or a critical dependency forbids virtual threads (for
   example, a JDBC driver that pins the carrier). When a blocking AI or tool call must run inside
@@ -39,7 +39,7 @@ generic web search.
   `ThreadLocal`.
 - **Structured concurrency for related subtasks.** For fan-out across related concurrent
   subtasks, prefer declarative parallelism (LangChain4j `@ParallelAgent` / `@ParallelMapperAgent`,
-  see §4) or explicit virtual-thread fan-out (`Thread.startVirtualThread(...)` or an
+  see section 4) or explicit virtual-thread fan-out (`Thread.startVirtualThread(...)` or an
   `Executors.newVirtualThreadPerTaskExecutor()`), instead of ad-hoc executor coordination.
   `StructuredTaskScope` is the preferred structured-concurrency primitive where the project can
   enable it; note it is a Java preview feature (requires `--enable-preview`) with GraalVM
@@ -63,8 +63,8 @@ generic web search.
 - **REST and API surface.** Use `quarkus-rest` (Quarkus REST) with `quarkus-rest-jsonb` for JSON,
   and expose `quarkus-smallrye-openapi` so endpoints are documented and explorable.
 - **Streaming uses WebSockets Next.** For token or progress streaming, use
-  `quarkus-websockets-next` rather than rolling a custom transport (see §4 for the streaming
-  pattern).
+  `quarkus-websockets-next` rather than rolling a custom transport (see section 4 for the
+  streaming pattern).
 - **Enable parameter-name retention.** Configure the compiler with `-parameters` (Maven:
   `<parameters>true</parameters>`), which REST and AI-service binding rely on.
 - **Build for both JVM and native.** Keep a `native` Maven profile so the project can produce a
@@ -84,14 +84,14 @@ generic web search.
   memory. Prefer this over manual `ChatModel` wiring unless there is a documented reason.
 - **Multi-agent workflows are composed declaratively.** Build agentic workflows from
   `@RegisterAiService` agents annotated with `@Agent(name, description, outputKey)` and orchestrate
-  them with the LangChain4j Agentic annotations — `@SequenceAgent`, `@ParallelAgent`,
-  `@ParallelMapperAgent`, and `@SupervisorAgent` (+ `@SupervisorRequest`) — assembling results
+  them with the LangChain4j Agentic annotations - `@SequenceAgent`, `@ParallelAgent`,
+  `@ParallelMapperAgent`, and `@SupervisorAgent` (+ `@SupervisorRequest`) - assembling results
   with `@Output` over the `AgenticScope`. Use the `quarkus-langchain4j-agentic` extension. Avoid
   hand-rolled executor or coordination glue between AI services.
 - **Structured output via typed return values.** Have services return records or enums to get
   structured results, and set `temperature=0` for classification and other deterministic tasks.
-- **Name and right-size models.** Configure models by name (`@RegisterAiService(modelName = "…")`
-  on services, `@ModelName("…")` on injected models) and use a small, fast, low-temperature model
+- **Name and right-size models.** Configure models by name (`@RegisterAiService(modelName = "..."`)
+  on services, `@ModelName("...")` on injected models) and use a small, fast, low-temperature model
   for cheap subtasks (classification, query rewriting) and a larger model for the primary task.
 - **Streaming pattern: reactive only at the edge.** Stream over `quarkus-websockets-next`
   (`@WebSocket`, `@OnTextMessage` returning a Mutiny `Multi`, `@OnError`). Keep the agent and
@@ -126,6 +126,6 @@ Apply it when adding tests:
 ## 6. Scope and overrides
 
 These conventions apply to projects in this Quarkus + LangChain4j stack. A per-project addition
-or override is allowed when justified — for example, pinning a fixed older Java version, choosing
-platform threads for a pinning dependency, or selecting a different model provider — and must be
+or override is allowed when justified - for example, pinning a fixed older Java version, choosing
+platform threads for a pinning dependency, or selecting a different model provider - and must be
 documented inline near the override so the deviation and its reason stay visible.

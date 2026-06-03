@@ -3,6 +3,16 @@
 All notable changes to this artifact are documented here. This project adheres to semantic
 versioning.
 
+## v0.3.0 — 2026-06-03
+- Added native Codex support alongside the existing Claude support: `AGENTS.md`,
+  `.codex-plugin/plugin.json`, `.agents/plugins/marketplace.json`, a non-duplicating
+  `plugins/quarkus-agentic/` marketplace wrapper, and Codex app metadata for the scaffolding
+  skill.
+- README: documented Codex prerequisites, plugin installation, and the relationship between
+  `AGENTS.md`, `CLAUDE.md`, and the shared scaffolding skill.
+- CONTRIBUTING: updated ownership and versioning guidance so future changes keep Claude and Codex
+  surfaces in sync.
+
 ## v0.2.0 — 2026-06-01
 - Packaged as an installable Claude Code **plugin**: added `.claude-plugin/plugin.json` and
   `.claude-plugin/marketplace.json` (the repository is both the marketplace and the plugin). The

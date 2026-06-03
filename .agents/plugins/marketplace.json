@@ -1,0 +1,20 @@
+{
+  "name": "eldermoraes",
+  "interface": {
+    "displayName": "Elder Moraes"
+  },
+  "plugins": [
+    {
+      "name": "quarkus-agentic",
+      "source": {
+        "source": "local",
+        "path": "./plugins/quarkus-agentic"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Developer Tools"
+    }
+  ]
+}

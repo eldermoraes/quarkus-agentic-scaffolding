@@ -4,7 +4,7 @@ description: Scaffold and structure new Quarkus + LangChain4j projects, modules,
 ---
 
 # Quarkus + LangChain4j Scaffolding
-# Version: 0.2.0
+# Version: 0.3.0
 
 ## 1. When to use this skill
 
@@ -26,7 +26,7 @@ discover extensions through the **Quarkus Agents MCP** (`quarkus_create`, `quark
 and call `quarkus_skills` for each chosen extension **before** writing any code — never create a
 Quarkus project or add an extension by hand. Use **context7** for every LangChain4j and other
 library API lookup. If either tool is unavailable, stop and report it rather than guessing. These
-are project prerequisites; see `CLAUDE.md` §1.
+are project prerequisites; see `CLAUDE.md` §1 or `AGENTS.md` §1.
 
 ## 2. Project layout convention
 
@@ -109,4 +109,5 @@ rather than invoking Maven directly.
 
 For coding conventions to apply once scaffolding is done — Java language level, virtual threads,
 records/sealed/pattern matching, declarative AI services, streaming, RAG, testing — see the
-project's `CLAUDE.md`. This skill does not duplicate those conventions.
+project's `CLAUDE.md` (Claude) or `AGENTS.md` (Codex). This skill does not duplicate those
+conventions.

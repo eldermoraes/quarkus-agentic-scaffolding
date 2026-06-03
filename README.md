@@ -1,14 +1,14 @@
 # Quarkus + LangChain4j + AI Stack
-# Version: 0.2.0
+# Version: 0.3.0
 
 ## What this repository is
 
 A small, opinionated, distribution-ready artifact for building AI and agent applications on the
-Java stack of **Quarkus + LangChain4j**. It pairs a drop-in `CLAUDE.md` of always-on coding
-conventions with a Claude skill that scaffolds new projects, AI services, agents, and RAG
-pipelines from working templates. The conventions and templates reflect real-world Quarkus +
-LangChain4j practice and a baseline of modern Java, so the guidance captures how these systems are
-actually built rather than generic boilerplate.
+Java stack of **Quarkus + LangChain4j**. It pairs drop-in always-on coding conventions
+(`CLAUDE.md` for Claude, `AGENTS.md` for Codex) with a reusable skill that scaffolds new projects,
+AI services, agents, and RAG pipelines from working templates. The conventions and templates
+reflect real-world Quarkus + LangChain4j practice and a baseline of modern Java, so the guidance
+captures how these systems are actually built rather than generic boilerplate.
 
 ## What's inside
 
@@ -16,13 +16,21 @@ actually built rather than generic boilerplate.
 .
 ├── README.md                 # This file
 ├── CLAUDE.md                 # Always-on project conventions (drop into your project root)
+├── AGENTS.md                 # Codex equivalent of the always-on project conventions
 ├── CONTRIBUTING.md           # How to propose changes
 ├── CHANGELOG.md              # Release history
 ├── LICENSE                   # Apache-2.0
 ├── .gitignore
-├── .claude-plugin/           # Installable-plugin + marketplace manifests
+├── .claude-plugin/           # Claude installable-plugin + marketplace manifests
 │   ├── plugin.json
 │   └── marketplace.json
+├── .codex-plugin/            # Codex plugin manifest
+│   └── plugin.json
+├── .agents/
+│   └── plugins/
+│       └── marketplace.json  # Codex repo-local marketplace manifest
+├── plugins/
+│   └── quarkus-agentic/      # Codex marketplace wrapper; symlinks to .codex-plugin + skills
 ├── docs/
 │   └── VALIDATING-TEMPLATES.md   # How to verify the templates still build
 └── skills/
@@ -36,7 +44,7 @@ actually built rather than generic boilerplate.
             └── RagSetup.java.template
 ```
 
-## How to use
+## How to use with Claude
 
 **Prerequisites (required).** `CLAUDE.md` §1 makes three pieces of tooling non-negotiable for this
 stack. Make them available in your Claude environment:
@@ -78,9 +86,50 @@ skill ships as a plugin, but `CLAUDE.md` must live in your project (a plugin can
    *"scaffold a new agent"*, or *"set up a new RAG pipeline"*. The skill produces the layout and
    starter files; `CLAUDE.md` governs the conventions of the code that follows.
 
-## What's in `CLAUDE.md` and why
+## How to use with Codex
 
-`CLAUDE.md` is intentionally short and always-on. Each section earns its place:
+**Prerequisites (required).** `AGENTS.md` §1 mirrors the same non-negotiable stack requirements for
+Codex. Make them available in your Codex environment:
+
+- **Quarkus Agents MCP** (mandatory) — all Quarkus work goes through it. Install the official
+  Quarkus plugin and add it to Codex:
+  ```
+  codex plugin marketplace add quarkusio/quarkus-agent-mcp
+  codex plugin add quarkus-agent@quarkus-tools
+  ```
+- **context7** (mandatory) — all library/framework documentation lookups go through it:
+  ```
+  codex mcp add context7 -- npx -y @upstash/context7-mcp
+  ```
+  (Append `--api-key <KEY>` for higher rate limits.)
+- **superpowers skills** — invoked wherever applicable to the task. Install or enable the
+  Superpowers plugin in your Codex environment.
+
+Set up both pieces — the conventions and the skill — then test it. They install differently: the
+skill ships as a plugin, but `AGENTS.md` must live in your project because Codex reads project
+instructions from the project tree.
+
+1. **Add the conventions.** Copy [`AGENTS.md`](AGENTS.md) to the root of your Quarkus +
+   LangChain4j project. Codex reads it automatically before it starts work in that project.
+
+2. **Install the skill (plugin).** Add this repository as a Codex plugin marketplace and install
+   it:
+   ```
+   codex plugin marketplace add eldermoraes/quarkus-agentic-scaffolding
+   codex plugin add quarkus-agentic@eldermoraes
+   ```
+   The `quarkus-langchain4j-scaffolding` skill and its `templates/` are installed and
+   auto-discovered.
+
+3. **Try it.** Open your project in Codex and use a trigger phrase such as
+   *"scaffold a new Quarkus + LangChain4j project"*, *"create a new AI service"*,
+   *"scaffold a new agent"*, or *"set up a new RAG pipeline"*. The skill produces the layout and
+   starter files; `AGENTS.md` governs the conventions of the code that follows.
+
+## What's in `CLAUDE.md` / `AGENTS.md` and why
+
+`CLAUDE.md` and `AGENTS.md` are intentionally short and always-on. They carry the same project
+conventions, expressed for the instruction surface each agent reads. Each section earns its place:
 
 - **§1 Required tooling (mandatory).** Makes `context7` and the **Quarkus Agents MCP** required,
   not optional: every Quarkus task goes through the Quarkus Agents MCP and every library lookup
@@ -101,7 +150,7 @@ skill ships as a plugin, but `CLAUDE.md` must live in your project (a plugin can
 - **§6 Scope and overrides.** States that per-project deviations are allowed when documented
   inline — the conventions guide, they do not imprison.
 
-## What the skill does and how it composes with `CLAUDE.md`
+## What the skill does and how it composes with the conventions
 
 The `quarkus-langchain4j-scaffolding` skill handles the *"create something new"* moments:
 new project, AI service, agent/workflow, or RAG component. It provides a project layout, a
@@ -110,34 +159,41 @@ dependency baseline, an `application.properties` baseline, and starter classes v
 
 The split is deliberate and non-overlapping:
 
-- **The skill is procedural** — it tells Claude *how to lay things out and get them running*, and
-  it points at the Quarkus Agents MCP to actually create and run the project.
-- **`CLAUDE.md` is declarative** — it states the conventions the resulting code must follow.
+- **The skill is procedural** — it tells Claude or Codex *how to lay things out and get them
+  running*, and it points at the Quarkus Agents MCP to actually create and run the project.
+- **`CLAUDE.md` / `AGENTS.md` are declarative** — they state the conventions the resulting code
+  must follow.
 
-The skill explicitly defers to `CLAUDE.md` for conventions and does not restate them, so there is
-a single source of truth: scaffolding in the skill, rules in `CLAUDE.md`.
+The skill explicitly defers to the always-on convention file for the active agent and does not
+restate those conventions, so there is a single source of truth per agent: scaffolding in the
+skill, rules in `CLAUDE.md` or `AGENTS.md`.
+
+For Codex distribution, `.agents/plugins/marketplace.json` points to `plugins/quarkus-agentic/`.
+That directory is only a lightweight wrapper with symlinks back to `.codex-plugin/` and `skills/`,
+so the Claude and Codex packages share the same skill content.
 
 ## Advanced — personal use (optional global install)
 
 A power user who works *exclusively* in this stack can move the contents of `CLAUDE.md` into the
-global `~/.claude/CLAUDE.md` so the conventions apply to every project without copying the file
-each time.
+global `~/.claude/CLAUDE.md`, or the contents of `AGENTS.md` into `~/.codex/AGENTS.md`, so the
+conventions apply to every project without copying the file each time.
 
 **Trade-off (stated explicitly):** the global file applies to **all** Claude Code work on your
-machine. If you also work in other stacks (other languages, frameworks, or non-AI Java projects),
-these Quarkus/LangChain4j-specific rules will bleed into unrelated work. For anyone who mixes
-stacks, the per-project drop-in is recommended over the global install.
+machine or Codex profile. If you also work in other stacks (other languages, frameworks, or non-AI
+Java projects), these Quarkus/LangChain4j-specific rules will bleed into unrelated work. For
+anyone who mixes stacks, the per-project drop-in is recommended over the global install.
 
 **Precedence and reverting.** A project-root `CLAUDE.md` is read *in addition to* a global
-`~/.claude/CLAUDE.md`, and the project file takes precedence where guidance conflicts — so a
-project can always override the global rules. Use `/memory` in a session to see and edit which
-files are active. To undo a global install, delete `~/.claude/CLAUDE.md` (or remove just the
-Quarkus/LangChain4j section you pasted into it).
+`~/.claude/CLAUDE.md`, and Codex layers project `AGENTS.md` files under global
+`~/.codex/AGENTS.md`. Project guidance can override broader global rules. To undo a global
+install, delete the global file (or remove just the Quarkus/LangChain4j section you pasted into
+it).
 
 ## Versioning and changelog
 
-This artifact uses semantic versioning. The current version is **0.2.0**; `CLAUDE.md`, `SKILL.md`,
-`.claude-plugin/plugin.json`, and this `README.md` each carry a matching version header. See
+This artifact uses semantic versioning. The current version is **0.3.0**; `CLAUDE.md`,
+`AGENTS.md`, `SKILL.md`, `.claude-plugin/plugin.json`, `.codex-plugin/plugin.json`, and this
+`README.md` each carry a matching version header. See
 [`CHANGELOG.md`](CHANGELOG.md) for release history.
 
 ## License
