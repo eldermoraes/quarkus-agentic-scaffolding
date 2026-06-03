@@ -1,7 +1,7 @@
 {
   "name": "quarkus-agentic",
   "version": "0.4.0",
-  "description": "Scaffolding skill for building Quarkus + LangChain4j agentic AI applications in Codex: new projects, AI services, agents/workflows, and RAG pipelines. Pairs with the repository's AGENTS.md conventions.",
+  "description": "Scaffolding skill for building Quarkus + LangChain4j agentic AI applications with Bob: new projects, AI services, agents/workflows, and RAG pipelines. Pairs with the repository's BOB.md conventions.",
   "author": {
     "name": "Elder Moraes",
     "email": "elder.moraes@gmail.com"
@@ -17,13 +17,13 @@
     "rag",
     "scaffolding",
     "java",
-    "codex"
+    "bob"
   ],
-  "skills": "./skills/",
+  "skills": "../skills/",
   "interface": {
     "displayName": "Quarkus Agentic Scaffolding",
     "shortDescription": "Scaffold Quarkus + LangChain4j AI services, agents, and RAG pipelines.",
-    "longDescription": "Reusable Codex workflow for creating Quarkus + LangChain4j applications, AI services, declarative agent workflows, and RAG pipelines from opinionated templates.",
+    "longDescription": "Reusable Bob workflow for creating Quarkus + LangChain4j applications, AI services, declarative agent workflows, and RAG pipelines from opinionated templates.",
     "developerName": "Elder Moraes",
     "category": "Developer Tools",
     "capabilities": [

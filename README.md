@@ -1,14 +1,15 @@
 # Quarkus + LangChain4j + AI Stack
-# Version: 0.3.0
+# Version: 0.4.0
 
 ## What this repository is
 
 A small, opinionated, distribution-ready artifact for building AI and agent applications on the
 Java stack of **Quarkus + LangChain4j**. It pairs drop-in always-on coding conventions
-(`CLAUDE.md` for Claude, `AGENTS.md` for Codex) with a reusable skill that scaffolds new projects,
-AI services, agents, and RAG pipelines from working templates. The conventions and templates
-reflect real-world Quarkus + LangChain4j practice and a baseline of modern Java, so the guidance
-captures how these systems are actually built rather than generic boilerplate.
+(`CLAUDE.md` for Claude, `AGENTS.md` for Codex, `BOB.md` for Bob) with a reusable skill that
+scaffolds new projects, AI services, agents, and RAG pipelines from working templates. The
+conventions and templates reflect real-world Quarkus + LangChain4j practice and a baseline of
+modern Java, so the guidance captures how these systems are actually built rather than generic
+boilerplate.
 
 ## What's inside
 
@@ -17,6 +18,7 @@ captures how these systems are actually built rather than generic boilerplate.
 ├── README.md                 # This file
 ├── CLAUDE.md                 # Always-on project conventions (drop into your project root)
 ├── AGENTS.md                 # Codex equivalent of the always-on project conventions
+├── BOB.md                    # Bob equivalent of the always-on project conventions
 ├── CONTRIBUTING.md           # How to propose changes
 ├── CHANGELOG.md              # Release history
 ├── LICENSE                   # Apache-2.0
@@ -25,6 +27,8 @@ captures how these systems are actually built rather than generic boilerplate.
 │   ├── plugin.json
 │   └── marketplace.json
 ├── .codex-plugin/            # Codex plugin manifest
+│   └── plugin.json
+├── .bob-plugin/              # Bob plugin manifest
 │   └── plugin.json
 ├── .agents/
 │   └── plugins/
@@ -120,16 +124,52 @@ instructions from the project tree.
    ```
    The `quarkus-langchain4j-scaffolding` skill and its `templates/` are installed and
    auto-discovered.
+## How to use with Bob
 
-3. **Try it.** Open your project in Codex and use a trigger phrase such as
+**Prerequisites (required).** `BOB.md` §1 makes three pieces of tooling non-negotiable for this
+stack. Make them available in your Bob environment:
+
+- **Quarkus Agents MCP** (mandatory) — all Quarkus work goes through it. Install the official
+  Quarkus plugin and add it to Bob:
+  ```
+  bob plugin marketplace add quarkusio/quarkus-agent-mcp
+  bob plugin add quarkus-agent@quarkus-tools
+  ```
+- **context7** (mandatory) — all library/framework documentation lookups go through it:
+  ```
+  bob mcp add context7 -- npx -y @upstash/context7-mcp
+  ```
+  (Append `--api-key <KEY>` for higher rate limits.)
+- **superpowers skills** — invoked wherever applicable to the task. Install or enable the
+  Superpowers plugin in your Bob environment.
+
+Set up both pieces — the conventions and the skill — then test it. They install differently: the
+skill ships as a plugin, but `BOB.md` must live in your project because Bob reads project
+instructions from the project tree.
+
+1. **Add the conventions.** Copy [`BOB.md`](BOB.md) to the root of your Quarkus +
+   LangChain4j project. Bob reads it automatically before it starts work in that project.
+
+2. **Install the skill (plugin).** Add this repository as a Bob plugin marketplace and install
+   it:
+   ```
+   bob plugin marketplace add eldermoraes/quarkus-agentic-scaffolding
+   bob plugin add quarkus-agentic@eldermoraes
+   ```
+   The `quarkus-langchain4j-scaffolding` skill and its `templates/` are installed and
+   auto-discovered.
+
+3. **Try it.** Open your project in Bob and use a trigger phrase such as
    *"scaffold a new Quarkus + LangChain4j project"*, *"create a new AI service"*,
    *"scaffold a new agent"*, or *"set up a new RAG pipeline"*. The skill produces the layout and
-   starter files; `AGENTS.md` governs the conventions of the code that follows.
+   starter files; `BOB.md` governs the conventions of the code that follows.
 
-## What's in `CLAUDE.md` / `AGENTS.md` and why
 
-`CLAUDE.md` and `AGENTS.md` are intentionally short and always-on. They carry the same project
-conventions, expressed for the instruction surface each agent reads. Each section earns its place:
+## What's in `CLAUDE.md` / `AGENTS.md` / `BOB.md` and why
+
+`CLAUDE.md`, `AGENTS.md`, and `BOB.md` are intentionally short and always-on. They carry the same
+project conventions, expressed for the instruction surface each agent reads. Each section earns its
+place:
 
 - **§1 Required tooling (mandatory).** Makes `context7` and the **Quarkus Agents MCP** required,
   not optional: every Quarkus task goes through the Quarkus Agents MCP and every library lookup
@@ -175,25 +215,24 @@ so the Claude and Codex packages share the same skill content.
 ## Advanced — personal use (optional global install)
 
 A power user who works *exclusively* in this stack can move the contents of `CLAUDE.md` into the
-global `~/.claude/CLAUDE.md`, or the contents of `AGENTS.md` into `~/.codex/AGENTS.md`, so the
-conventions apply to every project without copying the file each time.
+global `~/.claude/CLAUDE.md`, the contents of `AGENTS.md` into `~/.codex/AGENTS.md`, or the
+contents of `BOB.md` into `~/.bob/BOB.md`, so the conventions apply to every project without
+copying the file each time.
 
-**Trade-off (stated explicitly):** the global file applies to **all** Claude Code work on your
-machine or Codex profile. If you also work in other stacks (other languages, frameworks, or non-AI
-Java projects), these Quarkus/LangChain4j-specific rules will bleed into unrelated work. For
-anyone who mixes stacks, the per-project drop-in is recommended over the global install.
+**Trade-off (stated explicitly):** the global file applies to **all** work on your machine or
+agent profile. If you also work in other stacks (other languages, frameworks, or non-AI Java
+projects), these Quarkus/LangChain4j-specific rules will bleed into unrelated work. For anyone who
+mixes stacks, the per-project drop-in is recommended over the global install.
 
-**Precedence and reverting.** A project-root `CLAUDE.md` is read *in addition to* a global
-`~/.claude/CLAUDE.md`, and Codex layers project `AGENTS.md` files under global
-`~/.codex/AGENTS.md`. Project guidance can override broader global rules. To undo a global
-install, delete the global file (or remove just the Quarkus/LangChain4j section you pasted into
-it).
+**Precedence and reverting.** A project-root convention file is read *in addition to* a global
+one, and project guidance can override broader global rules. To undo a global install, delete the
+global file (or remove just the Quarkus/LangChain4j section you pasted into it).
 
 ## Versioning and changelog
 
-This artifact uses semantic versioning. The current version is **0.3.0**; `CLAUDE.md`,
-`AGENTS.md`, `SKILL.md`, `.claude-plugin/plugin.json`, `.codex-plugin/plugin.json`, and this
-`README.md` each carry a matching version header. See
+This artifact uses semantic versioning. The current version is **0.4.0**; `CLAUDE.md`,
+`AGENTS.md`, `BOB.md`, `SKILL.md`, `.claude-plugin/plugin.json`, `.codex-plugin/plugin.json`,
+`.bob-plugin/plugin.json`, and this `README.md` each carry a matching version header. See
 [`CHANGELOG.md`](CHANGELOG.md) for release history.
 
 ## License

@@ -1,7 +1,7 @@
 # Quarkus + LangChain4j + AI Stack — Project Conventions
 # Version: 0.4.0
 
-These conventions apply whenever code is written, reviewed, or configured in a Quarkus +
+These conventions apply whenever Bob writes, reviews, or configures code in a Quarkus +
 LangChain4j project. They are always-on. Procedural scaffolding steps and starter code live in
 the `quarkus-langchain4j-scaffolding` skill and its templates, not here.
 

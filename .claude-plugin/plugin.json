@@ -1,6 +1,6 @@
 {
   "name": "quarkus-agentic",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Scaffolding skill for building Quarkus + LangChain4j agentic AI applications: new projects, AI services, agents/workflows, and RAG pipelines. Pairs with the repository's CLAUDE.md conventions.",
   "author": {
     "name": "Elder Moraes",

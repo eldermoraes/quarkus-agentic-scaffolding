@@ -2,6 +2,16 @@
 
 All notable changes to this artifact are documented here. This project adheres to semantic
 versioning.
+## v0.4.0 — 2026-06-03
+- Added native Bob support alongside the existing Claude and Codex support: `BOB.md`,
+  `.bob-plugin/plugin.json`, and Bob-specific plugin metadata for the scaffolding skill.
+- README: documented Bob prerequisites, plugin installation, and the relationship between
+  `BOB.md`, `CLAUDE.md`, `AGENTS.md`, and the shared scaffolding skill.
+- CONTRIBUTING: updated ownership and versioning guidance to include Bob in the list of supported
+  agents.
+- All version headers synchronized to 0.4.0 across `README.md`, `CLAUDE.md`, `AGENTS.md`,
+  `BOB.md`, `SKILL.md`, and all plugin manifests.
+
 
 ## v0.3.0 — 2026-06-03
 - Added native Codex support alongside the existing Claude support: `AGENTS.md`,
