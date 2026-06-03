@@ -1,5 +1,5 @@
 # Quarkus + LangChain4j + AI Stack — Project Conventions
-# Version: 0.4.0
+# Version: 0.5.0
 
 These conventions apply whenever Bob writes, reviews, or configures code in a Quarkus +
 LangChain4j project. They are always-on. Procedural scaffolding steps and starter code live in
@@ -60,8 +60,9 @@ generic web search.
 - **CDI-first.** Use `quarkus-arc` and standard CDI (`@ApplicationScoped`, `@Inject`,
   `@Produces`) for wiring. Produce framework objects (retrieval augmentors, memory providers,
   embedding stores) from `@ApplicationScoped` producer beans.
-- **REST and API surface.** Use `quarkus-rest` (Quarkus REST) with `quarkus-rest-jsonb` for JSON,
-  and expose `quarkus-smallrye-openapi` so endpoints are documented and explorable.
+- **REST and API surface.** Use `quarkus-rest` (Quarkus REST) with `quarkus-rest-jackson` for JSON
+  (Jackson is the Quarkus default serializer), and expose `quarkus-smallrye-openapi` so endpoints
+  are documented and explorable.
 - **Streaming uses WebSockets Next.** For token or progress streaming, use
   `quarkus-websockets-next` rather than rolling a custom transport (see §4 for the streaming
   pattern).

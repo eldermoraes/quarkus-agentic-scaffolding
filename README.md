@@ -1,5 +1,5 @@
 # Quarkus + LangChain4j + AI Stack
-# Version: 0.4.0
+# Version: 0.5.0
 
 ## What this repository is
 
@@ -230,7 +230,7 @@ global file (or remove just the Quarkus/LangChain4j section you pasted into it).
 
 ## Versioning and changelog
 
-This artifact uses semantic versioning. The current version is **0.4.0**; `CLAUDE.md`,
+This artifact uses semantic versioning. The current version is **0.5.0**; `CLAUDE.md`,
 `AGENTS.md`, `BOB.md`, `SKILL.md`, `.claude-plugin/plugin.json`, `.codex-plugin/plugin.json`,
 `.bob-plugin/plugin.json`, and this `README.md` each carry a matching version header. See
 [`CHANGELOG.md`](CHANGELOG.md) for release history.
