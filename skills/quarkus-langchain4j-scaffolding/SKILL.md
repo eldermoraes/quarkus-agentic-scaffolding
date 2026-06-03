@@ -4,7 +4,7 @@ description: Scaffold and structure new Quarkus + LangChain4j projects, modules,
 ---
 
 # Quarkus + LangChain4j Scaffolding
-# Version: 0.4.0
+# Version: 0.5.0
 
 ## 1. When to use this skill
 
@@ -53,7 +53,7 @@ Start with only the sub-packages a feature needs; add the rest as the project gr
 
 Start from `templates/pom.xml.template`. It pins Java 25 as the minimum, imports the `quarkus-bom`
 and `quarkus-langchain4j-bom` platform BOMs, and includes the core extensions
-(`quarkus-rest` + `quarkus-rest-jsonb`, `quarkus-arc`, `quarkus-smallrye-openapi`,
+(`quarkus-rest` + `quarkus-rest-jackson`, `quarkus-arc`, `quarkus-smallrye-openapi`,
 `quarkus-websockets-next`, `quarkus-langchain4j-ollama`), the test stack (`quarkus-junit` +
 `rest-assured`), the `-parameters` compiler flag, and a `native` profile. The template marks
 which dependencies to add for **agents** (`quarkus-langchain4j-agentic`) and for **RAG**

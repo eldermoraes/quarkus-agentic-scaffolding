@@ -20,7 +20,7 @@ before shipping a release, and whenever you touch a template.
    ```
    quarkus_create(
      outputDir = "/tmp", artifactId = "ql4j-validate",
-     extensions = "rest,rest-jsonb,smallrye-openapi,websockets-next,langchain4j-ollama,langchain4j-agentic,langchain4j-easy-rag",
+     extensions = "rest,rest-jackson,smallrye-openapi,websockets-next,langchain4j-ollama,langchain4j-agentic,langchain4j-easy-rag",
      noCode = true, noWrapper = false
    )
    ```
@@ -62,6 +62,12 @@ When you only need to know *"does the template Java still compile against the cu
 
 ## Last validated
 
+- **0.5.0 (2026-06-03):** platform `3.36.1`, `maven.compiler.release` 25. Generated a throwaway
+  project with the `rest-jackson` extension list and compiled all 14 materialized template files
+  (`BUILD SUCCESS`, `javac [... release 25]`) — confirms `quarkus-rest-jackson` resolves on the
+  platform BOM and the agentic API (`@SequenceAgent` / `@ParallelAgent` / `@Output`, `AgenticScope`),
+  WebSockets Next, and Mutiny imports still resolve. Template baseline bumped `3.36.0` → `3.36.1` to
+  match the freshly generated pom.
 - **0.2.0 (2026-06-01):** platform `3.36.0`, `maven.compiler.release` 25. All template files
   compiled (`BUILD SUCCESS`); the agentic API (`dev.langchain4j.agentic.*`, `@SequenceAgent` /
   `@ParallelAgent` / `@Output`, `AgenticScope`), WebSockets Next, and Mutiny imports all resolved.

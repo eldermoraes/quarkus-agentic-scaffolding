@@ -2,6 +2,18 @@
 
 All notable changes to this artifact are documented here. This project adheres to semantic
 versioning.
+
+## v0.5.0 — 2026-06-03
+- Switched the generated REST JSON serializer from JSON-B to Jackson
+  (`quarkus-rest-jsonb` → `quarkus-rest-jackson`): `pom.xml.template`, the §3 REST convention in
+  `CLAUDE.md` / `AGENTS.md` / `BOB.md`, the `SKILL.md` dependency baseline, and the
+  `docs/VALIDATING-TEMPLATES.md` extension list. Jackson is the Quarkus default JSON serializer,
+  confirmed via the Quarkus Agents MCP against the `rest-json` guide. The Java templates use plain
+  records (no JSON-B annotations), so no code changes were required.
+- Reconciled the `pom.xml.template` platform baseline `3.36.0` → `3.36.1` to match the current
+  Quarkus platform (verified via `quarkus_create`); all 14 template files compile against it.
+- All version headers synchronized to 0.5.0.
+
 ## v0.4.0 — 2026-06-03
 - Added native Bob support alongside the existing Claude and Codex support: `BOB.md`,
   `.bob-plugin/plugin.json`, and Bob-specific plugin metadata for the scaffolding skill.
