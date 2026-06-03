@@ -3,6 +3,15 @@
 All notable changes to this artifact are documented here. This project adheres to semantic
 versioning.
 
+## v0.6.0 — 2026-06-03
+- Slimmed `pom.xml.template` from a full pom to a dependency reference. The project shell (platform
+  BOMs, build plugins, the `-parameters` flag, the `native` profile, the test stack, version pins) is
+  generated up to date by `quarkus_create` — the same codestart generator behind code.quarkus.io — so
+  hand-maintaining it only caused drift (see v0.5.0). The template now keeps only what generators do
+  not provide: the curated extension list and the non-extension `dev.langchain4j` deps (embedding
+  model, PDF parser). Updated `SKILL.md` §3 and the `VALIDATING-TEMPLATES.md` reconcile step to match.
+- All version headers synchronized to 0.6.0.
+
 ## v0.5.0 — 2026-06-03
 - Switched the generated REST JSON serializer from JSON-B to Jackson
   (`quarkus-rest-jsonb` → `quarkus-rest-jackson`): `pom.xml.template`, the §3 REST convention in

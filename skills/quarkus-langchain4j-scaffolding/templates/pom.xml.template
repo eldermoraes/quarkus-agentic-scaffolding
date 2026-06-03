@@ -1,197 +1,44 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  Quarkus + LangChain4j single-module starter.
-  - Java 25 is the MINIMUM language level (raise it freely; do not lower it without a documented reason).
-  - Versions are managed by the platform BOMs; do not pin individual extension versions.
-  - quarkus.platform.version below is a REFERENCE BASELINE, not the source of truth. The authoritative
-    current version comes from the Quarkus Agents MCP (quarkus_create) — reconcile this pom against a
-    freshly generated one and update the version before shipping.
-  Replace org.acme / quarkus-langchain4j-starter with your own coordinates.
+  Quarkus + LangChain4j — DEPENDENCY REFERENCE (this is NOT a full pom.xml).
+
+  The project SHELL — the full pom.xml: the quarkus-bom + quarkus-langchain4j-bom platform BOMs,
+  the build plugins, the `-parameters` compiler flag (parameter-name retention), the `native`
+  profile, the test stack, and every version pin — is generated, already up to date, by the
+  Quarkus Agents MCP `quarkus_create` (the same codestart generator that powers code.quarkus.io).
+  It is intentionally NOT hand-maintained here: a pinned copy only drifts (in v0.5.0 the baseline
+  had already fallen behind the live platform).
+
+  So this file keeps only the two things a project generator does NOT give you.
+
+  ==========================================================================
+  1. Extensions to pass to quarkus_create (resolved against the current platform BOM)
+  ==========================================================================
+    core:    rest, rest-jackson, smallrye-openapi, websockets-next, langchain4j-ollama
+    agents:  + langchain4j-agentic     (declarative LangChain4j Agentic workflows)
+    RAG:     + langchain4j-easy-rag     (Easy RAG)
+
+  quarkus-arc, quarkus-junit and rest-assured are pulled in automatically — do not list them.
+
+  ==========================================================================
+  2. Non-extension dependencies the generator does NOT add — paste into <dependencies>
+  ==========================================================================
+  These live under the dev.langchain4j group (they are libraries, not Quarkus extensions), so
+  neither quarkus_create nor code.quarkus.io will add them. Their versions are managed by
+  quarkus-langchain4j-bom, so they take NO <version>.
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
+<dependencies>
 
-    <groupId>org.acme</groupId>
-    <artifactId>quarkus-langchain4j-starter</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
-    <packaging>quarkus</packaging>
+    <!-- RAG: in-process embedding model required by Easy RAG -->
+    <dependency>
+        <groupId>dev.langchain4j</groupId>
+        <artifactId>langchain4j-embeddings-all-minilm-l6-v2</artifactId>
+    </dependency>
 
-    <properties>
-        <compiler-plugin.version>3.15.0</compiler-plugin.version>
-        <maven.compiler.release>25</maven.compiler.release>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <quarkus.platform.group-id>io.quarkus.platform</quarkus.platform.group-id>
-        <quarkus.platform.artifact-id>quarkus-bom</quarkus.platform.artifact-id>
-        <quarkus.platform.version>3.36.1</quarkus.platform.version>
-        <skipITs>true</skipITs>
-        <surefire-plugin.version>3.5.4</surefire-plugin.version>
-    </properties>
+    <!-- RAG: add only if ingesting PDFs -->
+    <dependency>
+        <groupId>dev.langchain4j</groupId>
+        <artifactId>langchain4j-document-parser-apache-pdfbox</artifactId>
+    </dependency>
 
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <groupId>${quarkus.platform.group-id}</groupId>
-                <artifactId>${quarkus.platform.artifact-id}</artifactId>
-                <version>${quarkus.platform.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-            <dependency>
-                <groupId>${quarkus.platform.group-id}</groupId>
-                <artifactId>quarkus-langchain4j-bom</artifactId>
-                <version>${quarkus.platform.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
-
-    <dependencies>
-        <!-- Core: REST + Jackson (JSON) + OpenAPI -->
-        <dependency>
-            <groupId>io.quarkus</groupId>
-            <artifactId>quarkus-rest</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>io.quarkus</groupId>
-            <artifactId>quarkus-rest-jackson</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>io.quarkus</groupId>
-            <artifactId>quarkus-smallrye-openapi</artifactId>
-        </dependency>
-
-        <!-- CDI -->
-        <dependency>
-            <groupId>io.quarkus</groupId>
-            <artifactId>quarkus-arc</artifactId>
-        </dependency>
-
-        <!-- Streaming transport (WebSockets Next) -->
-        <dependency>
-            <groupId>io.quarkus</groupId>
-            <artifactId>quarkus-websockets-next</artifactId>
-        </dependency>
-
-        <!-- LLM provider: Ollama (default base-url http://localhost:11434) -->
-        <dependency>
-            <groupId>io.quarkiverse.langchain4j</groupId>
-            <artifactId>quarkus-langchain4j-ollama</artifactId>
-        </dependency>
-
-        <!-- ====== Add for AGENT workflows (declarative LangChain4j Agentic) ====== -->
-        <!--
-        <dependency>
-            <groupId>io.quarkiverse.langchain4j</groupId>
-            <artifactId>quarkus-langchain4j-agentic</artifactId>
-        </dependency>
-        -->
-
-        <!-- ====== Add for RAG (Easy RAG + an in-process embedding model) ====== -->
-        <!--
-        <dependency>
-            <groupId>io.quarkiverse.langchain4j</groupId>
-            <artifactId>quarkus-langchain4j-easy-rag</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>dev.langchain4j</groupId>
-            <artifactId>langchain4j-embeddings-all-minilm-l6-v2</artifactId>
-        </dependency>
-        -->
-        <!-- Add only if ingesting PDFs:
-        <dependency>
-            <groupId>dev.langchain4j</groupId>
-            <artifactId>langchain4j-document-parser-apache-pdfbox</artifactId>
-        </dependency>
-        -->
-
-        <!-- Test -->
-        <dependency>
-            <groupId>io.quarkus</groupId>
-            <artifactId>quarkus-junit</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>io.rest-assured</groupId>
-            <artifactId>rest-assured</artifactId>
-            <scope>test</scope>
-        </dependency>
-    </dependencies>
-
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>${quarkus.platform.group-id}</groupId>
-                <artifactId>quarkus-maven-plugin</artifactId>
-                <version>${quarkus.platform.version}</version>
-                <extensions>true</extensions>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>build</goal>
-                            <goal>generate-code</goal>
-                            <goal>generate-code-tests</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>${compiler-plugin.version}</version>
-                <configuration>
-                    <!-- Parameter-name retention is required by REST and AI-service binding. -->
-                    <parameters>true</parameters>
-                </configuration>
-            </plugin>
-            <plugin>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <version>${surefire-plugin.version}</version>
-                <configuration>
-                    <systemPropertyVariables>
-                        <java.util.logging.manager>org.jboss.logmanager.LogManager</java.util.logging.manager>
-                        <maven.home>${maven.home}</maven.home>
-                    </systemPropertyVariables>
-                </configuration>
-            </plugin>
-            <plugin>
-                <artifactId>maven-failsafe-plugin</artifactId>
-                <version>${surefire-plugin.version}</version>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>integration-test</goal>
-                            <goal>verify</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <systemPropertyVariables>
-                        <native.image.path>${project.build.directory}/${project.build.finalName}-runner</native.image.path>
-                        <java.util.logging.manager>org.jboss.logmanager.LogManager</java.util.logging.manager>
-                        <maven.home>${maven.home}</maven.home>
-                    </systemPropertyVariables>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
-
-    <profiles>
-        <!-- Build a GraalVM native binary with: mvn verify -Dnative -->
-        <profile>
-            <id>native</id>
-            <activation>
-                <property>
-                    <name>native</name>
-                </property>
-            </activation>
-            <properties>
-                <skipITs>false</skipITs>
-                <quarkus.native.enabled>true</quarkus.native.enabled>
-                <quarkus.package.jar.enabled>false</quarkus.package.jar.enabled>
-            </properties>
-        </profile>
-    </profiles>
-</project>
+</dependencies>

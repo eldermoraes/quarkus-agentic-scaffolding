@@ -4,7 +4,7 @@ description: Scaffold and structure new Quarkus + LangChain4j projects, modules,
 ---
 
 # Quarkus + LangChain4j Scaffolding
-# Version: 0.5.0
+# Version: 0.6.0
 
 ## 1. When to use this skill
 
@@ -51,16 +51,21 @@ Start with only the sub-packages a feature needs; add the rest as the project gr
 
 ## 3. Dependency baseline
 
-Start from `templates/pom.xml.template`. It pins Java 25 as the minimum, imports the `quarkus-bom`
-and `quarkus-langchain4j-bom` platform BOMs, and includes the core extensions
-(`quarkus-rest` + `quarkus-rest-jackson`, `quarkus-arc`, `quarkus-smallrye-openapi`,
-`quarkus-websockets-next`, `quarkus-langchain4j-ollama`), the test stack (`quarkus-junit` +
-`rest-assured`), the `-parameters` compiler flag, and a `native` profile. The template marks
-which dependencies to add for **agents** (`quarkus-langchain4j-agentic`) and for **RAG**
-(`quarkus-langchain4j-easy-rag` + an in-process embedding model).
+Create the project with `quarkus_create` and let it generate the shell. The generated `pom.xml`
+already imports the `quarkus-bom` and `quarkus-langchain4j-bom` platform BOMs, sets Java 25, enables
+the `-parameters` compiler flag, adds a `native` profile, and pulls in the test stack
+(`quarkus-junit` + `rest-assured`) — all at the current platform version. Do not hand-maintain any
+of that: `quarkus_create` (the same codestart generator behind code.quarkus.io) keeps it up to date.
 
-When creating the project through the Quarkus Agents MCP, pass the matching extensions to
-`quarkus_create` and reconcile the generated `pom.xml` with the template.
+Pass these extensions to `quarkus_create`:
+
+- core: `rest`, `rest-jackson`, `smallrye-openapi`, `websockets-next`, `langchain4j-ollama`
+- agents: add `langchain4j-agentic`
+- RAG: add `langchain4j-easy-rag`
+
+(`quarkus-arc` comes in automatically.) Then add the **non-extension** dependencies listed in
+`templates/pom.xml.template` — the `dev.langchain4j` embedding model (required by Easy RAG) and,
+for PDFs, the document parser — since project generators add only Quarkus extensions, not those.
 
 ## 4. AI service scaffolding
 
