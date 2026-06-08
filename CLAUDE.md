@@ -1,5 +1,5 @@
 # Quarkus + LangChain4j + AI Stack — Project Conventions
-# Version: 0.6.0
+# Version: 0.7.0
 
 These conventions apply whenever code is written, reviewed, or configured in a Quarkus +
 LangChain4j project. They are always-on. Procedural scaffolding steps and starter code live in

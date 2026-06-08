@@ -3,6 +3,24 @@
 All notable changes to this artifact are documented here. This project adheres to semantic
 versioning.
 
+## v0.7.0 — 2026-06-08
+- **Fixed Bob support, which had been modeled on a non-existent CLI.** Removed the hallucinated
+  `bob plugin marketplace add` / `bob plugin add` and `bob mcp add` commands (IBM Bob has no plugin
+  CLI or marketplace), and removed `BOB.md` and `.bob-plugin/`. Verified against `bob.ibm.com/docs`:
+  Bob reads the same `AGENTS.md` as Codex, discovers skills under `.bob/skills/`, and configures MCP
+  servers via `.bob/mcp.json` (or the MCP tab in the UI). Added `scripts/install-bob-skill.sh` to
+  copy the skill into a project's (or global `~/.bob/skills/`) skills directory, and documented the
+  Quarkus Agents MCP + context7 setup as a `.bob/mcp.json` entry
+  (`jbang quarkus-agent-mcp@quarkusio`, `npx -y @upstash/context7-mcp`). The Quarkus Agents MCP is a
+  standalone MCP server whose docs list IBM Bob as a supported client.
+- **Fixed the Codex setup commands.** Replaced the non-existent `codex plugin add` with installing
+  the plugin from the `/plugins` list after `codex plugin marketplace add`, and switched the Quarkus
+  Agents MCP from a (non-existent) Codex plugin to
+  `codex mcp add quarkus-agent -- jbang quarkus-agent-mcp@quarkusio`. Added a "Try it" step for parity.
+- `AGENTS.md` is now the shared conventions file for both Codex and Bob; `README.md` and
+  `CONTRIBUTING.md` updated to drop `BOB.md` / `.bob-plugin/` and reflect the per-agent install paths.
+- All version headers synchronized to 0.7.0.
+
 ## v0.6.0 — 2026-06-03
 - Slimmed `pom.xml.template` from a full pom to a dependency reference. The project shell (platform
   BOMs, build plugins, the `-parameters` flag, the `native` profile, the test stack, version pins) is

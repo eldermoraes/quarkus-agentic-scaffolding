@@ -7,26 +7,26 @@ not from generic boilerplate. Contributions are expected to keep that bar.
 ## What lives where
 
 - **`CLAUDE.md`** — *declarative* conventions (the rules generated code must follow). Always-on.
-- **`AGENTS.md`** — the Codex equivalent of `CLAUDE.md`. Always-on for Codex.
-- **`BOB.md`** — the Bob equivalent of `CLAUDE.md`. Always-on for Bob.
+- **`AGENTS.md`** — the Codex and Bob equivalent of `CLAUDE.md`. Always-on for Codex and Bob.
 - **`skills/quarkus-langchain4j-scaffolding/`** — the *procedural* scaffolding skill (`SKILL.md`)
-  and its `templates/`. This is what gets packaged as the plugin for all agents.
+  and its `templates/`. Packaged as the plugin for Claude and Codex, and copied into Bob's
+  `.bob/skills/` by `scripts/install-bob-skill.sh`.
 - **`.claude-plugin/`** — `plugin.json` + `marketplace.json` (the Claude installable
   distribution).
 - **`.codex-plugin/`** — `plugin.json` (the Codex plugin manifest).
-- **`.bob-plugin/`** — `plugin.json` (the Bob plugin manifest).
 - **`.agents/plugins/marketplace.json`** — repo-local Codex marketplace entry.
 - **`plugins/quarkus-agentic/`** — Codex marketplace wrapper with symlinks to `.codex-plugin/`
   and `skills/`; do not put duplicate skill content here.
+- **`scripts/install-bob-skill.sh`** — installs the skill into a project's (or global) `.bob/skills/`
+  for Bob (which has no plugin marketplace).
 
-Keep the split clean: the skill says *how to lay things out*; `CLAUDE.md`, `AGENTS.md`, and
-`BOB.md` say *what the code must do*. Do not restate conventions inside the skill —
-cross-reference the always-on files instead.
+Keep the split clean: the skill says *how to lay things out*; `CLAUDE.md` and `AGENTS.md` say
+*what the code must do*. Do not restate conventions inside the skill — cross-reference the
+always-on files instead.
 
 ## Required tooling
 
-The same tooling the stack mandates applies to contributors (see `CLAUDE.md` §1, `AGENTS.md` §1,
-or `BOB.md` §1):
+The same tooling the stack mandates applies to contributors (see `CLAUDE.md` §1 or `AGENTS.md` §1):
 
 - **Quarkus Agents MCP** for any Quarkus work (project creation, extensions, version checks, docs).
 - **context7** for any external library/framework API lookup (LangChain4j included).
@@ -38,13 +38,12 @@ against these tools first.
 
 1. **Open an issue** describing the change and the evidence behind it.
 2. **Branch** from `main`.
-3. Make the change in the right place (`CLAUDE.md` / `AGENTS.md` / `BOB.md` vs `SKILL.md` vs a
-   template).
+3. Make the change in the right place (`CLAUDE.md` / `AGENTS.md` vs `SKILL.md` vs a template).
 4. If you touch a template, **validate it still builds** — see
    [`docs/VALIDATING-TEMPLATES.md`](docs/VALIDATING-TEMPLATES.md).
 5. **Bump the version** (semver) in the version headers of `README.md`, `CLAUDE.md`,
-   `AGENTS.md`, `BOB.md`, `SKILL.md`, `.claude-plugin/plugin.json`, `.codex-plugin/plugin.json`,
-   and `.bob-plugin/plugin.json`, and add a `CHANGELOG.md` entry.
+   `AGENTS.md`, `SKILL.md`, `.claude-plugin/plugin.json`, and `.codex-plugin/plugin.json`, and add a
+   `CHANGELOG.md` entry.
 6. Open a PR that links the issue and summarizes the evidence.
 
 ### Evidence bar for conventions and templates
@@ -66,18 +65,16 @@ Conventions and templates should reflect how real Quarkus + LangChain4j systems 
 1. Prefer patterns that recur across multiple real-world projects over one-off choices from a
    single codebase.
 2. Confirm any API or configuration against the Quarkus Agents MCP or context7 before encoding it.
-3. Distill only the **recurring, defensible** patterns into `CLAUDE.md` / `AGENTS.md` / `BOB.md`
-   and the templates; document any deliberate deviation inline (see `CLAUDE.md` §6, `AGENTS.md`
-   §6, or `BOB.md` §6).
+3. Distill only the **recurring, defensible** patterns into `CLAUDE.md` / `AGENTS.md` and the
+   templates; document any deliberate deviation inline (see `CLAUDE.md` §6 or `AGENTS.md` §6).
 4. When a change is driven by a build or runtime result, capture that rationale in the
    `CHANGELOG.md` entry.
 
 ## Versioning
 
 This artifact uses semantic versioning. Keep the version header identical across `README.md`,
-`CLAUDE.md`, `AGENTS.md`, `BOB.md`, `SKILL.md`, `.claude-plugin/plugin.json`,
-`.codex-plugin/plugin.json`, and `.bob-plugin/plugin.json`, and record every change in
-`CHANGELOG.md`.
+`CLAUDE.md`, `AGENTS.md`, `SKILL.md`, `.claude-plugin/plugin.json`, and
+`.codex-plugin/plugin.json`, and record every change in `CHANGELOG.md`.
 
 ## License
 
