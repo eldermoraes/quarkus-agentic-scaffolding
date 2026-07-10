@@ -25,6 +25,9 @@ jobs:
           distribution: temurin
           java-version: ${{ env.JAVA_VERSION }}
           cache: maven
+          # This repo ships no pom.xml (the project is generated at validation time),
+          # so key the ~/.m2 cache on the baseline versions instead.
+          cache-dependency-path: ci/baseline.env
       - name: Build from templates
         # PR/push: reproducible build against the Renovate-tracked baseline.
         # schedule/dispatch: empty arg -> the script resolves the live latest platform.
