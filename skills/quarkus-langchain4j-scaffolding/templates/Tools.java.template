@@ -1,0 +1,36 @@
+package org.acme.tools;
+
+import dev.langchain4j.agent.tool.Tool;
+import io.smallrye.common.annotation.RunOnVirtualThread;
+import jakarta.enterprise.context.ApplicationScoped;
+
+/*
+ * Function-calling tools — a CDI bean whose @Tool methods the model may invoke to fetch data
+ * or take actions. Replace the triage-domain example below with your own methods.
+ *
+ * Wiring (two equivalent ways):
+ *   - globally, for every method of an AI service:  @RegisterAiService(tools = TicketTools.class)
+ *   - per AI-service method:                         @ToolBox(TicketTools.class)
+ *
+ * Blocking: tools run blocking by default. Annotate a method to change that —
+ *   @Blocking (caller thread), @NonBlocking (event loop; for Uni/CompletionStage returns), or
+ *   @RunOnVirtualThread for blocking I/O (DB/REST) so it stays off the event loop (CLAUDE.md §2).
+ *
+ * Tool-level guardrails: validate a tool's arguments/results with @ToolInputGuardrails /
+ *   @ToolOutputGuardrails — see Guardrails.java.template for the guardrail beans they reference.
+ */
+@ApplicationScoped
+public class TicketTools {
+
+    /** A small typed result — the model receives structured, unambiguous tool output. */
+    public record CustomerContext(String plan, int openTickets) {}
+
+    @Tool("Looks up the customer's plan and open-ticket count")
+    @RunOnVirtualThread // a real lookup hits a DB or REST client — keep that blocking I/O off the event loop
+    public CustomerContext lookupCustomer(String customerId) {
+        // Deterministic fake. Replace with a Panache repository or a REST client call.
+        int openTickets = Math.floorMod(customerId.hashCode(), 5);
+        String plan = openTickets > 2 ? "ENTERPRISE" : "STANDARD";
+        return new CustomerContext(plan, openTickets);
+    }
+}

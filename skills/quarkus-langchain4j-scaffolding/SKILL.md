@@ -4,7 +4,7 @@ description: Scaffold and structure new Quarkus + LangChain4j projects, modules,
 ---
 
 # Quarkus + LangChain4j Scaffolding
-# Version: 0.8.0
+# Version: 0.9.0
 
 ## 1. When to use this skill
 
@@ -19,7 +19,7 @@ Use this skill when **creating something new** in a Quarkus + LangChain4j projec
   classes for this stack.
 
 This skill covers *how to lay things out and get them running*. It does **not** restate coding
-conventions — see §9.
+conventions — see §12.
 
 **Required tooling (mandatory).** This skill must not scaffold without it. Create the project and
 discover extensions through the **Quarkus Agents MCP** (`quarkus_create`, `quarkus_searchTools`),
@@ -36,6 +36,8 @@ package into focused sub-packages:
 ```
 src/main/java/<group>/<app>/
   ai/         # @RegisterAiService interfaces (AI services and agents)
+  tools/      # @Tool CDI beans the AI services can call
+  guardrails/ # input/output guardrails (optional)
   dto/        # records: inputs, reports, and event/step types
   workflow/   # agentic orchestrators + the streaming-bridge beans
   rest/       # JAX-RS resources (@Path)
@@ -74,7 +76,16 @@ Use `templates/AiService.java.template`. It is a `@RegisterAiService` interface 
 `@RegisterAiService(modelName = "…")` for selecting a named model. Pair it with a `rest/`
 resource or a `web/` WebSocket endpoint to expose it.
 
-## 5. Agent scaffolding
+## 5. Tool scaffolding
+
+Use `templates/Tools.java.template`. Tools are plain `@ApplicationScoped` CDI beans with
+`@Tool`-annotated methods the model may call. Wire them globally with
+`@RegisterAiService(tools = TicketTools.class)` or per method with `@ToolBox(TicketTools.class)`.
+Tools run blocking by default; keep blocking I/O (DB, REST) off the event loop by annotating the
+method `@RunOnVirtualThread`. Validate a tool's arguments or results with tool-level guardrails —
+see §8.
+
+## 6. Agent scaffolding
 
 Use `templates/Agent.java.template`. It shows the full declarative agentic shape:
 
@@ -89,7 +100,7 @@ Use `templates/Agent.java.template`. It shows the full declarative agentic shape
 Requires the `quarkus-langchain4j-agentic` extension. Call `quarkus_skills` for it before writing
 the workflow.
 
-## 6. RAG pipeline scaffolding
+## 7. RAG pipeline scaffolding
 
 Use `templates/RagSetup.java.template`. Default to **Easy RAG**: add `quarkus-langchain4j-easy-rag`
 plus an in-process embedding model (`langchain4j-embeddings-all-minilm-l6-v2`), drop documents
@@ -98,19 +109,40 @@ startup — no retriever code required. The template also includes a commented, 
 path (a CDI-produced `EmbeddingStore` + `EmbeddingStoreContentRetriever` + `RetrievalAugmentor`)
 to use **only when a project needs control Easy RAG does not provide**.
 
-## 7. `application.properties` baseline
+## 8. Guardrails
+
+Use `templates/Guardrails.java.template`. Guardrails are `@ApplicationScoped` CDI beans that
+validate an AI service's inputs (`InputGuardrail`) and outputs (`OutputGuardrail`); attach them
+with `@InputGuardrails(…)` / `@OutputGuardrails(…)` on the AI-service method or interface. Use the
+upstream `dev.langchain4j.guardrail` API — the Quarkus-specific guardrail API was removed. An
+output guardrail can force the model to answer again with `reprompt(…)`; cap attempts with
+`quarkus.langchain4j.guardrails.max-retries` (default 3, 0 disables).
+
+## 9. `application.properties` baseline
 
 Use `templates/application.properties.template`. It configures the Ollama provider with a local
 default model (cloud models shown as comments), a named `smaller` model for cheap subtasks,
 generous timeouts, request/response logging, disabled Dev Services, and the Easy RAG documents
 path.
 
-## 8. After scaffolding
+## 10. After scaffolding
 
 Run and verify through the Quarkus Agents MCP (start dev mode, run tests via the Dev MCP tools)
 rather than invoking Maven directly.
 
-## 9. Cross-reference
+## 11. Test scaffolding
+
+Use `templates/AiServiceTest.java.template`. Its active content is a `@QuarkusTest` wiring smoke
+test (`ChatAssistantTest`) that injects the `ChatAssistant` AI service and asserts it is non-null:
+booting Quarkus builds the CDI container and the AI-service proxy, so a green test proves wiring
+and augmentation succeeded **without calling the model and without a running Ollama** — only
+`quarkus-junit` is needed. The template also carries commented, opt-in examples: a model-dependent
+test (live Ollama, `temperature=0`) and an **AI-quality evaluation** example (`Scorer` /
+`@EvaluationTest` with semantic-similarity or AI-judge strategies), backed by
+`quarkus-langchain4j-testing-evaluation-junit5` — already listed, test-scoped, in
+`templates/pom.xml.template` (the platform BOM manages its version).
+
+## 12. Cross-reference
 
 For coding conventions to apply once scaffolding is done — Java language level, virtual threads,
 records/sealed/pattern matching, declarative AI services, streaming, RAG, testing — see the

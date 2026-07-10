@@ -249,4 +249,59 @@ public class TriageSocket {
  *   import dev.langchain4j.agentic.declarative.ParallelMapperAgent;
  *   @ParallelMapperAgent(subAgent = CategoryAnalyzer.class, outputKey = "results")
  *   java.util.List<CategoryReport> analyzeEach(@V("tickets") java.util.List<String> tickets);
+ *
+ * ===================== Variant: loop until a condition holds =====================
+ * Repeat sub-agents until a static @ExitCondition passes (or maxIterations is reached):
+ *
+ *   import dev.langchain4j.agentic.declarative.ExitCondition;
+ *   import dev.langchain4j.agentic.declarative.LoopAgent;
+ *
+ *   public interface StyleReviewLoop {
+ *       @LoopAgent(outputKey = "draft", maxIterations = 5,
+ *               subAgents = { StyleScorer.class, StyleEditor.class })
+ *       String refine(@V("draft") String draft);
+ *
+ *       @ExitCondition
+ *       static boolean good(@V("score") double score) { return score >= 0.8; }
+ *   }
+ *
+ * ===================== Variant: conditional routing =====================
+ * Run a sub-agent only when its static @ActivationCondition returns true:
+ *
+ *   import dev.langchain4j.agentic.declarative.ActivationCondition;
+ *   import dev.langchain4j.agentic.declarative.ConditionalAgent;
+ *
+ *   public interface ExpertRouter {
+ *       @ConditionalAgent(outputKey = "answer",
+ *               subAgents = { MedicalExpert.class, LegalExpert.class })
+ *       String route(@V("request") String request);
+ *
+ *       @ActivationCondition(MedicalExpert.class)
+ *       static boolean medical(@V("category") String category) { return "MEDICAL".equals(category); }
+ *   }
+ *
+ * ===================== Variant: declarative error recovery =====================
+ * Recover from a failing sub-agent instead of propagating the exception — a static @ErrorHandler
+ * returns ErrorRecoveryResult.retry() (re-run) or .throwException() (give up):
+ *
+ *   import dev.langchain4j.agentic.agent.ErrorContext;
+ *   import dev.langchain4j.agentic.agent.ErrorRecoveryResult;
+ *   import dev.langchain4j.agentic.declarative.ErrorHandler;
+ *
+ *   @ErrorHandler
+ *   static ErrorRecoveryResult onError(ErrorContext ctx) {
+ *       ctx.agenticScope().writeState("topic", "dragons and wizards");
+ *       return ErrorRecoveryResult.retry();
+ *   }
+ *
+ * ===================== Variant: human-in-the-loop =====================
+ * Pause mid-workflow for human input; the returned value is stored under outputKey:
+ *
+ *   import dev.langchain4j.agentic.declarative.HumanInTheLoop;
+ *
+ *   @HumanInTheLoop(description = "Ask which audience to target", outputKey = "audience")
+ *   static String askAudience(@V("topic") String topic) {
+ *       System.console().printf("Which audience for %s? ", topic);
+ *       return System.console().readLine();
+ *   }
  */

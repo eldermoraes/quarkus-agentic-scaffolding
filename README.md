@@ -1,5 +1,5 @@
 # Quarkus + LangChain4j + AI Stack
-# Version: 0.8.0
+# Version: 0.9.0
 
 ## What this repository is
 
@@ -43,7 +43,10 @@ boilerplate.
             ├── pom.xml.template
             ├── application.properties.template
             ├── AiService.java.template
+            ├── AiServiceTest.java.template
             ├── Agent.java.template
+            ├── Tools.java.template
+            ├── Guardrails.java.template
             └── RagSetup.java.template
 ```
 
@@ -261,7 +264,7 @@ global file (or remove just the Quarkus/LangChain4j section you pasted into it).
 
 ## Versioning and changelog
 
-This artifact uses semantic versioning. The current version is **0.8.0**; `CLAUDE.md`,
+This artifact uses semantic versioning. The current version is **0.9.0**; `CLAUDE.md`,
 `AGENTS.md`, `SKILL.md`, `.claude-plugin/plugin.json`, `.codex-plugin/plugin.json`, and this
 `README.md` each carry a matching version header. See [`CHANGELOG.md`](CHANGELOG.md) for release
 history.

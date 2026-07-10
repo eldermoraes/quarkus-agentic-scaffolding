@@ -1,0 +1,57 @@
+package org.acme.guardrails;
+
+import dev.langchain4j.data.message.AiMessage;
+import dev.langchain4j.data.message.UserMessage;
+import dev.langchain4j.guardrail.InputGuardrail;
+import dev.langchain4j.guardrail.InputGuardrailResult;
+import dev.langchain4j.guardrail.OutputGuardrail;
+import dev.langchain4j.guardrail.OutputGuardrailResult;
+import jakarta.enterprise.context.ApplicationScoped;
+
+/*
+ * Guardrails — beans that validate what goes into and comes out of an AI service.
+ * They are ordinary CDI beans; use the upstream dev.langchain4j.guardrail API (the older
+ * Quarkus-specific io.quarkiverse.langchain4j.guardrails API was removed).
+ *
+ * Attach them on the AI-service method or interface:
+ *   @InputGuardrails(PromptInjectionGuard.class)     // dev.langchain4j.service.guardrail
+ *   @OutputGuardrails(EmptyResponseGuard.class)
+ *
+ * An output guardrail may force the model to answer again with reprompt(...); cap the attempts
+ * with quarkus.langchain4j.guardrails.max-retries (Quarkus default 3, 0 disables retries).
+ *
+ * The script names this file after the first public type; both guards live here for that reason.
+ */
+@ApplicationScoped
+public class PromptInjectionGuard implements InputGuardrail {
+
+    private static final int MAX_INPUT_CHARS = 4_000;
+
+    @Override
+    public InputGuardrailResult validate(UserMessage userMessage) {
+        String text = userMessage.singleText();
+        if (text.length() > MAX_INPUT_CHARS) {
+            return failure("Input exceeds the " + MAX_INPUT_CHARS + "-character limit.");
+        }
+        // Honest heuristic — real projects tune this (allow-lists, a classifier model, ...).
+        if (text.toLowerCase().contains("ignore previous instructions")) {
+            return failure("Input rejected: possible prompt-injection marker.");
+        }
+        return success();
+    }
+}
+
+@ApplicationScoped
+class EmptyResponseGuard implements OutputGuardrail {
+
+    @Override
+    public OutputGuardrailResult validate(AiMessage responseFromLLM) {
+        String text = responseFromLLM.text();
+        if (text == null || text.isBlank()) {
+            // reprompt(message, reprompt): retry the call with an added instruction.
+            return reprompt("The model returned an empty response.",
+                    "Provide a complete, non-empty answer.");
+        }
+        return success();
+    }
+}

@@ -1,0 +1,120 @@
+/*
+ * Wiring smoke test for the ChatAssistant AI service (pairs with AiService.java.template).
+ *
+ * What the ACTIVE test below verifies: booting Quarkus with @QuarkusTest builds the CDI
+ * container and the AI-service proxy (Quarkus augmentation) at startup, and injecting the
+ * assistant proves that wiring succeeded. assertNotNull does NOT send a prompt, so the test is
+ * fast, deterministic, and passes without a running Ollama and without any inference.
+ *
+ * What it does NOT do: it does not call the model, does not assert on generated text, and does
+ * not exercise tools, guardrails, or RAG. Those need a live model — see the commented examples.
+ *
+ * Only quarkus-junit is required on the test classpath for the active test to compile and run.
+ * The commented model-dependent and evaluation examples additionally need a live Ollama and,
+ * for evals, the quarkus-langchain4j-testing-evaluation-junit5 dependency (already added,
+ * test-scoped, in templates/pom.xml.template — the platform BOM manages its version).
+ */
+package org.acme.ai;
+
+import io.quarkus.test.junit.QuarkusTest;
+import jakarta.inject.Inject;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
+@QuarkusTest
+public class ChatAssistantTest {
+
+    @Inject
+    ChatAssistant assistant;
+
+    @Test
+    void aiServiceIsWired() {
+        // CDI wiring + Quarkus AI-service augmentation succeeded if the proxy was injected.
+        // No model call happens here, so this passes without a running Ollama.
+        assertNotNull(assistant);
+    }
+
+    // --- Model-dependent test (requires a running Ollama; not run in CI) ---------------------
+    // Uncomment to exercise real inference. Keep prompts fixed and configure the model with
+    // temperature=0 for deterministic assertions (CLAUDE.md §5). Assert a stable property of the
+    // reply rather than exact wording — model output is fuzzy.
+    //
+    //   @Test
+    //   void answersARealQuestion() {
+    //       String reply = assistant.answer("My deployment returns HTTP 503. What should I check?");
+    //       assertNotNull(reply);
+    //       org.junit.jupiter.api.Assertions.assertFalse(reply.isBlank());
+    //   }
+}
+
+/*
+ * ===================== AI-quality evaluation (opt-in) =====================
+ * Model output is fuzzy, so grade it with the evaluation framework instead of brittle string
+ * asserts. This needs a live model and the test-scoped dependency
+ *   io.quarkiverse.langchain4j:quarkus-langchain4j-testing-evaluation-junit5
+ * which templates/pom.xml.template already adds (version managed by the platform BOM).
+ * Shape verified against https://docs.quarkiverse.io/quarkus-langchain4j/dev/testing.html
+ *
+ * Labelled samples go in a YAML file under src/test/resources (a list of
+ * name / parameters / expected-output entries):
+ *
+ *   - name: reset_password
+ *     parameters:
+ *       - "How do I reset my password?"
+ *     expected-output: |
+ *       Explain that the user opens Settings > Security and clicks "Reset password".
+ *     tags: ["support"]
+ *
+ * Programmatic style — inject a Scorer and the samples, then score with a strategy:
+ *
+ *   import io.quarkiverse.langchain4j.evaluation.junit5.Evaluate;
+ *   import io.quarkiverse.langchain4j.evaluation.junit5.SampleLocation;
+ *   import io.quarkiverse.langchain4j.evaluation.junit5.ScorerConfiguration;
+ *   import io.quarkiverse.langchain4j.testing.evaluation.EvaluationReport;
+ *   import io.quarkiverse.langchain4j.testing.evaluation.Samples;
+ *   import io.quarkiverse.langchain4j.testing.evaluation.Scorer;
+ *   import io.quarkiverse.langchain4j.testing.evaluation.similarity.SemanticSimilarityStrategy;
+ *   import static org.junit.jupiter.api.Assertions.assertTrue;
+ *
+ *   @QuarkusTest
+ *   @Evaluate                                    // enables the evaluation extension
+ *   class ChatAssistantScorerTest {
+ *       @Inject ChatAssistant assistant;
+ *
+ *       @Test
+ *       void meetsQualityBar(
+ *               @ScorerConfiguration(concurrency = 4) Scorer scorer,
+ *               @SampleLocation("src/test/resources/support-samples.yaml") Samples<String> samples) {
+ *           EvaluationReport<String> report = scorer.evaluate(
+ *                   samples,
+ *                   params -> assistant.answer(params.get(0, String.class)),
+ *                   new SemanticSimilarityStrategy(0.8)); // embedding cosine threshold, 0..1
+ *           assertTrue(report.score() >= 80.0);          // report.score() is a 0..100 percentage
+ *       }
+ *   }
+ *
+ * Declarative style — @EvaluationTest wires samples + strategy + the pass threshold for you and
+ * calls a method named by @EvaluationFunction (see the docs for that binding):
+ *
+ *   @QuarkusTest
+ *   @Evaluate
+ *   class ChatAssistantEvalTest {
+ *       @Inject ChatAssistant assistant;
+ *
+ *       @EvaluationFunction("answer")
+ *       String answer(Parameters p) { return assistant.answer(p.get(0, String.class)); }
+ *
+ *       @EvaluationTest(
+ *               samples = "src/test/resources/support-samples.yaml",
+ *               function = "answer",
+ *               strategy = SemanticSimilarityStrategy.class,
+ *               minScore = 80.0)                          // fails the test below this percentage
+ *       void graded() { }
+ *   }
+ *
+ * Swap the strategy for an LLM-as-judge with
+ *   io.quarkiverse.langchain4j.testing.evaluation.judge.AiJudgeStrategy
+ * (add quarkus-langchain4j-testing-evaluation-ai-judge, also BOM-managed) when a model should
+ * grade semantic correctness rather than embedding similarity.
+ */

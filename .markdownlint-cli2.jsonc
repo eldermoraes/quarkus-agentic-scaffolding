@@ -1,0 +1,21 @@
+{
+  // Content gate, not a style straitjacket: long lines, inline HTML, blank-line
+  // spacing, bare code fences, table styling and the dual "# Version:" headers are
+  // established conventions across this repo's markdown — don't fight them. Link and
+  // reference integrity rules (e.g. MD034 no-bare-urls, MD051/MD052 link checks) stay on.
+  "gitignore": true, // lint what's committed; skip gitignored local scratch (.superpowers/, ANALYSIS.md)
+  "config": {
+    "MD013": false, // line length
+    "MD033": false, // inline HTML
+    "MD041": false, // first line need not be a top-level heading (version headers)
+    "MD025": false, // a second top-level heading ("# Version: …") is the repo's convention
+    "MD024": { "siblings_only": true }, // repeated headings across sections are fine
+    "MD012": false, // multiple consecutive blank lines
+    "MD022": false, // blank lines around headings
+    "MD031": false, // blank lines around fenced code blocks
+    "MD032": false, // blank lines around lists
+    "MD040": false, // language hint on fenced code blocks
+    "MD060": false  // table column style
+  },
+  "globs": ["**/*.md", "!.tmp-audit/**", "!docs/superpowers/**", "!node_modules/**"]
+}

@@ -1,0 +1,62 @@
+name: validate-templates
+on:
+  push:
+    branches: [main]
+    paths: ['skills/**', 'ci/**', '.github/workflows/validate-templates.yml']
+  pull_request:
+    paths: ['skills/**', 'ci/**', '.github/workflows/validate-templates.yml']
+  schedule:
+    - cron: '0 5 * * 1'   # weekly, Monday 05:00 UTC: validate against LIVE latest platform
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  compile:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Load baseline versions
+        run: grep -v '^#' ci/baseline.env >> "$GITHUB_ENV"
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: ${{ env.JAVA_VERSION }}
+          cache: maven
+      - name: Build from templates
+        # PR/push: reproducible build against the Renovate-tracked baseline.
+        # schedule/dispatch: empty arg -> the script resolves the live latest platform.
+        run: |
+          if [[ "${{ github.event_name }}" == "schedule" || "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            ci/build-from-templates.sh
+          else
+            ci/build-from-templates.sh "$QUARKUS_PLATFORM_VERSION"
+          fi
+      - name: Toggle tracking issue on scheduled failure
+        if: failure() && github.event_name == 'schedule'
+        uses: jayqi/failed-build-issue-action@v1
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+  links:
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Check markdown links
+        uses: lycheeverse/lychee-action@v2
+        with:
+          args: >-
+            --no-progress
+            README.md CLAUDE.md AGENTS.md CONTRIBUTING.md CHANGELOG.md
+            docs/VALIDATING-TEMPLATES.md docs/EVOLUTION-PLAN.md
+            skills/quarkus-langchain4j-scaffolding/SKILL.md
+          fail: true
+      - name: Toggle tracking issue on scheduled failure
+        if: failure() && github.event_name == 'schedule'
+        uses: jayqi/failed-build-issue-action@v1
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          title-template: 'Link check failed on scheduled run'

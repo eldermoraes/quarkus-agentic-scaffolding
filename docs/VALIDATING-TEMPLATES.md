@@ -64,6 +64,16 @@ When you only need to know *"does the template Java still compile against the cu
 
 ## Last validated
 
+- **0.9.0 (2026-07-10):** platform `3.37.2`, `maven.compiler.release` 25. `ci/build-from-templates.sh`
+  reconstructed the full template set — 17 `.java` files plus `application.properties`
+  (18 materialized entries) from the AiService, AiServiceTest, Agent (multi-file), Tools,
+  Guardrails, and RagSetup templates — and ran `mvn test-compile`: 16 main sources compiled to
+  `target/classes` and the `ChatAssistantTest` wiring smoke test compiled to `target/test-classes`
+  (`BUILD SUCCESS`, `javac [... release 25]`). Confirms the agentic API, WebSockets Next, Mutiny,
+  the `@Tool` and guardrail (`dev.langchain4j.guardrail`) imports, and the three injected
+  non-extension deps — embedding model, PDF parser, and the test-scoped
+  `quarkus-langchain4j-testing-evaluation-junit5` — all resolve on the platform BOM with no explicit
+  `<version>`.
 - **0.6.0 (2026-06-03):** platform `3.36.1`. After slimming `pom.xml.template` to a dependency
   reference: regenerated the shell via `quarkus_create` (core + agents + RAG — all extensions
   resolved) and confirmed the two non-extension deps now listed in the template
@@ -81,29 +91,35 @@ When you only need to know *"does the template Java still compile against the cu
   The generated pom confirmed the `quarkus-langchain4j-bom` strategy. Template version bumped
   `3.35.3` → `3.36.0` to match.
 
-## Optional: CI (best-effort static check)
+## Automated validation
 
-CI can run the **static fallback** to catch drift automatically, but note that the Quarkus Agents
-MCP is **not** available in CI — so CI reconstructs the project statically (it cannot call
-`quarkus_create`), and the MCP procedure above stays the source of truth. A minimal GitHub Actions
-job:
+Two mechanisms run these drift checks for you. Both are **backstops** — the Quarkus Agents MCP is
+**not** available in CI, so CI reconstructs the project statically (it cannot call `quarkus_create`)
+and the MCP procedure above stays the source of truth.
 
-```yaml
-# .github/workflows/validate-templates.yml
-name: validate-templates
-on: [push, pull_request]
-jobs:
-  compile:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-java@v4
-        with: { distribution: graalvm, java-version: '25' }
-      # Reconstruct a project from templates/, then `mvn -B -DskipTests compile`.
-      # Keep the reconstruction script alongside this workflow; update it when the
-      # template set changes so a new/renamed template can't silently escape the check.
-      - run: ./ci/build-from-templates.sh
-```
+**Static compile in CI.** `ci/build-from-templates.sh` scripts the **static fallback** above — it
+reconstructs a project from `templates/` and compiles it — and `.github/workflows/validate-templates.yml`
+runs that script two ways:
 
-Treat CI as a backstop, not a replacement: a green run means the Java still compiles, not that a
-full Quarkus augmentation (Easy RAG, model wiring) succeeds — that requires the MCP procedure.
+- on every **push and pull request**, against the versions pinned in `ci/baseline.env`, so builds
+  stay reproducible, and
+- on a **weekly cron (Mondays, 05:00 UTC)**, against the **live latest** Quarkus platform, so a new
+  release that breaks the templates is caught even when nothing in the repo changed.
+
+A failing scheduled run opens a tracking issue (labeled `build failed`), or comments on the
+existing one; close it manually once a later run is green.
+
+**Release watching (Renovate).** `renovate.json` watches the entries in `ci/baseline.env` and
+surfaces new releases on the repo's **Dependency Dashboard** issue for approval — it raises no
+automatic PRs. It tracks the Quarkus platform (`quarkus-bom`, via Maven Central), the
+`quarkus-langchain4j` BOM, and new OpenJDK GA releases (via the `java-version` datasource). Ticking a
+dashboard checkbox is what turns a noticed release into a bump; independently, the weekly cron above
+catches breakage whether or not anyone has ticked it.
+
+> **Activation is a user action.** Renovate only runs once the **Mend Renovate GitHub App** is
+> installed on the repository. Until then `renovate.json` sits inert and no Dependency Dashboard
+> appears.
+
+Treat CI as a backstop, not a replacement: a green run means the Java still **compiles**, not that a
+full Quarkus augmentation (Easy RAG, model wiring) succeeds — that requires the MCP procedure, which
+remains the source of truth.

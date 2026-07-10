@@ -1,5 +1,8 @@
 .tmp-audit/
 target/
+# Session bookkeeping from agent-driven development - never committed
+.superpowers/
+docs/superpowers/
 .idea/
 .vscode/
 *.iml

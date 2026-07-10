@@ -1,5 +1,5 @@
 # Quarkus + LangChain4j + AI Stack - Project Conventions
-# Version: 0.8.0
+# Version: 0.9.0
 
 These conventions apply whenever Codex or Bob writes, reviews, or configures code in a Quarkus +
 LangChain4j project. They are always-on. Procedural scaffolding steps and starter code live in
@@ -83,6 +83,9 @@ generic web search.
   annotated with `@RegisterAiService` (the Quarkus form of LangChain4j's declarative service),
   using `@SystemMessage` / `@UserMessage` for prompts and `@MemoryId` for per-conversation
   memory. Prefer this over manual `ChatModel` wiring unless there is a documented reason.
+- **Tools are CDI beans.** Expose actions to a model with `@Tool` methods on `@ApplicationScoped`
+  beans, wired via `@RegisterAiService(tools = ...)` or `@ToolBox` - never hand-rolled JSON
+  function dispatch. Tool methods doing I/O follow the section 2 virtual-thread rules.
 - **Multi-agent workflows are composed declaratively.** Build agentic workflows from
   `@RegisterAiService` agents annotated with `@Agent(name, description, outputKey)` and orchestrate
   them with the LangChain4j Agentic annotations - `@SequenceAgent`, `@ParallelAgent`,
@@ -100,6 +103,10 @@ generic web search.
   orchestrator that runs the blocking pipeline on a virtual thread
   (`Multi.createFrom().emitter(...)` + `Thread.startVirtualThread(...)`) and emits progress.
   Mutiny appears only at the channel edge, never inside the engine.
+- **Guardrails wrap AI services declaratively.** Validate prompts/responses with
+  `@InputGuardrails` / `@OutputGuardrails` beans implementing the upstream
+  `dev.langchain4j.guardrail` interfaces (the Quarkus-specific guardrail API was retired in favor
+  of upstream); tune retries with `quarkus.langchain4j.guardrails.max-retries`.
 - **RAG starts simple with Easy RAG.** For retrieval-augmented generation, start with the
   `quarkus-langchain4j-easy-rag` extension plus an in-process embedding model: point
   `quarkus.langchain4j.easy-rag.path` at a documents folder and let it ingest on startup. Move to
@@ -121,6 +128,10 @@ Apply it when adding tests:
 - Run native integration tests through `maven-failsafe-plugin` inside the `native` profile.
 - Keep model interactions deterministic in tests (`temperature=0`, fixed prompts) or mock the
   model so tests do not depend on live inference.
+- Grade model *quality* with the evaluation framework
+  (`quarkus-langchain4j-testing-evaluation-junit5` + semantic-similarity / AI-judge strategies)
+  rather than brittle string asserts; keep the scaffolded `@QuarkusTest` wiring smoke test green
+  without a live model.
 
 ---
 

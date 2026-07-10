@@ -23,9 +23,11 @@
   ==========================================================================
   2. Non-extension dependencies the generator does NOT add — paste into <dependencies>
   ==========================================================================
-  These live under the dev.langchain4j group (they are libraries, not Quarkus extensions), so
-  neither quarkus_create nor code.quarkus.io will add them. Their versions are managed by
-  quarkus-langchain4j-bom, so they take NO <version>.
+  Most live under the dev.langchain4j group (they are libraries, not Quarkus extensions); the
+  test-scoped eval artifact is a quarkiverse module the generator likewise omits. Neither
+  quarkus_create nor code.quarkus.io will add any of them, and their versions are managed by
+  quarkus-langchain4j-bom, so they take NO <version>. Add each only when its feature is used
+  (RAG embedding model, PDF parsing, AI-quality evals).
 -->
 <dependencies>
 
@@ -39,6 +41,13 @@
     <dependency>
         <groupId>dev.langchain4j</groupId>
         <artifactId>langchain4j-document-parser-apache-pdfbox</artifactId>
+    </dependency>
+
+    <!-- testing: AI-quality evals (Scorer/@EvaluationTest) -->
+    <dependency>
+        <groupId>io.quarkiverse.langchain4j</groupId>
+        <artifactId>quarkus-langchain4j-testing-evaluation-junit5</artifactId>
+        <scope>test</scope>
     </dependency>
 
 </dependencies>

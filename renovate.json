@@ -1,0 +1,15 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:recommended"],
+  "dependencyDashboard": true,
+  "dependencyDashboardApproval": true,
+  "customManagers": [
+    {
+      "customType": "regex",
+      "managerFilePatterns": ["/^ci/baseline\\.env$/"],
+      "matchStrings": [
+        "# renovate: datasource=(?<datasource>[a-z-]+) depName=(?<depName>[^\\s]+)\\n[A-Z0-9_]+=(?<currentValue>[^\\s]+)"
+      ]
+    }
+  ]
+}

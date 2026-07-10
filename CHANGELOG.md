@@ -3,6 +3,27 @@
 All notable changes to this artifact are documented here. This project adheres to semantic
 versioning.
 
+## v0.9.0 — 2026-07-10
+- Added a real CI backstop: `ci/build-from-templates.sh` reconstructs a project from the
+  templates by convention and compiles it; the `validate-templates` workflow runs it on PRs
+  (against `ci/baseline.env`) and weekly against the live latest platform, opening or updating a
+  tracking issue on scheduled failures (closed manually once a later run is green); the `quality`
+  workflow adds version-consistency, shellcheck, actionlint, and markdownlint gates; scheduled
+  link checking via lychee.
+- Added `renovate.json` + `ci/baseline.env`: Renovate watches Quarkus platform, the
+  quarkus-langchain4j BOM, and new OpenJDK GA releases (java-version datasource) on the
+  Dependency Dashboard (approval mode — no automatic PRs). Activation requires installing the
+  Mend Renovate app.
+- Closed template capability gaps: `Tools.java.template` (@Tool CDI beans + wiring),
+  `Guardrails.java.template` (upstream input/output guardrails), `AiServiceTest.java.template`
+  (@QuarkusTest wiring smoke test + commented model-dependent and eval examples), and commented
+  loop/conditional/error-handler/human-in-the-loop variants in `Agent.java.template`;
+  `pom.xml.template` gained the test-scoped `quarkus-langchain4j-testing-evaluation-junit5`
+  dependency (version managed by the platform BOM); SKILL.md gained tool/guardrail/test-scaffolding
+  sections and the layout gained `tools/` and `guardrails/`; CLAUDE.md/AGENTS.md §4–§5 now cover
+  tools, guardrails, and the eval framework.
+- All version headers synchronized to 0.9.0.
+
 ## v0.8.0 — 2026-07-10
 - Documented a universal install path via the skills.sh CLI (`npx skills add
   eldermoraes/quarkus-agentic-scaffolding`), which detects and installs the scaffolding skill into
