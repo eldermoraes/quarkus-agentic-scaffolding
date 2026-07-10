@@ -3,6 +3,14 @@
 All notable changes to this artifact are documented here. This project adheres to semantic
 versioning.
 
+## v0.8.0 — 2026-07-10
+- Documented a universal install path via the skills.sh CLI (`npx skills add
+  eldermoraes/quarkus-agentic-scaffolding`), which detects and installs the scaffolding skill into
+  any Agent Skills-compatible agent (Claude Code, Codex, Copilot, Cursor, Windsurf, opencode, and
+  others). Verified end-to-end against the live CLI. The conventions files and the required MCP
+  tooling remain per-agent manual steps, as before.
+- All version headers synchronized to 0.8.0.
+
 ## v0.7.0 — 2026-06-08
 - **Fixed Bob support, which had been modeled on a non-existent CLI.** Removed the hallucinated
   `bob plugin marketplace add` / `bob plugin add` and `bob mcp add` commands (IBM Bob has no plugin

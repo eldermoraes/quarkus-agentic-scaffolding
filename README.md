@@ -1,5 +1,5 @@
 # Quarkus + LangChain4j + AI Stack
-# Version: 0.7.0
+# Version: 0.8.0
 
 ## What this repository is
 
@@ -46,6 +46,21 @@ boilerplate.
             ├── Agent.java.template
             └── RagSetup.java.template
 ```
+
+## Quick install — any skills-capable agent
+
+The fastest install on any agent that supports the [Agent Skills](https://agentskills.io) format —
+Claude Code, Codex, GitHub Copilot, Cursor, Windsurf, opencode, Amp, and dozens more:
+
+```
+npx skills add eldermoraes/quarkus-agentic-scaffolding
+```
+
+The [skills.sh](https://www.skills.sh/) CLI detects your agents and installs the
+`quarkus-langchain4j-scaffolding` skill for each of them. Two things it does **not** set up, which
+the per-agent sections below cover: the always-on conventions file (`CLAUDE.md` for Claude,
+`AGENTS.md` for everything else) that you copy into your project root, and the required MCP
+tooling (Quarkus Agents MCP + context7).
 
 ## How to use with Claude
 
@@ -246,7 +261,7 @@ global file (or remove just the Quarkus/LangChain4j section you pasted into it).
 
 ## Versioning and changelog
 
-This artifact uses semantic versioning. The current version is **0.7.0**; `CLAUDE.md`,
+This artifact uses semantic versioning. The current version is **0.8.0**; `CLAUDE.md`,
 `AGENTS.md`, `SKILL.md`, `.claude-plugin/plugin.json`, `.codex-plugin/plugin.json`, and this
 `README.md` each carry a matching version header. See [`CHANGELOG.md`](CHANGELOG.md) for release
 history.
