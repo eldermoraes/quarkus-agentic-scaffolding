@@ -180,7 +180,7 @@ usage, and per-tool spans with zero code ([observability docs](https://docs.quar
 tool-calling loops — [fault-tolerance guide](https://docs.quarkiverse.io/quarkus-langchain4j/dev/guide-fault-tolerance.html)).
 One §-worth of conventions each plus a few template lines.
 
-### 12. Community distribution campaign *(adoption — leverage the author's standing)* — step 1 ✅ done 2026-07-10 (awesome-langchain4j PR #29 submitted); steps 2–4 pending user
+### 12. Community distribution campaign *(adoption — leverage the author's standing)* — step 1 ✅ done 2026-07-10 (awesome-langchain4j PR #29 submitted); steps 2–4 📦 archived (owner decision 2026-07-10 — not pursued for now)
 Sequenced so social proof accumulates:
 1. PR to [langchain4j-community-resources](https://github.com/langchain4j/langchain4j-community-resources)
    (explicitly open to shared resources — trivially accepted).
@@ -198,7 +198,7 @@ pattern (vercel-labs/agent-skills, ~29k stars) is vendor blog + one-line install
 Also: the skill is already on [jvmskills.com](https://jvmskills.com/) — engage the curator; their
 eval badges ("96% vs 70%") are the emerging quality signal (see 13).
 
-### 13. Publish an eval for the skill *(quality signal)*
+### 13. Publish an eval for the skill *(quality signal)* — 📋 tracked in [issue #6](https://github.com/eldermoraes/quarkus-agentic-scaffolding/issues/6) (design ready; owner decisions pending)
 SkillsBench ([arxiv 2602.12670](https://arxiv.org/html/2602.12670v1)) found curated skills add
 +16pp average but many skills add nothing — publishable evidence of effectiveness is becoming the
 differentiator (jvmskills badges). Design a small fixed-task eval (scaffold X with vs. without the
@@ -210,7 +210,7 @@ public repo with a `gemini-extension.json` and the GitHub topic `gemini-cli-exte
 ([releasing docs](https://geminicli.com/docs/extensions/releasing/)). The manifest can declare the
 two MCP servers this stack requires. Cheapest official-gallery listing of the three vendors.
 
-### 15. Agentic maintenance automation *(after #6/#7 are in place)*
+### 15. Agentic maintenance automation *(after #6/#7 are in place)* — ⏸ deliberately deferred (owner decision 2026-07-10: the initiative to act on a broken-CI issue stays with the maintainer; detection stays automated via the weekly cron + Renovate dashboard. Revisit only at the owner's request.)
 Phase 2 of "stay current": a scheduled agent run that executes this repo's own validation
 procedure and proposes fixes. Options, in maturity order:
 [claude-code-action on cron](https://code.claude.com/docs/en/github-actions) (automation mode;
