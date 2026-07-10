@@ -53,6 +53,7 @@ jobs:
         with:
           args: >-
             --no-progress
+            --exclude 'medium\.com'
             README.md CLAUDE.md AGENTS.md CONTRIBUTING.md CHANGELOG.md
             docs/VALIDATING-TEMPLATES.md docs/EVOLUTION-PLAN.md
             skills/quarkus-langchain4j-scaffolding/SKILL.md
