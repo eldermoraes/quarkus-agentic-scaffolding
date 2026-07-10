@@ -1,10 +1,10 @@
 ---
 name: quarkus-langchain4j-scaffolding
-description: Scaffold and structure new Quarkus + LangChain4j projects, modules, AI services, agents, RAG pipelines, and embedding store setups. Use this whenever the user asks to create, scaffold, set up, bootstrap, initialize, start, generate, or kickstart a new Quarkus project, AI service, agent, RAG component, embedding store, or related module in this stack. Also use for generating baseline pom.xml, application.properties, project layout, or starter classes for Quarkus + LangChain4j work.
+description: Scaffold and structure new Quarkus + LangChain4j projects, modules, AI services, agents, RAG pipelines, MCP clients and servers (Model Context Protocol), and embedding store setups. Use this whenever the user asks to create, scaffold, set up, bootstrap, initialize, start, generate, or kickstart a new Quarkus project, AI service, agent, RAG component, MCP client or server integration, embedding store, or related module in this stack. Also use for generating baseline pom.xml, application.properties, project layout, or starter classes for Quarkus + LangChain4j work.
 ---
 
 # Quarkus + LangChain4j Scaffolding
-# Version: 0.9.0
+# Version: 0.10.0
 
 ## 1. When to use this skill
 
@@ -19,7 +19,7 @@ Use this skill when **creating something new** in a Quarkus + LangChain4j projec
   classes for this stack.
 
 This skill covers *how to lay things out and get them running*. It does **not** restate coding
-conventions — see §12.
+conventions — see §14.
 
 **Required tooling (mandatory).** This skill must not scaffold without it. Create the project and
 discover extensions through the **Quarkus Agents MCP** (`quarkus_create`, `quarkus_searchTools`),
@@ -38,6 +38,7 @@ src/main/java/<group>/<app>/
   ai/         # @RegisterAiService interfaces (AI services and agents)
   tools/      # @Tool CDI beans the AI services can call
   guardrails/ # input/output guardrails (optional)
+  mcp/        # MCP server features (@Tool/@Prompt/@Resource offered to remote MCP clients)
   dto/        # records: inputs, reports, and event/step types
   workflow/   # agentic orchestrators + the streaming-bridge beans
   rest/       # JAX-RS resources (@Path)
@@ -64,6 +65,10 @@ Pass these extensions to `quarkus_create`:
 - core: `rest`, `rest-jackson`, `smallrye-openapi`, `websockets-next`, `langchain4j-ollama`
 - agents: add `langchain4j-agentic`
 - RAG: add `langchain4j-easy-rag`
+- MCP client: add `langchain4j-mcp`
+- MCP server: add `mcp-server-http` (io.quarkiverse.mcp; use `mcp-server-stdio` for a subprocess server)
+- observability (optional): add `micrometer-registry-prometheus` and `opentelemetry`
+- fault tolerance (optional): add `smallrye-fault-tolerance`
 
 (`quarkus-arc` comes in automatically.) Then add the **non-extension** dependencies listed in
 `templates/pom.xml.template` — the `dev.langchain4j` embedding model (required by Easy RAG) and,
@@ -83,9 +88,34 @@ Use `templates/Tools.java.template`. Tools are plain `@ApplicationScoped` CDI be
 `@RegisterAiService(tools = TicketTools.class)` or per method with `@ToolBox(TicketTools.class)`.
 Tools run blocking by default; keep blocking I/O (DB, REST) off the event loop by annotating the
 method `@RunOnVirtualThread`. Validate a tool's arguments or results with tool-level guardrails —
-see §8.
+see §10.
 
-## 6. Agent scaffolding
+## 6. MCP client scaffolding (consume remote MCP tools)
+
+Use `templates/McpClient.java.template`. An AI service can take its tools from one or more MCP
+servers: annotate the service method with `@McpToolBox("name")`
+(`io.quarkiverse.langchain4j.mcp.runtime`) — or `@McpToolBox` with no name to activate every
+configured client — and declare each named client in `application.properties`
+(`quarkus.langchain4j.mcp.<name>.transport-type` + `.url`; prefer `streamable-http`, or
+`stdio` + `.command` for a local subprocess server). Requires the `langchain4j-mcp` extension (the
+platform BOM manages its version). Local `@Tool` beans (§5) and MCP toolboxes combine freely on
+the same service. Each client adds a readiness health check; disable with
+`quarkus.langchain4j.mcp.health.enabled=false` when the remote server is optional at startup.
+
+## 7. MCP server scaffolding (expose your app as an MCP server)
+
+Use `templates/McpServer.java.template`. Annotate business methods with `@Tool` / `@ToolArg`
+from `io.quarkiverse.mcp.server` (plus `@Prompt` / `@Resource` for reusable prompts and data)
+to offer them to any MCP client over Streamable HTTP at `/mcp`
+(`quarkus.mcp.server.http.root-path`). Requires the `mcp-server-http` extension
+(`io.quarkiverse.mcp`, managed by the platform's `quarkus-mcp-server-bom` — no version pin);
+use `mcp-server-stdio` instead when a desktop client spawns the app as a subprocess. Do not
+confuse the two `@Tool` annotations: `io.quarkiverse.mcp.server.Tool` offers a method to remote
+MCP clients, while `dev.langchain4j.agent.tool.Tool` (§5) offers it to your own model — the
+template delegates to the `TicketTools` bean so one implementation backs both. Enable
+`quarkus.mcp.server.traffic-logging.enabled=true` to watch the JSON-RPC exchanges in dev.
+
+## 8. Agent scaffolding
 
 Use `templates/Agent.java.template`. It shows the full declarative agentic shape:
 
@@ -100,7 +130,7 @@ Use `templates/Agent.java.template`. It shows the full declarative agentic shape
 Requires the `quarkus-langchain4j-agentic` extension. Call `quarkus_skills` for it before writing
 the workflow.
 
-## 7. RAG pipeline scaffolding
+## 9. RAG pipeline scaffolding
 
 Use `templates/RagSetup.java.template`. Default to **Easy RAG**: add `quarkus-langchain4j-easy-rag`
 plus an in-process embedding model (`langchain4j-embeddings-all-minilm-l6-v2`), drop documents
@@ -109,7 +139,7 @@ startup — no retriever code required. The template also includes a commented, 
 path (a CDI-produced `EmbeddingStore` + `EmbeddingStoreContentRetriever` + `RetrievalAugmentor`)
 to use **only when a project needs control Easy RAG does not provide**.
 
-## 8. Guardrails
+## 10. Guardrails
 
 Use `templates/Guardrails.java.template`. Guardrails are `@ApplicationScoped` CDI beans that
 validate an AI service's inputs (`InputGuardrail`) and outputs (`OutputGuardrail`); attach them
@@ -118,19 +148,21 @@ upstream `dev.langchain4j.guardrail` API — the Quarkus-specific guardrail API 
 output guardrail can force the model to answer again with `reprompt(…)`; cap attempts with
 `quarkus.langchain4j.guardrails.max-retries` (default 3, 0 disables).
 
-## 9. `application.properties` baseline
+## 11. `application.properties` baseline
 
 Use `templates/application.properties.template`. It configures the Ollama provider with a local
 default model (cloud models shown as comments), a named `smaller` model for cheap subtasks,
 generous timeouts, request/response logging, disabled Dev Services, and the Easy RAG documents
-path.
+path. A commented MCP client block declares the named `ops` client used in §6. A commented MCP
+server block sets the Streamable HTTP path and traffic logging for §7. A commented observability
+block wires OTLP trace export and dev-only prompt/completion capture.
 
-## 10. After scaffolding
+## 12. After scaffolding
 
 Run and verify through the Quarkus Agents MCP (start dev mode, run tests via the Dev MCP tools)
 rather than invoking Maven directly.
 
-## 11. Test scaffolding
+## 13. Test scaffolding
 
 Use `templates/AiServiceTest.java.template`. Its active content is a `@QuarkusTest` wiring smoke
 test (`ChatAssistantTest`) that injects the `ChatAssistant` AI service and asserts it is non-null:
@@ -142,7 +174,7 @@ test (live Ollama, `temperature=0`) and an **AI-quality evaluation** example (`S
 `quarkus-langchain4j-testing-evaluation-junit5` — already listed, test-scoped, in
 `templates/pom.xml.template` (the platform BOM manages its version).
 
-## 12. Cross-reference
+## 14. Cross-reference
 
 For coding conventions to apply once scaffolding is done — Java language level, virtual threads,
 records/sealed/pattern matching, declarative AI services, streaming, RAG, testing — see the

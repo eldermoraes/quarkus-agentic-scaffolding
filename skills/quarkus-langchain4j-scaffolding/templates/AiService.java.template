@@ -43,4 +43,23 @@ public interface ChatAssistant {
     //   @UserMessage("Summarize the following text:\n{text}")
     //   Summary summarize(String text);
     // -------------------------------------------------------------------------
+
+    // -------------------------------------------------------------------------
+    // Fault tolerance (opt-in): with the quarkus-smallrye-fault-tolerance extension,
+    // MicroProfile FT annotations work directly on AI-service methods. Caveat from the
+    // quarkus-langchain4j fault-tolerance guide: a tool-calling method may loop through
+    // several model/tool round-trips, so size @Timeout generously.
+    //
+    //   import java.time.temporal.ChronoUnit;
+    //   import org.eclipse.microprofile.faulttolerance.Fallback;
+    //   import org.eclipse.microprofile.faulttolerance.Timeout;
+    //
+    //   @Timeout(value = 60, unit = ChronoUnit.SECONDS)
+    //   @Fallback(fallbackMethod = "answerFallback")
+    //   String answer(String problem);
+    //
+    //   default String answerFallback(String problem) {
+    //       return "The assistant is temporarily unavailable; please retry shortly.";
+    //   }
+    // -------------------------------------------------------------------------
 }

@@ -3,6 +3,31 @@
 All notable changes to this artifact are documented here. This project adheres to semantic
 versioning.
 
+## v0.10.0 — 2026-07-10
+- Added MCP scaffolding in both directions: `McpClient.java.template` (an AI service consuming
+  MCP tools via `@McpToolBox`, with `streamable-http`/`stdio` client config in
+  `application.properties.template`) and `McpServer.java.template` (exposing the app's own
+  `TicketTools` as an MCP server via `io.quarkiverse.mcp.server` `@Tool`, versioned by the
+  platform member BOM `quarkus-mcp-server-bom` — no pins). SKILL.md gained MCP client (§6) and
+  MCP server (§7) sections; the CI extension list now covers `langchain4j-mcp` and
+  `mcp-server-http`.
+- Conventions: CLAUDE.md/AGENTS.md now cover zero-code AI observability (Micrometer +
+  OpenTelemetry auto-instrumentation, GenAI token-usage/cost metrics, per-tool spans) and
+  declarative fault tolerance on AI-service methods (`@Timeout`/`@Retry`/`@Fallback`, with the
+  `@Timeout` × tool-calling-loops caveat), plus the GraalVM native-baseline note (no GraalVM
+  releases for JDK 26, 27, or 28 — native stays on the JDK 25 baseline until JDK 29).
+  `application.properties.template` and `AiService.java.template` carry commented, opt-in
+  examples for both.
+- New CI gate: `ci/check-conventions-parity.sh` + a `conventions-parity` job in the quality
+  workflow — CLAUDE.md and AGENTS.md are now diffed under typography normalization so a
+  convention edit can no longer land on one side only (a pre-existing one-character drift was
+  fixed in the process).
+- Added `gemini-extension.json` so the repository can be listed in the Gemini CLI extensions
+  gallery (declares the required Quarkus Agents MCP + context7 servers; `contextFileName`
+  delivers `AGENTS.md`); it is now the seventh version-carrying file, enforced by the extended
+  `ci/check-version-consistency.sh`.
+- All version headers synchronized to 0.10.0.
+
 ## v0.9.0 — 2026-07-10
 - Added a real CI backstop: `ci/build-from-templates.sh` reconstructs a project from the
   templates by convention and compiles it; the `validate-templates` workflow runs it on PRs

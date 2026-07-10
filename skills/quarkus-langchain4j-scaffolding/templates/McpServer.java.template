@@ -1,0 +1,36 @@
+package org.acme.mcp;
+
+import org.acme.tools.TicketTools;
+
+import io.quarkiverse.mcp.server.Tool;
+import io.quarkiverse.mcp.server.ToolArg;
+import jakarta.inject.Inject;
+
+/*
+ * MCP server — offers this application's capabilities as MCP tools that any MCP-capable
+ * agent (Claude Code, an IDE, another Quarkus app via quarkus-langchain4j-mcp) can call.
+ * Requires the mcp-server-http extension (io.quarkiverse.mcp — managed by the platform's
+ * quarkus-mcp-server-bom, so NO version pin). Streamable HTTP endpoint: /mcp by default
+ * (quarkus.mcp.server.http.root-path; see application.properties.template). Use the
+ * mcp-server-stdio extension instead when a desktop client should spawn the app directly.
+ *
+ * Two different @Tool annotations exist in this stack — do not mix them up:
+ *   io.quarkiverse.mcp.server.Tool   offers a method to REMOTE MCP clients (this file);
+ *   dev.langchain4j.agent.tool.Tool  offers a method to YOUR OWN model (Tools.java.template).
+ * Here the MCP tool delegates to the same TicketTools bean, so one implementation backs both.
+ *
+ * The declaring type is turned into a CDI bean automatically; @Inject works as usual.
+ * @Prompt and @Resource (same package) expose reusable prompts and data the same way.
+ */
+public class TriageMcpServer {
+
+    @Inject
+    TicketTools tickets;
+
+    @Tool(description = "Looks up a customer's support context: plan and open-ticket count")
+    public String customerContext(
+            @ToolArg(description = "The customer id") String customerId) {
+        TicketTools.CustomerContext ctx = tickets.lookupCustomer(customerId);
+        return "plan=%s openTickets=%d".formatted(ctx.plan(), ctx.openTickets());
+    }
+}

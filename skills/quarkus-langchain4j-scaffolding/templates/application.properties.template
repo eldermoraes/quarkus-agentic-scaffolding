@@ -45,3 +45,35 @@ quarkus.langchain4j.devservices.enabled=false
 # startup; the in-process embedding model is detected automatically (no config).
 # ============================================================================
 # quarkus.langchain4j.easy-rag.path=src/main/resources/rag
+
+# ============================================================================
+# MCP client — uncomment when the langchain4j-mcp extension is present. Declares
+# a named client ("ops") whose tools an AI service imports with @McpToolBox("ops").
+# streamable-http is the recommended transport; stdio spawns a local server process.
+# ============================================================================
+# quarkus.langchain4j.mcp.ops.transport-type=streamable-http
+# quarkus.langchain4j.mcp.ops.url=http://localhost:8081/mcp
+## stdio alternative (local subprocess):
+# quarkus.langchain4j.mcp.ops.transport-type=stdio
+# quarkus.langchain4j.mcp.ops.command=npm,exec,@modelcontextprotocol/server-everything
+
+# ============================================================================
+# MCP server — uncomment when the mcp-server-http extension is present. The
+# Streamable HTTP endpoint is served at /mcp by default. Traffic logging prints
+# every JSON-RPC exchange during development.
+# ============================================================================
+# quarkus.mcp.server.http.root-path=/mcp
+# quarkus.mcp.server.traffic-logging.enabled=true
+# quarkus.mcp.server.traffic-logging.text-limit=500
+
+# ============================================================================
+# Observability — uncomment when quarkus-micrometer-registry-prometheus and
+# quarkus-opentelemetry are on the classpath. AI-service metrics (incl. GenAI
+# token usage gen_ai.client.token.usage) and per-service/per-tool spans are then
+# emitted automatically; metrics are scraped at /q/metrics. Keys below only tune it.
+# ============================================================================
+## Ship traces to an OTLP collector (the default endpoint, shown explicitly):
+# quarkus.otel.exporter.otlp.traces.endpoint=http://localhost:4317
+## Dev-only: copy prompt/completion text onto spans (records user content):
+# quarkus.langchain4j.tracing.include-prompt=true
+# quarkus.langchain4j.tracing.include-completion=true

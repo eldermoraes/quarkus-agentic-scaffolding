@@ -1,0 +1,36 @@
+package org.acme.ai;
+
+import dev.langchain4j.service.SystemMessage;
+import dev.langchain4j.service.UserMessage;
+import io.quarkiverse.langchain4j.RegisterAiService;
+import io.quarkiverse.langchain4j.mcp.runtime.McpToolBox;
+
+/*
+ * MCP client — an AI service whose tools come from a remote MCP server rather than from
+ * local @Tool beans (compare Tools.java.template; the two combine freely on one service).
+ * Requires the langchain4j-mcp extension (io.quarkiverse.langchain4j:quarkus-langchain4j-mcp,
+ * version managed by the platform BOM — no pin).
+ *
+ * The toolbox name ("ops") is bound to a client declared in application.properties:
+ *   quarkus.langchain4j.mcp.ops.transport-type=streamable-http
+ *   quarkus.langchain4j.mcp.ops.url=http://localhost:8081/mcp
+ * (the block ships commented in application.properties.template — uncomment to use).
+ * @McpToolBox with no name activates ALL configured MCP clients.
+ *
+ * Health: each configured client contributes a readiness check; set
+ * quarkus.langchain4j.mcp.health.enabled=false if the remote server may be down at startup.
+ */
+@RegisterAiService
+public interface TicketOpsAssistant {
+
+    @SystemMessage("""
+            You are a support operations assistant. Use the available tools to look up or
+            update ticket data before answering; never invent ticket state.
+            """)
+    @UserMessage("""
+            Handle this support request and report what you did:
+            {request}
+            """)
+    @McpToolBox("ops")
+    String handle(String request);
+}

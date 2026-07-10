@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Fails unless the six versioned files carry one identical version.
+# Fails unless the seven versioned files carry one identical version.
 set -euo pipefail
 cd "$(dirname "${BASH_SOURCE[0]}")/.."
 md_versions="$(grep -hoE '^# Version: [0-9]+\.[0-9]+\.[0-9]+' \
@@ -7,14 +7,14 @@ md_versions="$(grep -hoE '^# Version: [0-9]+\.[0-9]+\.[0-9]+' \
   | awk '{print $3}')"
 json_versions="$(python3 -c '
 import json
-for f in (".claude-plugin/plugin.json", ".codex-plugin/plugin.json"):
+for f in (".claude-plugin/plugin.json", ".codex-plugin/plugin.json", "gemini-extension.json"):
     print(json.load(open(f))["version"])')"
 all="$(printf '%s\n%s\n' "$md_versions" "$json_versions")"
 count_files="$(printf '%s\n' "$all" | wc -l | tr -d ' ')"
 count_unique="$(printf '%s\n' "$all" | sort -u | wc -l | tr -d ' ')"
-if [[ "$count_files" != "6" || "$count_unique" != "1" ]]; then
-  echo "FAIL: expected 6 identical version headers, got $count_files entries / $count_unique distinct:" >&2
+if [[ "$count_files" != "7" || "$count_unique" != "1" ]]; then
+  echo "FAIL: expected 7 identical version headers, got $count_files entries / $count_unique distinct:" >&2
   printf '%s\n' "$all" >&2
   exit 1
 fi
-echo "OK: version $(printf '%s\n' "$all" | head -1) consistent across 6 files"
+echo "OK: version $(printf '%s\n' "$all" | head -1) consistent across 7 files"

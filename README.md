@@ -1,12 +1,12 @@
 # Quarkus + LangChain4j + AI Stack
-# Version: 0.9.0
+# Version: 0.10.0
 
 ## What this repository is
 
 A small, opinionated, distribution-ready artifact for building AI and agent applications on the
 Java stack of **Quarkus + LangChain4j**. It pairs drop-in always-on coding conventions
 (`CLAUDE.md` for Claude, `AGENTS.md` for Codex and Bob) with a reusable skill that
-scaffolds new projects, AI services, agents, and RAG pipelines from working templates. The
+scaffolds new projects, AI services, agents, RAG pipelines, and MCP clients/servers from working templates. The
 conventions and templates reflect real-world Quarkus + LangChain4j practice and a baseline of
 modern Java, so the guidance captures how these systems are actually built rather than generic
 boilerplate.
@@ -45,6 +45,8 @@ boilerplate.
             ├── AiService.java.template
             ├── AiServiceTest.java.template
             ├── Agent.java.template
+            ├── McpClient.java.template
+            ├── McpServer.java.template
             ├── Tools.java.template
             ├── Guardrails.java.template
             └── RagSetup.java.template
@@ -207,11 +209,13 @@ section earns its place:
   stance on structured concurrency, and favors **records / sealed types / pattern matching**.
   These are the modern-Java habits that make AI code simpler and more debuggable.
 - **§3 Quarkus conventions.** Platform BOMs over pinned versions, CDI-first wiring, Quarkus REST +
-  OpenAPI, WebSockets Next for streaming, the `-parameters` flag, a dual JVM/native build, and
-  turning off Dev Services when a real model endpoint is configured.
+  OpenAPI, WebSockets Next for streaming, the `-parameters` flag, a dual JVM/native build,
+  zero-code AI observability via Micrometer + OpenTelemetry, and turning off Dev Services when a
+  real model endpoint is configured.
 - **§4 LangChain4j conventions.** Declarative `@RegisterAiService` over manual wiring, declarative
   **agentic** composition for multi-agent workflows, typed structured output, named/right-sized
-  models, a streaming pattern that keeps reactive types at the edge, and **Easy RAG first**.
+  models, a streaming pattern that keeps reactive types at the edge, declarative fault tolerance
+  on AI-service methods, and **Easy RAG first**.
 - **§5 Testing.** A minimal intended baseline (`@QuarkusTest` + REST-assured + native ITs),
   flagged as a target rather than an observed standard.
 - **§6 Scope and overrides.** States that per-project deviations are allowed when documented
@@ -220,7 +224,7 @@ section earns its place:
 ## What the skill does and how it composes with the conventions
 
 The `quarkus-langchain4j-scaffolding` skill handles the *"create something new"* moments:
-new project, AI service, agent/workflow, or RAG component. It provides a project layout, a
+new project, AI service, agent/workflow, RAG component, or MCP integration (client or server). It provides a project layout, a
 dependency baseline, an `application.properties` baseline, and starter classes via the files in
 `templates/`.
 
@@ -264,9 +268,10 @@ global file (or remove just the Quarkus/LangChain4j section you pasted into it).
 
 ## Versioning and changelog
 
-This artifact uses semantic versioning. The current version is **0.9.0**; `CLAUDE.md`,
-`AGENTS.md`, `SKILL.md`, `.claude-plugin/plugin.json`, `.codex-plugin/plugin.json`, and this
-`README.md` each carry a matching version header. See [`CHANGELOG.md`](CHANGELOG.md) for release
+This artifact uses semantic versioning. The current version is **0.10.0**; `CLAUDE.md`,
+`AGENTS.md`, `SKILL.md`, `.claude-plugin/plugin.json`, `.codex-plugin/plugin.json`,
+`gemini-extension.json`, and this `README.md` each carry a matching version header (enforced in
+CI by `ci/check-version-consistency.sh`). See [`CHANGELOG.md`](CHANGELOG.md) for release
 history.
 
 ## License

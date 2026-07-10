@@ -20,7 +20,7 @@ before shipping a release, and whenever you touch a template.
    ```
    quarkus_create(
      outputDir = "/tmp", artifactId = "ql4j-validate",
-     extensions = "rest,rest-jackson,smallrye-openapi,websockets-next,langchain4j-ollama,langchain4j-agentic,langchain4j-easy-rag",
+     extensions = "rest,rest-jackson,smallrye-openapi,websockets-next,langchain4j-ollama,langchain4j-agentic,langchain4j-easy-rag,langchain4j-mcp,mcp-server-http",
      noCode = true, noWrapper = false
    )
    ```
@@ -64,6 +64,15 @@ When you only need to know *"does the template Java still compile against the cu
 
 ## Last validated
 
+- **0.10.0 (2026-07-10):** platform `3.37.2`, `maven.compiler.release` 25.
+  `ci/build-from-templates.sh 3.37.2` reconstructed the full template set — 19 `.java` files plus
+  `application.properties` (20 materialized entries), now including the MCP pair
+  (`TicketOpsAssistant` from McpClient, `TriageMcpServer` from McpServer) — and ran
+  `mvn test-compile` to `BUILD SUCCESS`. The generated pom imported `quarkus-mcp-server-bom`
+  (member BOM, no version pins) alongside `quarkus-bom` and `quarkus-langchain4j-bom`; the three
+  non-extension dependencies injected and resolved. Quality gates at the same state: version
+  consistency across 7 files (including `gemini-extension.json`), conventions parity, shellcheck,
+  actionlint, markdownlint — all green.
 - **0.9.0 (2026-07-10):** platform `3.37.2`, `maven.compiler.release` 25. `ci/build-from-templates.sh`
   reconstructed the full template set — 17 `.java` files plus `application.properties`
   (18 materialized entries) from the AiService, AiServiceTest, Agent (multi-file), Tools,

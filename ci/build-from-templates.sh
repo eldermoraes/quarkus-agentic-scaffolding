@@ -25,7 +25,7 @@ set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 TEMPLATES="$REPO_ROOT/skills/quarkus-langchain4j-scaffolding/templates"
-EXTENSIONS="rest,rest-jackson,smallrye-openapi,websockets-next,langchain4j-ollama,langchain4j-agentic,langchain4j-easy-rag"
+EXTENSIONS="rest,rest-jackson,smallrye-openapi,websockets-next,langchain4j-ollama,langchain4j-agentic,langchain4j-easy-rag,langchain4j-mcp,mcp-server-http"
 
 PLATFORM_VERSION="${1:-}"
 if [[ -z "$PLATFORM_VERSION" ]]; then

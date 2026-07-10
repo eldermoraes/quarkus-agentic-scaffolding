@@ -162,7 +162,7 @@ option (3.33 now, 3.40 from Sept 2026) for users who want stability, per
 
 ## P2 — Strategic (1–2 months)
 
-### 10. MCP templates — client and server *(new capabilities, phase 2)*
+### 10. MCP templates — client and server *(new capabilities, phase 2)* — ✅ done 2026-07-10 (v0.10.0: McpClient + McpServer templates, SKILL §6/§7, CI extensions)
 Both directions are first-class now and squarely on-theme:
 - **Client:** `quarkus-langchain4j-mcp`, `@McpToolBox("name")` on AI services, `streamable-http`
   transport recommended ([MCP docs](https://docs.quarkiverse.io/quarkus-langchain4j/dev/mcp.html)).
@@ -172,7 +172,7 @@ A "make my agent use MCP tools" and "expose my service as an MCP server" scaffol
 a differentiator no comparable kit has. Watch also: the new `@Skills` annotation/extension in
 quarkus-langchain4j 1.12.0, and A2A (`@A2AClientAgent`, protocol 1.0.0.Final — still beta).
 
-### 11. Observability + fault-tolerance conventions *(new capabilities)*
+### 11. Observability + fault-tolerance conventions *(new capabilities)* — ✅ done 2026-07-10 (v0.10.0: bullets in CLAUDE/AGENTS §3–§4 + commented template examples)
 Both are now automatic/annotation-level in the extension and absent from the kit:
 `quarkus-micrometer` + `quarkus-opentelemetry` give AI-service metrics, OTel GenAI-semconv token
 usage, and per-tool spans with zero code ([observability docs](https://docs.quarkiverse.io/quarkus-langchain4j/dev/observability.html));
@@ -180,7 +180,7 @@ usage, and per-tool spans with zero code ([observability docs](https://docs.quar
 tool-calling loops — [fault-tolerance guide](https://docs.quarkiverse.io/quarkus-langchain4j/dev/guide-fault-tolerance.html)).
 One §-worth of conventions each plus a few template lines.
 
-### 12. Community distribution campaign *(adoption — leverage the author's standing)*
+### 12. Community distribution campaign *(adoption — leverage the author's standing)* — step 1 ✅ done 2026-07-10 (awesome-langchain4j PR #29 submitted); steps 2–4 pending user
 Sequenced so social proof accumulates:
 1. PR to [langchain4j-community-resources](https://github.com/langchain4j/langchain4j-community-resources)
    (explicitly open to shared resources — trivially accepted).
@@ -204,7 +204,7 @@ SkillsBench ([arxiv 2602.12670](https://arxiv.org/html/2602.12670v1)) found cura
 differentiator (jvmskills badges). Design a small fixed-task eval (scaffold X with vs. without the
 skill; compile + convention-compliance as the rubric) and publish the numbers in the README.
 
-### 14. Gemini CLI listing *(adoption, cheap)*
+### 14. Gemini CLI listing *(adoption, cheap)* — ✅ done 2026-07-10 (v0.10.0: gemini-extension.json; ⏳ activation = add the gemini-cli-extension topic post-merge)
 The Gemini gallery ([geminicli.com/extensions](https://geminicli.com/extensions/)) lists any
 public repo with a `gemini-extension.json` and the GitHub topic `gemini-cli-extension` — no review
 ([releasing docs](https://geminicli.com/docs/extensions/releasing/)). The manifest can declare the
@@ -219,14 +219,14 @@ default output is a fix branch + prefilled-PR link), Anthropic Routines
 Workflows ([gh-aw](https://github.com/github/gh-aw), technical preview, safe-outputs mediate PR
 creation). The deterministic CI (#6) stays the source of truth; the agent consumes its failures.
 
-### 16. CLAUDE.md × AGENTS.md parity gate *(robustness)*
+### 16. CLAUDE.md × AGENTS.md parity gate *(robustness)* — ✅ done 2026-07-10 (v0.10.0: ci/check-conventions-parity.sh + conventions-parity job)
 The two files are hand-synced twins whose only diffs are typographic (— vs -, § vs "section") plus
 the preamble. Add a CI check that normalizes those and diffs the rest, so a convention edit can't
 land in one file only. Context: AGENTS.md is now a Linux Foundation (AAIF) standard read by
 Codex, Cursor, Copilot, Windsurf, Zed, Junie et al. ([agents.md](https://agents.md/)); Claude Code
 remains the CLAUDE.md holdout, so both files stay necessary.
 
-### 17. Conventions touch-ups from the OpenJDK/GraalVM audit *(small edits)*
+### 17. Conventions touch-ups from the OpenJDK/GraalVM audit *(small edits)* — ✅ done 2026-07-10 (v0.10.0: GraalVM native-baseline note in §2 and §3)
 - §2 is accurate today (Scoped Values final via JEP 506; StructuredTaskScope still preview — 6th
   round in 26, 7th in 27, **API breaking each round**, no finalization targeted).
 - Add one load-bearing note: **GraalVM ships no releases for JDK 26–28** — native-image is pinned

@@ -17,6 +17,10 @@
     core:    rest, rest-jackson, smallrye-openapi, websockets-next, langchain4j-ollama
     agents:  + langchain4j-agentic     (declarative LangChain4j Agentic workflows)
     RAG:     + langchain4j-easy-rag     (Easy RAG)
+    MCP client: + langchain4j-mcp      (consume tools from remote MCP servers)
+    MCP server: + mcp-server-http      (expose this app as an MCP server; stdio variant: mcp-server-stdio)
+    observability: + micrometer-registry-prometheus, opentelemetry   (optional; see application.properties.template)
+    fault tolerance: + smallrye-fault-tolerance                      (optional; MicroProfile FT on AI-service methods)
 
   quarkus-arc, quarkus-junit and rest-assured are pulled in automatically — do not list them.
 
