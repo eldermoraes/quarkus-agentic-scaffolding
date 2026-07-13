@@ -1,5 +1,5 @@
 # Quarkus + LangChain4j + AI Stack
-# Version: 0.10.0
+# Version: 0.10.1
 
 ## What this repository is
 

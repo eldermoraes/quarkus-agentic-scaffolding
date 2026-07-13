@@ -1,6 +1,6 @@
 {
   "name": "quarkus-agentic",
-  "version": "0.10.0",
+  "version": "0.10.1",
   "description": "Scaffolding skill and always-on conventions for building Quarkus + LangChain4j agentic AI applications: new projects, AI services, agents and workflows, and RAG pipelines.",
   "contextFileName": "AGENTS.md",
   "mcpServers": {
