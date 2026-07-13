@@ -3,6 +3,17 @@
 All notable changes to this artifact are documented here. This project adheres to semantic
 versioning.
 
+## v0.10.1 — 2026-07-13
+- Added a `displayName` of "Quarkus Agentic Scaffolding" to the plugin so the Claude Code UI
+  shows a proper human-readable label instead of the prettified `quarkus-agentic` slug. The field
+  is set in both `.claude-plugin/plugin.json` and the `.claude-plugin/marketplace.json` plugin
+  entry (the marketplace entry wins for users installing from this marketplace, with `plugin.json`
+  as the fallback), so installed users see the new name. The `name` identifier stays
+  `quarkus-agentic`, so skill namespacing and install identity are unchanged. `displayName`
+  requires Claude Code v2.1.143+ and falls back to `name` on older clients. This brings the Claude
+  Code manifests to parity with the Codex manifest, which already carried the same display name.
+- All version headers synchronized to 0.10.1.
+
 ## v0.10.0 — 2026-07-10
 - Added MCP scaffolding in both directions: `McpClient.java.template` (an AI service consuming
   MCP tools via `@McpToolBox`, with `streamable-http`/`stdio` client config in

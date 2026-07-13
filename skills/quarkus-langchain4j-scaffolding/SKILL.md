@@ -4,7 +4,7 @@ description: Scaffold and structure new Quarkus + LangChain4j projects, modules,
 ---
 
 # Quarkus + LangChain4j Scaffolding
-# Version: 0.10.0
+# Version: 0.10.1
 
 ## 1. When to use this skill
 
