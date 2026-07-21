@@ -1,8 +1,8 @@
 {
   "name": "quarkus-agentic",
   "displayName": "Quarkus Agentic Scaffolding",
-  "version": "0.10.1",
-  "description": "Scaffolding skill for building Quarkus + LangChain4j agentic AI applications: new projects, AI services, agents/workflows, and RAG pipelines. Pairs with the repository's CLAUDE.md conventions.",
+  "version": "0.11.0",
+  "description": "Three-skill flow for building Quarkus + LangChain4j agentic AI applications: setup-agentic-scaffolding (prerequisites: toolchain, Quarkus Agents MCP + context7, conventions file), scaffold-project (create projects and add AI services, agents, RAG, and MCP clients/servers), and audit-project (audit an existing project against the conventions). Pairs with the repository's CLAUDE.md conventions.",
   "author": {
     "name": "Elder Moraes",
     "email": "elder.moraes@gmail.com"
@@ -16,7 +16,10 @@
     "ai",
     "agents",
     "rag",
+    "mcp",
     "scaffolding",
+    "setup",
+    "audit",
     "java"
   ]
 }

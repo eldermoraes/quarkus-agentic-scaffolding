@@ -8,9 +8,11 @@ not from generic boilerplate. Contributions are expected to keep that bar.
 
 - **`CLAUDE.md`** — *declarative* conventions (the rules generated code must follow). Always-on.
 - **`AGENTS.md`** — the Codex and Bob equivalent of `CLAUDE.md`. Always-on for Codex and Bob.
-- **`skills/quarkus-langchain4j-scaffolding/`** — the *procedural* scaffolding skill (`SKILL.md`)
-  and its `templates/`. Packaged as the plugin for Claude and Codex, and copied into Bob's
-  `.bob/skills/` by `scripts/install-bob-skill.sh`.
+- **`skills/`** — the three *procedural* skills, each a `SKILL.md` (some with `templates/`):
+  `setup-agentic-scaffolding` (prerequisites), `scaffold-project` (create projects and add
+  components; owns `templates/`), and `audit-project` (conformance/adoption review). Packaged
+  as the plugin for Claude and Codex, and copied into Bob's `.bob/skills/` by
+  `scripts/install-bob-skill.sh`.
 - **`.claude-plugin/`** — `plugin.json` + `marketplace.json` (the Claude installable
   distribution).
 - **`.codex-plugin/`** — `plugin.json` (the Codex plugin manifest).
@@ -42,8 +44,8 @@ against these tools first.
 4. If you touch a template, **validate it still builds** — see
    [`docs/VALIDATING-TEMPLATES.md`](docs/VALIDATING-TEMPLATES.md).
 5. **Bump the version** (semver) in the version headers of `README.md`, `CLAUDE.md`,
-   `AGENTS.md`, `SKILL.md`, `.claude-plugin/plugin.json`, and `.codex-plugin/plugin.json`, and add a
-   `CHANGELOG.md` entry.
+   `AGENTS.md`, the three `skills/*/SKILL.md` files, `.claude-plugin/plugin.json`,
+   `.codex-plugin/plugin.json`, and `gemini-extension.json`, and add a `CHANGELOG.md` entry.
 6. Open a PR that links the issue and summarizes the evidence.
 
 ### Evidence bar for conventions and templates
@@ -73,8 +75,9 @@ Conventions and templates should reflect how real Quarkus + LangChain4j systems 
 ## Versioning
 
 This artifact uses semantic versioning. Keep the version header identical across `README.md`,
-`CLAUDE.md`, `AGENTS.md`, `SKILL.md`, `.claude-plugin/plugin.json`, and
-`.codex-plugin/plugin.json`, and record every change in `CHANGELOG.md`.
+`CLAUDE.md`, `AGENTS.md`, the three `skills/*/SKILL.md` files, `.claude-plugin/plugin.json`,
+`.codex-plugin/plugin.json`, and `gemini-extension.json` (nine files, enforced by
+`ci/check-version-consistency.sh`), and record every change in `CHANGELOG.md`.
 
 ## License
 

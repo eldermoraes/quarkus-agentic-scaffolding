@@ -1,0 +1,17 @@
+interface:
+  display_name: "Audit Agentic Project"
+  short_description: "Read-only audit of a Quarkus + LangChain4j project against the agentic conventions."
+  brand_color: "#4695EB"
+  default_prompt: "Run audit-project to review this Quarkus + LangChain4j project against the conventions."
+
+policy:
+  allow_implicit_invocation: false
+
+dependencies:
+  tools:
+    - type: "mcp"
+      value: "quarkus-agent"
+      description: "Quarkus Agents MCP server for version-matched validation (quarkus_skills / quarkus_searchDocs with projectDir)."
+    - type: "mcp"
+      value: "context7"
+      description: "Context7 MCP server for current library and framework documentation."

@@ -1,32 +1,36 @@
 ---
-name: quarkus-langchain4j-scaffolding
-description: Scaffold and structure new Quarkus + LangChain4j projects, modules, AI services, agents, RAG pipelines, MCP clients and servers (Model Context Protocol), and embedding store setups. Use this whenever the user asks to create, scaffold, set up, bootstrap, initialize, start, generate, or kickstart a new Quarkus project, AI service, agent, RAG component, MCP client or server integration, embedding store, or related module in this stack. Also use for generating baseline pom.xml, application.properties, project layout, or starter classes for Quarkus + LangChain4j work.
+name: scaffold-project
+description: Scaffold Quarkus + LangChain4j projects end-to-end and add agentic components to existing ones — AI services, tools, agents and multi-agent workflows, RAG pipelines, MCP clients and servers (Model Context Protocol), guardrails, and embedding store setups. Use this whenever the user asks to create, scaffold, set up, bootstrap, initialize, start, generate, or kickstart a new Quarkus + LangChain4j project or module, OR to add an AI service, tool, agent, RAG component, MCP client or server integration, guardrail, or embedding store to an existing project in this stack. Also use for generating baseline pom.xml, application.properties, project layout, or starter classes for Quarkus + LangChain4j work.
 ---
 
 # Quarkus + LangChain4j Scaffolding
-# Version: 0.10.1
+# Version: 0.11.0
+
+**Prerequisites.** The Quarkus Agents MCP, context7, and the project conventions file
+(`CLAUDE.md` for Claude, `AGENTS.md` for Codex) should already be configured — if they are
+not, run `/setup-agentic-scaffolding` first. Invoke this skill as `/scaffold-project`, or as
+`/quarkus-agentic:scaffold-project` when it is installed as a plugin; it also triggers
+automatically when you ask to create a project or add a component.
 
 ## 1. When to use this skill
 
-Use this skill when **creating something new** in a Quarkus + LangChain4j project:
+This skill has two roles:
 
-- Create, scaffold, bootstrap, initialize, start, generate, or kickstart a new Quarkus +
-  LangChain4j **project** or **module**.
-- Add a new **AI service** (`@RegisterAiService` interface).
-- Add a new **agent** or **multi-agent workflow** (declarative LangChain4j Agentic).
-- Set up a **RAG** component or **embedding store**.
-- Generate a baseline **`pom.xml`**, **`application.properties`**, **project layout**, or starter
-  classes for this stack.
+- **Create a Quarkus + LangChain4j project end-to-end** — scaffold, bootstrap, initialize,
+  generate, or kickstart a new project or module, from `quarkus_create` through a running,
+  test-green dev mode (§2–§3, §11–§13).
+- **Add a component to an existing project** — a new AI service (§4), tools (§5), MCP client
+  (§6) or server (§7), agent or multi-agent workflow (§8), RAG pipeline (§9), guardrails
+  (§10), or embedding store. These requests auto-trigger the skill.
 
-This skill covers *how to lay things out and get them running*. It does **not** restate coding
+It covers *how to lay things out and get them running*. It does **not** restate coding
 conventions — see §14.
 
-**Required tooling (mandatory).** This skill must not scaffold without it. Create the project and
-discover extensions through the **Quarkus Agents MCP** (`quarkus_create`, `quarkus_searchTools`),
-and call `quarkus_skills` for each chosen extension **before** writing any code — never create a
-Quarkus project or add an extension by hand. Use **context7** for every LangChain4j and other
-library API lookup. If either tool is unavailable, stop and report it rather than guessing. These
-are project prerequisites; see `CLAUDE.md` §1 or `AGENTS.md` §1.
+Everything here goes through the Quarkus Agents MCP and context7 (see the prerequisites note
+above): create projects and discover extensions with `quarkus_create` / `quarkus_searchTools`,
+call `quarkus_skills` for each chosen extension **before** writing any code, and look up
+LangChain4j and other library APIs with context7. If a required tool is unavailable, stop and
+report it rather than guessing.
 
 ## 2. Project layout convention
 
@@ -50,29 +54,66 @@ src/main/resources/
   rag/        # documents folder ingested by Easy RAG (quarkus.langchain4j.easy-rag.path)
 ```
 
-Start with only the sub-packages a feature needs; add the rest as the project grows.
+Start with only the sub-packages a feature needs; add the rest as the project grows. This
+layout is owned by the skill — `quarkus_create` does not impose it.
 
-## 3. Dependency baseline
+## 3. Creating a new project
 
-Create the project with `quarkus_create` and let it generate the shell. The generated `pom.xml`
-already imports the `quarkus-bom` and `quarkus-langchain4j-bom` platform BOMs, sets Java 25, enables
-the `-parameters` compiler flag, adds a `native` profile, and pulls in the test stack
-(`quarkus-junit` + `rest-assured`) — all at the current platform version. Do not hand-maintain any
-of that: `quarkus_create` (the same codestart generator behind code.quarkus.io) keeps it up to date.
+Create the project through the Quarkus Agents MCP `quarkus_create` — never by hand, and never
+with Maven, Gradle, or the Quarkus CLI. `quarkus_create` both generates the project **and
+auto-starts dev mode**, so run the steps below in order.
 
-Pass these extensions to `quarkus_create`:
+**Required parameters.** `quarkus_create` takes `outputDir`, `noCode`, and `noWrapper`. Present
+these recommended defaults to the user and confirm before generating:
 
-- core: `rest`, `rest-jackson`, `smallrye-openapi`, `websockets-next`, `langchain4j-ollama`
+- `noCode=true` — this repo's opinionated templates (§4–§13) replace the codestart
+  hello-world, so skip the generated sample code.
+- `noWrapper=false` — keep the Maven Wrapper (`mvnw`) so the project builds without a local
+  Maven install.
+- `outputDir` — the target directory for the new project.
+
+**Choose the Quarkus version up front.** There is no `streams` parameter. Decide LTS vs. latest
+with the user before generating: pass `quarkusVersion` explicitly to pin a release — pick the
+current LTS from the [Quarkus release/support policy](https://quarkus.io/blog/quarkus-lts-releases/)
+rather than hardcoding a number that will rot — or omit `quarkusVersion` to take the latest
+platform release.
+
+**Extension selection is a mandatory user gate.** `quarkus_create`'s own contract requires the
+extension list to be chosen, not assumed. Present this capability-based menu with the
+recommended default and **wait for the user's choice** before generating:
+
+- core (recommended default): `rest`, `rest-jackson`, `smallrye-openapi`, `websockets-next`,
+  `langchain4j-ollama`
 - agents: add `langchain4j-agentic`
 - RAG: add `langchain4j-easy-rag`
 - MCP client: add `langchain4j-mcp`
-- MCP server: add `mcp-server-http` (io.quarkiverse.mcp; use `mcp-server-stdio` for a subprocess server)
+- MCP server: add `mcp-server-http` (`io.quarkiverse.mcp`; use `mcp-server-stdio` for a
+  subprocess server)
 - observability (optional): add `micrometer-registry-prometheus` and `opentelemetry`
 - fault tolerance (optional): add `smallrye-fault-tolerance`
 
-(`quarkus-arc` comes in automatically.) Then add the **non-extension** dependencies listed in
-`templates/pom.xml.template` — the `dev.langchain4j` embedding model (required by Easy RAG) and,
-for PDFs, the document parser — since project generators add only Quarkus extensions, not those.
+(`quarkus-arc` comes in automatically.) The generated `pom.xml` already imports the
+`quarkus-bom` and `quarkus-langchain4j-bom` platform BOMs, sets Java 25, enables the
+`-parameters` compiler flag, adds a `native` profile, and pulls in the test stack
+(`quarkus-junit` + `rest-assured`) — all at the resolved platform version. Do not hand-maintain
+any of that: `quarkus_create` (the same codestart generator behind code.quarkus.io) keeps it up
+to date.
+
+**Put the generated project under git immediately.** Before any further MCP call, run
+`git init && git add -A && git commit` inside the generated project directory — the Quarkus
+Agents MCP refuses to operate on a project that is not under git control, so `quarkus_start`
+and `quarkus_skills` fail until this is done.
+
+**Learn each extension's patterns before writing code.** Call `quarkus_skills` for every
+selected extension (comma-separated queries are supported) before scaffolding against it — this
+is mandatory, not optional — and use context7 for LangChain4j and other library API lookups.
+
+**Add the non-extension dependencies.** Project generators add only Quarkus extensions, so add
+the `dev.langchain4j` dependencies from `templates/pom.xml.template` by hand: the embedding
+model (required by Easy RAG) and, for PDF ingestion, the document parser.
+
+Then lay out the sub-packages (§2), drop in the templates you need (§4–§10), write the
+`application.properties` baseline (§11), and verify (§12).
 
 ## 4. AI service scaffolding
 
@@ -150,17 +191,23 @@ output guardrail can force the model to answer again with `reprompt(…)`; cap a
 
 ## 11. `application.properties` baseline
 
-Use `templates/application.properties.template`. It configures the Ollama provider with a local
-default model (cloud models shown as comments), a named `smaller` model for cheap subtasks,
-generous timeouts, request/response logging, disabled Dev Services, and the Easy RAG documents
-path. A commented MCP client block declares the named `ops` client used in §6. A commented MCP
-server block sets the Streamable HTTP path and traffic logging for §7. A commented observability
-block wires OTLP trace export and dev-only prompt/completion capture.
+Use `templates/application.properties.template` — this baseline is owned by the skill, not
+generated by `quarkus_create`. It configures the Ollama provider with a local default model
+(cloud models shown as comments), a named `smaller` model for cheap subtasks, generous timeouts,
+request/response logging, disabled Dev Services, and the Easy RAG documents path. A commented MCP
+client block declares the named `ops` client used in §6. A commented MCP server block sets the
+Streamable HTTP path and traffic logging for §7. A commented observability block wires OTLP trace
+export and dev-only prompt/completion capture.
 
 ## 12. After scaffolding
 
-Run and verify through the Quarkus Agents MCP (start dev mode, run tests via the Dev MCP tools)
-rather than invoking Maven directly.
+`quarkus_create` already started dev mode, so verify through the Quarkus Agents MCP — never
+invoke Maven or Gradle directly. Run the tests with `quarkus_callTool` `devui-testing_runTests`,
+and inspect failures with `quarkus_callTool` `devui-exceptions_getLastException` (fall back to
+`quarkus_logs` for broader context). Keep the §13 wiring smoke test green.
+
+To audit or bring an existing project in line with these conventions later, `/audit-project`
+runs a read-only conformance check and hands any fixes back to this skill's component sections.
 
 ## 13. Test scaffolding
 

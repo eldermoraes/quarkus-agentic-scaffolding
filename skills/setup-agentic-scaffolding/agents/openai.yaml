@@ -1,0 +1,17 @@
+interface:
+  display_name: "Setup Agentic Scaffolding"
+  short_description: "Set up the Quarkus + LangChain4j prerequisites: toolchain, MCP servers, and conventions file."
+  brand_color: "#4695EB"
+  default_prompt: "Run setup-agentic-scaffolding to configure the Quarkus + LangChain4j prerequisites for this agent."
+
+policy:
+  allow_implicit_invocation: false
+
+dependencies:
+  tools:
+    - type: "mcp"
+      value: "quarkus-agent"
+      description: "Quarkus Agents MCP server this skill registers (project creation, extension discovery, docs, dev-mode work)."
+    - type: "mcp"
+      value: "context7"
+      description: "Context7 MCP server this skill registers for current library and framework documentation."

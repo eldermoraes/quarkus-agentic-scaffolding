@@ -1,8 +1,8 @@
 interface:
-  display_name: "Quarkus LangChain4j Scaffolding"
-  short_description: "Scaffold Quarkus + LangChain4j projects, AI services, agents, and RAG pipelines."
+  display_name: "Scaffold Project (Quarkus + LangChain4j)"
+  short_description: "Scaffold Quarkus + LangChain4j projects and add AI services, agents, RAG, and MCP components."
   brand_color: "#4695EB"
-  default_prompt: "Use quarkus-langchain4j-scaffolding to scaffold a Quarkus + LangChain4j agentic component."
+  default_prompt: "Use scaffold-project to scaffold a Quarkus + LangChain4j agentic component."
 
 policy:
   allow_implicit_invocation: true
