@@ -5,7 +5,7 @@ disable-model-invocation: true
 ---
 
 # Setup Agentic Scaffolding
-# Version: 0.12.1
+# Version: 0.13.0
 
 ## 1. When to use this skill
 

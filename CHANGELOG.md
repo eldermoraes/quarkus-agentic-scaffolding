@@ -3,6 +3,17 @@
 All notable changes to this artifact are documented here. This project adheres to semantic
 versioning.
 
+## v0.13.0 — 2026-07-21
+- **Hard-stop MCP gate.** Closed the rationalization loophole where agents proceeded to scaffold
+  manually when the Quarkus Agents MCP was down. Conventions §1 (`CLAUDE.md` / `AGENTS.md`) now
+  require verifying the MCP is reachable (`quarkus_*` tools present + a cheap `quarkus_status`
+  call) before any Quarkus task, and mandate an immediate STOP — report what is missing, point the
+  user to `/setup-agentic-scaffolding` (and to restarting the session), and end the turn — with no
+  fallback to the Quarkus CLI, Maven/Gradle archetypes, model memory, or web search. Added a
+  matching "verify the MCP first" procedural gate at the top of the `scaffold-project` and
+  `audit-project` skills. `/setup-agentic-scaffolding` remains the sole exception. Motivated by
+  observed agent behavior of proceeding manually when the MCP is down.
+
 ## v0.12.1 — 2026-07-21
 - **Grouped skill selection in the skills.sh installer.** `.claude-plugin/plugin.json` now declares
   the `skills` array explicitly, so `npx skills add` presents a selectable "Quarkus Agentic

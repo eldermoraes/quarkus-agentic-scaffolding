@@ -6,7 +6,18 @@ disable-model-invocation: true
 
 # Audit a Quarkus + LangChain4j Project
 
-# Version: 0.12.1
+# Version: 0.13.0
+
+## Gate: verify the MCP first
+
+**Do this before anything else — before reading the project, before §1.** An audit is Quarkus
+work, so the Quarkus Agents MCP is mandatory (conventions §1). VERIFY it is reachable: confirm the
+`quarkus_*` tools are present in your toolset and that a cheap call (e.g. `quarkus_status`)
+succeeds. If the tools are absent or the call fails, STOP immediately: report exactly what is
+missing, point the user to `/setup-agentic-scaffolding` (and to restarting the session after
+registering it, since MCPs load at session start), and end the turn. A missing or unreachable MCP
+is never permission to proceed manually — do not fall back to the Quarkus CLI, model memory, or web
+search, and do not offer to "continue without it". Only once the gate passes do you continue below.
 
 ## 1. When to use this skill
 

@@ -1,5 +1,5 @@
 # Quarkus + LangChain4j + AI Stack — Project Conventions
-# Version: 0.12.1
+# Version: 0.13.0
 
 These conventions apply whenever code is written, reviewed, or configured in a Quarkus +
 LangChain4j project. They are always-on. Procedural scaffolding steps and starter code live in
@@ -15,8 +15,15 @@ generic web search.
 
 - **Quarkus Agents MCP — required for every Quarkus task.** Project creation, extension selection,
   configuration, version checks, API usage, and troubleshooting MUST go through the Quarkus Agents
-  MCP. Never create a Quarkus project or add an extension by hand, and never answer a Quarkus
-  question from model memory before consulting it.
+  MCP; never create a Quarkus project, add an extension, or answer a Quarkus question from model
+  memory by hand. Before any Quarkus task, VERIFY the MCP is reachable — its `quarkus_*` tools are
+  present and a cheap call (e.g. `quarkus_status`) succeeds. If the tools are absent or the call
+  fails, STOP immediately: report exactly what is missing, point the user to
+  `/setup-agentic-scaffolding` (and to restarting the session after registering it, since MCPs load
+  at session start), and end the turn. A missing or unreachable MCP is never permission to proceed
+  manually — do not fall back to the Quarkus CLI, Maven/Gradle archetypes, model memory, or web
+  search, do not offer to "continue without it", and do not treat the stop as optional. The only
+  exception is `/setup-agentic-scaffolding`, whose job is to install it.
 - **context7 — required for external library and framework documentation.** Before relying on
   memory or web search for any library or framework API — LangChain4j included — you MUST look it
   up with `context7` first.

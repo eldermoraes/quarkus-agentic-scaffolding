@@ -4,13 +4,25 @@ description: Scaffold Quarkus + LangChain4j projects end-to-end and add agentic 
 ---
 
 # Quarkus + LangChain4j Scaffolding
-# Version: 0.12.1
+# Version: 0.13.0
 
 **Prerequisites.** The Quarkus Agents MCP, context7, and the project conventions file
 (`CLAUDE.md` for Claude, `AGENTS.md` for Codex) should already be configured — if they are
 not, run `/setup-agentic-scaffolding` first. Invoke this skill as `/scaffold-project`, or as
 `/quarkus-agentic-scaffolding:scaffold-project` when it is installed as a plugin; it also triggers
 automatically when you ask to create a project or add a component.
+
+## Gate: verify the MCP first
+
+**Do this before anything else — before reading the project, before §1.** Scaffolding is Quarkus
+work, so the Quarkus Agents MCP is mandatory (conventions §1). VERIFY it is reachable: confirm the
+`quarkus_*` tools are present in your toolset and that a cheap call (e.g. `quarkus_status`)
+succeeds. If the tools are absent or the call fails, STOP immediately: report exactly what is
+missing, point the user to `/setup-agentic-scaffolding` (and to restarting the session after
+registering it, since MCPs load at session start), and end the turn. A missing or unreachable MCP
+is never permission to proceed manually — do not fall back to the Quarkus CLI, Maven/Gradle
+archetypes, model memory, or web search, and do not offer to "continue without it". Only once the
+gate passes do you continue below.
 
 ## 1. When to use this skill
 
@@ -29,8 +41,9 @@ conventions — see §14.
 Everything here goes through the Quarkus Agents MCP and context7 (see the prerequisites note
 above): create projects and discover extensions with `quarkus_create` / `quarkus_searchTools`,
 call `quarkus_skills` for each chosen extension **before** writing any code, and look up
-LangChain4j and other library APIs with context7. If a required tool is unavailable, stop and
-report it rather than guessing.
+LangChain4j and other library APIs with context7. The Quarkus Agents MCP itself is a hard
+prerequisite — verify it up front per the **Gate** above; if any other required tool is
+unavailable, stop and report it rather than guessing.
 
 ## 2. Project layout convention
 
