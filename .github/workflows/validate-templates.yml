@@ -56,7 +56,9 @@ jobs:
             --exclude 'medium\.com'
             README.md CLAUDE.md AGENTS.md CONTRIBUTING.md CHANGELOG.md
             docs/VALIDATING-TEMPLATES.md docs/EVOLUTION-PLAN.md
-            skills/quarkus-langchain4j-scaffolding/SKILL.md
+            skills/setup-agentic-scaffolding/SKILL.md
+            skills/scaffold-project/SKILL.md
+            skills/audit-project/SKILL.md
           fail: true
       - name: Toggle tracking issue on scheduled failure
         if: failure() && github.event_name == 'schedule'

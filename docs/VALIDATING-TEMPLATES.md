@@ -1,6 +1,6 @@
 # Validating the templates
 
-The templates in `skills/quarkus-langchain4j-scaffolding/templates/` are the product. As Quarkus
+The templates in `skills/scaffold-project/templates/` are the product. As Quarkus
 and LangChain4j evolve, two things can rot:
 
 1. the pinned **platform version** in `pom.xml.template` falls behind, and

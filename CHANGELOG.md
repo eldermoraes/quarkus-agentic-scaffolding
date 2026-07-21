@@ -3,6 +3,42 @@
 All notable changes to this artifact are documented here. This project adheres to semantic
 versioning.
 
+## v0.11.0 — 2026-07-21
+- **Restructured the single umbrella skill into an explicit three-skill flow** split along the
+  invocation axis (see `docs/FLOW-REDESIGN-PLAN.md`):
+  - **New `setup-agentic-scaffolding`** (user-invoked, `disable-model-invocation: true`) — the
+    flow's entry point. Verifies the toolchain (JDK 25 / GraalVM, JBang, container runtime),
+    registers the Quarkus Agents MCP + context7 for the running agent, and writes the conventions
+    file into the user's project. Ships byte-for-byte seed copies of the root conventions
+    (`templates/conventions-CLAUDE.md`, `templates/conventions-AGENTS.md`).
+  - **`quarkus-langchain4j-scaffolding` renamed to `scaffold-project`** (model-invoked umbrella,
+    owner decision D6 — creation + components stay one skill). Its creation path was reworked
+    around the Quarkus Agents MCP surface: `quarkus_create` defaults (`noCode=true`,
+    `noWrapper=false`), the mandatory extension-selection gate, a `git init`/commit step before
+    `quarkus_skills`/`quarkus_start`, and `devui-testing_runTests` dev-mode verification.
+  - **New `audit-project`** (user-invoked, `disable-model-invocation: true`) — read-only
+    conformance/adoption audit of an existing project against the §2–§5 conventions, the package
+    layout, and the dependency/properties baseline; applies fixes only on confirmation by handing
+    off to `scaffold-project`'s component sections.
+- **README rewritten around the flow.** Quick install (skills CLI) leads, now installing all three
+  skills and covering IBM Bob as a first-class agent; added a **The flow** section
+  (setup → scaffold → audit) and the skills.sh badge; collapsed the three near-duplicate per-agent
+  prerequisite walkthroughs into a single `/setup-agentic-scaffolding` step plus a manual fallback
+  each; documented both slash-command invocation forms (bare via skills-CLI installs,
+  `/quarkus-agentic:<skill>` via plugin installs); fixed the stale "current version is 0.10.0"
+  prose line.
+- **CI gates extended.** `ci/check-version-consistency.sh` now covers all three `SKILL.md` files
+  (nine versioned files total, up from seven); `ci/check-conventions-parity.sh` additionally
+  verifies the two setup-skill seed copies are byte-for-byte identical to the root `CLAUDE.md` /
+  `AGENTS.md`; `ci/build-from-templates.sh` and the validate-templates workflow point at
+  `skills/scaffold-project/templates/`.
+- **Distribution manifests** (`.claude-plugin/plugin.json` + `marketplace.json`,
+  `.codex-plugin/plugin.json`, `gemini-extension.json`) describe the three-skill flow, with
+  `scaffolding`, `setup`, `audit`, and `mcp` keywords; `gemini-extension.json` keeps
+  `contextFileName: AGENTS.md`. `scripts/install-bob-skill.sh` now installs all three skills
+  (same CLI shape) and is documented as a fallback, since `npx skills add` covers Bob natively.
+- All version headers synchronized to 0.11.0.
+
 ## v0.10.1 — 2026-07-13
 - Added a `displayName` of "Quarkus Agentic Scaffolding" to the plugin so the Claude Code UI
   shows a proper human-readable label instead of the prettified `quarkus-agentic` slug. The field

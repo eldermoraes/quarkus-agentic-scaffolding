@@ -12,7 +12,7 @@
         "source": "github",
         "repo": "eldermoraes/quarkus-agentic-scaffolding"
       },
-      "description": "Scaffolding skill for building Quarkus + LangChain4j agentic AI applications. Pairs with the repository's CLAUDE.md conventions. Requires the Quarkus Agents MCP and context7 (see README)."
+      "description": "Three-skill flow for building Quarkus + LangChain4j agentic AI applications: setup (prerequisites), scaffold-project (create + component scaffolding), and audit-project (conformance review). Pairs with the repository's CLAUDE.md conventions. Requires the Quarkus Agents MCP and context7 (see README)."
     }
   ]
 }
