@@ -3,6 +3,13 @@
 All notable changes to this artifact are documented here. This project adheres to semantic
 versioning.
 
+## v0.12.1 — 2026-07-21
+- **Grouped skill selection in the skills.sh installer.** `.claude-plugin/plugin.json` now declares
+  the `skills` array explicitly, so `npx skills add` presents a selectable "Quarkus Agentic
+  Scaffolding" group node that toggles all three skills at once (individual selection still
+  works). No behavior change for Claude Code plugin installs, which already auto-discover
+  `skills/`.
+
 ## v0.12.0 — 2026-07-21
 - **Plugin machine id renamed `quarkus-agentic` → `quarkus-agentic-scaffolding`** so the repository
   name, install command, and plugin id all match. The human `displayName` ("Quarkus Agentic

@@ -6,7 +6,7 @@ disable-model-invocation: true
 
 # Audit a Quarkus + LangChain4j Project
 
-# Version: 0.12.0
+# Version: 0.12.1
 
 ## 1. When to use this skill
 
