@@ -1,5 +1,5 @@
 # Quarkus + LangChain4j + AI Stack
-# Version: 0.13.0
+# Version: 0.13.1
 
 ## What this repository is
 
@@ -11,58 +11,9 @@ working templates. The conventions and templates reflect real-world Quarkus + La
 practice and a baseline of modern Java, so the guidance captures how these systems are actually
 built rather than generic boilerplate.
 
-## What's inside
-
-```
-.
-├── README.md                 # This file
-├── CLAUDE.md                 # Always-on project conventions (drop into your project root)
-├── AGENTS.md                 # Codex/Bob equivalent of the always-on project conventions
-├── CONTRIBUTING.md           # How to propose changes
-├── CHANGELOG.md              # Release history
-├── LICENSE                   # Apache-2.0
-├── .gitignore
-├── .claude-plugin/           # Claude installable-plugin + marketplace manifests
-│   ├── plugin.json
-│   └── marketplace.json
-├── .codex-plugin/            # Codex plugin manifest
-│   └── plugin.json
-├── gemini-extension.json     # Gemini CLI extension manifest (declares the MCP servers)
-├── .agents/
-│   └── plugins/
-│       └── marketplace.json  # Codex repo-local marketplace manifest
-├── plugins/
-│   └── quarkus-agentic-scaffolding/  # Codex marketplace wrapper; symlinks to .codex-plugin + skills
-├── scripts/
-│   └── install-bob-skill.sh  # Fallback: copy the skills into a project's (or global) .bob/skills/
-├── docs/
-│   └── VALIDATING-TEMPLATES.md   # How to verify the templates still build
-└── skills/
-    ├── setup-agentic-scaffolding/   # User-invoked: prerequisites (toolchain, MCP, conventions)
-    │   ├── SKILL.md
-    │   └── templates/
-    │       ├── conventions-CLAUDE.md    # Byte-for-byte seed copy of root CLAUDE.md
-    │       └── conventions-AGENTS.md    # Byte-for-byte seed copy of root AGENTS.md
-    ├── scaffold-project/            # Create projects + add components (model-invoked umbrella)
-    │   ├── SKILL.md
-    │   └── templates/
-    │       ├── pom.xml.template
-    │       ├── application.properties.template
-    │       ├── AiService.java.template
-    │       ├── AiServiceTest.java.template
-    │       ├── Agent.java.template
-    │       ├── McpClient.java.template
-    │       ├── McpServer.java.template
-    │       ├── Tools.java.template
-    │       ├── Guardrails.java.template
-    │       └── RagSetup.java.template
-    └── audit-project/               # User-invoked: audit an existing project vs the conventions
-        └── SKILL.md
-```
-
 ## Quick install — any skills-capable agent
 
-[![Skills](https://skills.sh/b/eldermoraes/quarkus-agentic-scaffolding)](https://skills.sh)
+[![Skills](https://www.skills.sh/b/eldermoraes/quarkus-agentic-scaffolding)](https://www.skills.sh/eldermoraes/quarkus-agentic-scaffolding)
 
 The fastest install on any agent that supports the [Agent Skills](https://agentskills.io) format —
 Claude Code, Codex, GitHub Copilot, Cursor, Windsurf, opencode, Amp, IBM Bob, and dozens more:
@@ -283,6 +234,55 @@ mixes stacks, the per-project drop-in is recommended over the global install.
 **Precedence and reverting.** A project-root convention file is read *in addition to* a global
 one, and project guidance can override broader global rules. To undo a global install, delete the
 global file (or remove just the Quarkus/LangChain4j section you pasted into it).
+
+## What's inside
+
+```
+.
+├── README.md                 # This file
+├── CLAUDE.md                 # Always-on project conventions (drop into your project root)
+├── AGENTS.md                 # Codex/Bob equivalent of the always-on project conventions
+├── CONTRIBUTING.md           # How to propose changes
+├── CHANGELOG.md              # Release history
+├── LICENSE                   # Apache-2.0
+├── .gitignore
+├── .claude-plugin/           # Claude installable-plugin + marketplace manifests
+│   ├── plugin.json
+│   └── marketplace.json
+├── .codex-plugin/            # Codex plugin manifest
+│   └── plugin.json
+├── gemini-extension.json     # Gemini CLI extension manifest (declares the MCP servers)
+├── .agents/
+│   └── plugins/
+│       └── marketplace.json  # Codex repo-local marketplace manifest
+├── plugins/
+│   └── quarkus-agentic-scaffolding/  # Codex marketplace wrapper; symlinks to .codex-plugin + skills
+├── scripts/
+│   └── install-bob-skill.sh  # Fallback: copy the skills into a project's (or global) .bob/skills/
+├── docs/
+│   └── VALIDATING-TEMPLATES.md   # How to verify the templates still build
+└── skills/
+    ├── setup-agentic-scaffolding/   # User-invoked: prerequisites (toolchain, MCP, conventions)
+    │   ├── SKILL.md
+    │   └── templates/
+    │       ├── conventions-CLAUDE.md    # Byte-for-byte seed copy of root CLAUDE.md
+    │       └── conventions-AGENTS.md    # Byte-for-byte seed copy of root AGENTS.md
+    ├── scaffold-project/            # Create projects + add components (model-invoked umbrella)
+    │   ├── SKILL.md
+    │   └── templates/
+    │       ├── pom.xml.template
+    │       ├── application.properties.template
+    │       ├── AiService.java.template
+    │       ├── AiServiceTest.java.template
+    │       ├── Agent.java.template
+    │       ├── McpClient.java.template
+    │       ├── McpServer.java.template
+    │       ├── Tools.java.template
+    │       ├── Guardrails.java.template
+    │       └── RagSetup.java.template
+    └── audit-project/               # User-invoked: audit an existing project vs the conventions
+        └── SKILL.md
+```
 
 ## Versioning and changelog
 

@@ -3,6 +3,12 @@
 All notable changes to this artifact are documented here. This project adheres to semantic
 versioning.
 
+## v0.13.1 — 2026-07-21
+- **README fixes.** The skills.sh badge image now uses the `www.skills.sh` host directly (the
+  apex-domain URL 308-redirects, which GitHub's image proxy does not follow, breaking the image)
+  and links to the project's own skills.sh page instead of the site root. The "What's inside"
+  repository tree moved below the usage sections so Quick install and The flow lead the page.
+
 ## v0.13.0 — 2026-07-21
 - **Hard-stop MCP gate.** Closed the rationalization loophole where agents proceeded to scaffold
   manually when the Quarkus Agents MCP was down. Conventions §1 (`CLAUDE.md` / `AGENTS.md`) now
