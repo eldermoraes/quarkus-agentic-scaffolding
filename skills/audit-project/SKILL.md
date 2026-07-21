@@ -6,7 +6,7 @@ disable-model-invocation: true
 
 # Audit a Quarkus + LangChain4j Project
 
-# Version: 0.11.0
+# Version: 0.12.0
 
 ## 1. When to use this skill
 
@@ -14,7 +14,7 @@ Use this skill to **review an existing project** against the Quarkus + LangChain
 conventions and report where it conforms and where it drifts. It never creates or scaffolds — for
 that, use `/scaffold-project`; to configure prerequisites, use `/setup-agentic-scaffolding`.
 
-Invoke it as `/audit-project` (skills-CLI install) or `/quarkus-agentic:audit-project` (plugin
+Invoke it as `/audit-project` (skills-CLI install) or `/quarkus-agentic-scaffolding:audit-project` (plugin
 install) — both name the same skill.
 
 **Required tooling (mandatory).** This skill needs the **Quarkus Agents MCP** (for version-matched

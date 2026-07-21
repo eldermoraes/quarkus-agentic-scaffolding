@@ -6,7 +6,7 @@
   },
   "plugins": [
     {
-      "name": "quarkus-agentic",
+      "name": "quarkus-agentic-scaffolding",
       "displayName": "Quarkus Agentic Scaffolding",
       "source": {
         "source": "github",

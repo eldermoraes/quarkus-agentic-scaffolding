@@ -5,10 +5,10 @@
   },
   "plugins": [
     {
-      "name": "quarkus-agentic",
+      "name": "quarkus-agentic-scaffolding",
       "source": {
         "source": "local",
-        "path": "./plugins/quarkus-agentic"
+        "path": "./plugins/quarkus-agentic-scaffolding"
       },
       "policy": {
         "installation": "AVAILABLE",

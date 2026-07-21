@@ -17,7 +17,7 @@ not from generic boilerplate. Contributions are expected to keep that bar.
   distribution).
 - **`.codex-plugin/`** — `plugin.json` (the Codex plugin manifest).
 - **`.agents/plugins/marketplace.json`** — repo-local Codex marketplace entry.
-- **`plugins/quarkus-agentic/`** — Codex marketplace wrapper with symlinks to `.codex-plugin/`
+- **`plugins/quarkus-agentic-scaffolding/`** — Codex marketplace wrapper with symlinks to `.codex-plugin/`
   and `skills/`; do not put duplicate skill content here.
 - **`scripts/install-bob-skill.sh`** — installs the skill into a project's (or global) `.bob/skills/`
   for Bob (which has no plugin marketplace).

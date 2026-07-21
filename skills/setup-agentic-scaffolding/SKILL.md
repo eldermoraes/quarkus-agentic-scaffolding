@@ -5,7 +5,7 @@ disable-model-invocation: true
 ---
 
 # Setup Agentic Scaffolding
-# Version: 0.11.0
+# Version: 0.12.0
 
 ## 1. When to use this skill
 
@@ -178,6 +178,6 @@ This skill is reachable under two slash names depending on how it was installed:
 
 - **Skills-CLI install** (`npx skills add …`): bare — `/setup-agentic-scaffolding`.
 - **Plugin install** (Claude Code marketplace): namespaced by the plugin id —
-  `/quarkus-agentic:setup-agentic-scaffolding`.
+  `/quarkus-agentic-scaffolding:setup-agentic-scaffolding`.
 
 Both invoke the same skill; plugin users who do not see the bare name should use the namespaced form.

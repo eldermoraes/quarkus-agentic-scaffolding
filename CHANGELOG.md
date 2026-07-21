@@ -3,6 +3,17 @@
 All notable changes to this artifact are documented here. This project adheres to semantic
 versioning.
 
+## v0.12.0 — 2026-07-21
+- **Plugin machine id renamed `quarkus-agentic` → `quarkus-agentic-scaffolding`** so the repository
+  name, install command, and plugin id all match. The human `displayName` ("Quarkus Agentic
+  Scaffolding") is unchanged. Updated across every manifest (`.claude-plugin/plugin.json` +
+  `marketplace.json`, `.codex-plugin/plugin.json`, `.agents/plugins/marketplace.json`,
+  `gemini-extension.json`), the `plugins/quarkus-agentic-scaffolding/` Codex wrapper directory, and
+  all namespaced invocation forms (`/quarkus-agentic-scaffolding:<skill>`) in the README and skills.
+- **Breaking for existing installs.** Because the id changed, a plugin installed under the old
+  `quarkus-agentic` id must be reinstalled: uninstall the old id, then reinstall under
+  `quarkus-agentic-scaffolding`. Skills and templates are otherwise unchanged.
+
 ## v0.11.0 — 2026-07-21
 - **Restructured the single umbrella skill into an explicit three-skill flow** split along the
   invocation axis (see `docs/FLOW-REDESIGN-PLAN.md`):

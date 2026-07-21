@@ -1,5 +1,5 @@
 # Quarkus + LangChain4j + AI Stack
-# Version: 0.11.0
+# Version: 0.12.0
 
 ## What this repository is
 
@@ -32,7 +32,7 @@ built rather than generic boilerplate.
 │   └── plugins/
 │       └── marketplace.json  # Codex repo-local marketplace manifest
 ├── plugins/
-│   └── quarkus-agentic/      # Codex marketplace wrapper; symlinks to .codex-plugin + skills
+│   └── quarkus-agentic-scaffolding/  # Codex marketplace wrapper; symlinks to .codex-plugin + skills
 ├── scripts/
 │   └── install-bob-skill.sh  # Fallback: copy the skills into a project's (or global) .bob/skills/
 ├── docs/
@@ -94,8 +94,8 @@ Three skills, run in order the first time and revisited as needed:
 **Two invocation forms.** How you installed the skills decides the slash-command name in Claude
 Code: a **skills-CLI install** (the Quick install above) gives bare names —
 `/setup-agentic-scaffolding`, `/scaffold-project`, `/audit-project`; a **plugin install** (the
-per-agent sections below) namespaces them by the plugin id — `/quarkus-agentic:setup-agentic-scaffolding`,
-`/quarkus-agentic:scaffold-project`, `/quarkus-agentic:audit-project`. Both refer to the same
+per-agent sections below) namespaces them by the plugin id — `/quarkus-agentic-scaffolding:setup-agentic-scaffolding`,
+`/quarkus-agentic-scaffolding:scaffold-project`, `/quarkus-agentic-scaffolding:audit-project`. Both refer to the same
 skills; use whichever your install produced.
 
 ## How to use with Claude
@@ -104,7 +104,7 @@ skills; use whichever your install produced.
 
 ```
 /plugin marketplace add eldermoraes/quarkus-agentic-scaffolding
-/plugin install quarkus-agentic@eldermoraes
+/plugin install quarkus-agentic-scaffolding@eldermoraes
 ```
 
 All three skills and the `scaffold-project` `templates/` are installed and auto-discovered. (Or
@@ -112,7 +112,7 @@ use the [Quick install](#quick-install--any-skills-capable-agent) above, which w
 Code too.)
 
 **Set up the prerequisites.** Run `/setup-agentic-scaffolding` (or
-`/quarkus-agentic:setup-agentic-scaffolding` on a plugin install) — it verifies the toolchain,
+`/quarkus-agentic-scaffolding:setup-agentic-scaffolding` on a plugin install) — it verifies the toolchain,
 registers the **Quarkus Agents MCP** and **context7** MCP servers, and drops `CLAUDE.md` into your
 project root. `CLAUDE.md` §1 makes those two MCP servers non-negotiable for this stack, and the
 setup skill is what puts them in place.
@@ -140,7 +140,7 @@ the plugin from the plugins list:
 codex plugin marketplace add eldermoraes/quarkus-agentic-scaffolding
 ```
 
-Open Codex, run `/plugins`, select the `eldermoraes` marketplace, and install `quarkus-agentic`.
+Open Codex, run `/plugins`, select the `eldermoraes` marketplace, and install `quarkus-agentic-scaffolding`.
 All three skills and the `scaffold-project` `templates/` are auto-discovered. (Codex also
 auto-discovers skills placed under `.agents/skills/`, and the [Quick install](#quick-install--any-skills-capable-agent)
 works for Codex too.)
@@ -258,7 +258,7 @@ The split between skill and conventions is deliberate and non-overlapping:
 - **`CLAUDE.md` / `AGENTS.md` are declarative** — they state the conventions the resulting code
   must follow (`CLAUDE.md` for Claude, `AGENTS.md` for Codex and Bob).
 
-For Codex distribution, `.agents/plugins/marketplace.json` points to `plugins/quarkus-agentic/`.
+For Codex distribution, `.agents/plugins/marketplace.json` points to `plugins/quarkus-agentic-scaffolding/`.
 That directory is only a lightweight wrapper with symlinks back to `.codex-plugin/` and `skills/`,
 so the Claude and Codex packages share the same skill content. Bob does not use a marketplace; its
 skills are installed by the skills CLI (or `scripts/install-bob-skill.sh`) into `.bob/skills/`.
