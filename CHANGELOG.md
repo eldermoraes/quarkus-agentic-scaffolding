@@ -3,6 +3,47 @@
 All notable changes to this artifact are documented here. This project adheres to semantic
 versioning.
 
+## v0.18.0 — 2026-08-10
+- **Every published Quarkus Agents MCP registration now pins the JDK: `jbang --java 21+
+  io.quarkus:quarkus-agent-mcp:1.2.5:runner`.** The old command shipped no JDK hint, and §5 of the
+  setup skill justified that by saying the missing `java-version: 21+` was "moot here, because
+  Phase A already requires JDK 25+". That reasoning was the bug: Phase A proves the *machine* has a
+  JDK 25, but JBang resolves its own JDK and falls back to its default — 17 on JBang 0.125.x —
+  whenever the spawning process exports no `JAVA_HOME` (GUI- and IDE-launched agents typically do
+  not) or points below 21. The server is compiled for Java 21, so it died at boot with
+  `UnsupportedClassVersionError: … class file version 65.0 … up to 61.0`, the client retried and
+  gave up, and it read as "the MCP is broken". Verified by MCP `initialize` handshake against 1.2.5:
+  the old command **fails** with no `JAVA_HOME` and passes with `JAVA_HOME=25` — so a
+  terminal-launched agent was passing by accident of its environment; `--java 21+` passes in both.
+  The `quarkus-agent-mcp@quarkusio` alias is not an escape hatch: it *does* declare
+  `java-version: 21+`, but JBang 0.125.x ignores that for a GAV `script-ref` and fails identically
+  (also verified). `21+` is a floor rather than a pin, so a machine already on 25 reuses it instead
+  of downloading JDK 21. Touches the four `mcp add` rows and the JSON snippet in the setup skill,
+  the Codex/Gemini/Bob commands and both snippets in `README.md`, and `gemini-extension.json`. The
+  Renovate pin still resolves — its `matchStrings` anchor on the GAV, which the flag precedes.
+- **Bob's global MCP file was documented at a path Bob never reads.** We published
+  `~/.bob/mcp.json` (with a hedge toward `mcp_settings.json`); Bob 2.0.0's own constants are
+  `MCP_WORKSPACE_FILENAME = "mcp.json"` (→ `<project>/.bob/mcp.json`, correct), `MCP_GLOBAL_FILENAME
+  = "mcp.json"` in the global settings directory (→ **`~/.bob/settings/mcp.json`**), and
+  `MCP_LEGACY_GLOBAL_FILENAME = "mcp_settings.json"`, which Bob migrates **only when `mcp.json` does
+  not yet exist**. So on any machine that already has `mcp.json`, a registration written to the
+  legacy name is silently ignored — the setup reports success and Bob never loads the server. New
+  §5.1 in the setup skill documents the two real paths, the legacy trap, and the precedence rules,
+  and `README.md`'s uninstall boundary now names the global file it keeps.
+- **Bob registration switches from hand-written JSON to `bob mcp add` (Bob 2.0.0), verified against
+  the CLI.** `bob mcp add -s global <name> jbang -- --java 21+ <GAV>` writes
+  `~/.bob/settings/mcp.json`, creating the file and directory when missing, and `bob mcp list` is a
+  real verification in the same style as the other agent rows. Two behaviors that cost a run if you
+  do not know them, both reproduced in a scratch workspace: the `--` separator is **mandatory**
+  (without it Bob parses the server's flag as its own and exits `error: unknown option '--java'`),
+  and `-s workspace` does **not** create `.bob/mcp.json` — it exits `Fatal error: ENOENT`. Bob also
+  watches the file and restarts the servers whose entry changed (`Restarting changed servers` in
+  `~/.bob/logs/shell/`), so its "Live this session?" cell moves from "Reload in UI" to yes.
+- **The upstream Claude plugin carries the same JDK trap, and the README now says so.**
+  `quarkus-agent@quarkus-tools` launches `jbang quarkus-agent-mcp@quarkusio` with no JDK pin, so the
+  Claude manual-fallback path points at the pinned `claude mcp add` command as the fix if that
+  server never comes up.
+
 ## v0.17.0 — 2026-08-10
 - **Documented how to uninstall this artifact — and only this artifact.** New `## Uninstall`
   section in `README.md`, placed after *Advanced — personal use* because it depends on what that
