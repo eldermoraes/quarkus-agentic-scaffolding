@@ -176,6 +176,13 @@ file Bob actually reads and `bob mcp list` is a real verification. Three rules t
 - **`--` before the server's own arguments is mandatory.** `bob mcp add … jbang --java 21+ <GAV>`
   fails with `error: unknown option '--java'`, because Bob parses the flag as its own. With the
   separator (`… jbang -- --java 21+ <GAV>`) the arguments land verbatim in the entry's `args`.
+- **`add` never updates an existing entry — `add-json` does.** On a name that is already registered,
+  `bob mcp add` exits 1 with `Error: MCP server "…" already exists in …` and leaves the old entry
+  untouched, so an idempotent re-run cannot repair a stale registration (an unpinned command, say)
+  through it. Use `bob mcp add-json -s <scope> quarkus-agent '{"command":"jbang","args":["--java",
+  "21+","io.quarkus:quarkus-agent-mcp:1.2.5:runner"]}'`, which overwrites in place — still the CLI,
+  so the file Bob reads stays the one being written. Show the user the current entry and confirm
+  before overwriting; `bob mcp remove` then `add` works too, but loses the entry if the add fails.
 - **`-s global` writes `~/.bob/settings/mcp.json`**, creating the file and directory if needed.
   `-s workspace` (the default) writes `<project>/.bob/mcp.json` but does **not** create it — it exits
   with `Fatal error: ENOENT … .bob/mcp.json`. Create the file first
@@ -184,8 +191,11 @@ file Bob actually reads and `bob mcp list` is a real verification. Three rules t
   Bob 2.0.0 treats it as legacy and migrates it **only when `mcp.json` does not yet exist** (and it
   says so: *"your global MCP configuration has been migrated to mcp.json"*). Where `mcp.json` is
   already there — which one `bob mcp add -s global` is enough to cause — a registration written to
-  the legacy name is silently ignored, and the MCP looks registered while Bob never loads it. If you
-  find such a file, report it and register through the CLI instead.
+  the legacy name is silently ignored, and the MCP looks registered while Bob never loads it. Check
+  `~/.bob/mcp.json` and `~/.bob/mcp_settings.json` as well — one directory **above** the settings
+  directory, where releases of this skill before v0.18.0 told agents to write. Bob reads neither and
+  migrates neither, so a machine set up by an earlier run may hold a registration there that has
+  never loaded. If you find any of the three, report it and register through the CLI instead.
 
 A same-named server at workspace scope overrides global, and a deeper `.bob/mcp.json` overrides a
 shallower one in the same workspace. When something still fails to start, Bob's own log is the

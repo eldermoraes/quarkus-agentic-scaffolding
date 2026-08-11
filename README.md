@@ -72,8 +72,10 @@ setup skill is what puts them in place.
 `/plugin marketplace add quarkusio/quarkus-agent-mcp` then `/plugin install quarkus-agent@quarkus-tools`
 — that plugin launches `jbang quarkus-agent-mcp@quarkusio`, which pins no JDK, so if the server never
 comes up, register it yourself with
-`claude mcp add -s user quarkus-agent -- jbang --java 21+ io.quarkus:quarkus-agent-mcp:1.2.5:runner`
-(see the [Bob note](#how-to-use-with-bob) on why the JDK flag matters);
+`claude mcp add -s user quarkus-agent -- jbang --java 21+ io.quarkus:quarkus-agent-mcp:1.2.5:runner`.
+JBang picks its own JDK and defaults to 17 when the process that launched it exports no `JAVA_HOME`,
+and the server needs 21 — a login shell that sets `JAVA_HOME` hides this, the desktop app and the IDE
+extensions may not;
 add context7 with `claude mcp add context7 -- npx -y @upstash/context7-mcp@4.0.0` (for higher rate limits
 `export CONTEXT7_API_KEY=…` in your shell — the server picks it up from the environment, so no key
 belongs on the command line); optionally install superpowers with
@@ -141,13 +143,19 @@ The `--` is required: without it Bob parses `--java` as one of its own options a
 `error: unknown option '--java'`. Use `-s workspace` to register in the current project instead —
 but at that scope the file must already exist, or the command dies with `ENOENT … .bob/mcp.json`;
 run `mkdir -p .bob && echo '{"mcpServers":{}}' > .bob/mcp.json` first. At global scope Bob creates
-the file and its directory for you.
+the file and its directory for you. On a name that is already registered, `add` refuses
+(`Error: MCP server "quarkus-agent" already exists`) — to *replace* a stale entry use
+`bob mcp add-json -s global quarkus-agent '{"command":"jbang","args":["--java","21+","io.quarkus:quarkus-agent-mcp:1.2.5:runner"]}'`,
+which overwrites in place.
 
 To write the JSON by hand instead, the global file is `~/.bob/settings/mcp.json` and the project
 file is `<project>/.bob/mcp.json` (a same-named server at project scope overrides global). Older
 Bob docs name `mcp_settings.json` in that same settings directory; Bob 2.0.0 treats it as legacy and
 migrates it **only when `mcp.json` does not yet exist**, so on a machine that already has `mcp.json`
-anything written to the legacy name is silently ignored. Contents either way:
+anything written to the legacy name is silently ignored. If you set Bob up with a version of this
+guide before v0.18.0, also look for `~/.bob/mcp.json` and `~/.bob/mcp_settings.json` — one directory
+above `settings/`, which is where we used to point you; Bob reads neither, so a registration sitting
+there has never loaded. Contents either way:
 
 ```json
 {
@@ -367,8 +375,9 @@ It removes only the three skills it installed, and only after reading each `SKIL
 is skipped with a warning rather than deleted. What the check cannot do is tell two identical
 declarations apart, so a skill of your own that *also* declares `name: audit-project` is
 indistinguishable from ours and **will** be removed. Move it aside before you run this. A symlinked
-skill is unlinked, not recursed into. `.bob/mcp.json`, `.bob/rules/`, and every other skill in
-`.bob/skills/` are left alone. Re-running it is a clean no-op. Skills load once per conversation, so
+skill is unlinked, not recursed into. Your MCP registration (`.bob/mcp.json` in a project,
+`~/.bob/settings/mcp.json` globally), `.bob/rules/`, and every other skill in `.bob/skills/` are
+left alone. Re-running it is a clean no-op. Skills load once per conversation, so
 **start a new conversation** in Bob afterwards.
 
 **Gemini CLI** — if you installed the extension, uninstalling it takes the two MCP servers it

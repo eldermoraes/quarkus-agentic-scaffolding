@@ -39,6 +39,22 @@ versioning.
   and `-s workspace` does **not** create `.bob/mcp.json` — it exits `Fatal error: ENOENT`. Bob also
   watches the file and restarts the servers whose entry changed (`Restarting changed servers` in
   `~/.bob/logs/shell/`), so its "Live this session?" cell moves from "Reload in UI" to yes.
+- **`bob mcp add` cannot repair a stale entry; `add-json` can.** Verified: on a name that already
+  exists, `add` exits 1 with `Error: MCP server "…" already exists in …` and leaves the old entry
+  intact — so an idempotent re-run could not have replaced an unpinned registration through the route
+  this release recommends. §5.1 and the README now document
+  `bob mcp add-json -s <scope> quarkus-agent '{…}'`, which overwrites in place, with a
+  confirm-before-overwrite rule.
+- **Registrations written by earlier releases of this skill sit one directory above where Bob looks.**
+  Before v0.18.0 we pointed agents at `~/.bob/mcp.json` / `~/.bob/mcp_settings.json`; Bob reads
+  neither and migrates neither (its legacy migration only ever looks inside the settings directory),
+  so a machine set up by an earlier run can hold a registration that has never loaded. Both the skill
+  and the README now name those two orphan paths as things to check, not just the settings directory.
+- **`scripts/uninstall-bob-skill.sh`'s boundary comment and `--help` named the wrong files.** They
+  listed a `settings.json` file where Bob 2.0.0 has a `settings/` directory, and named only
+  `.bob/mcp.json` as the MCP registration the uninstall must not touch — which under `--global` is
+  now `~/.bob/settings/mcp.json`. Both scopes are spelled out, in the script and in the README's Bob
+  uninstall paragraph. Behavior unchanged: the script never touched those files.
 - **The upstream Claude plugin carries the same JDK trap, and the README now says so.**
   `quarkus-agent@quarkus-tools` launches `jbang quarkus-agent-mcp@quarkusio` with no JDK pin, so the
   Claude manual-fallback path points at the pinned `claude mcp add` command as the fix if that

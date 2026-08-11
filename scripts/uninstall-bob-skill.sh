@@ -8,10 +8,10 @@
 # filesystem rather than recording it. Deleting the directory IS the uninstall.
 #
 # Boundary — this removes the three skill directories and nothing else. .bob/ also holds
-# mcp.json (the Quarkus Agents MCP + context7 servers, which are shared with the rest of
-# your work and must survive), rules/, custom_modes.yaml, settings.json, hooks/, and
-# commands/. None are touched, and neither is .bob/skills/ itself, where your own skills
-# live.
+# the MCP registration (mcp.json at a project's .bob/, or settings/mcp.json under ~/.bob/ —
+# the Quarkus Agents MCP + context7 servers, which are shared with the rest of your work and
+# must survive), plus rules/, custom_modes.yaml, settings/, hooks/, and commands/. None are
+# touched, and neither is .bob/skills/ itself, where your own skills live.
 #
 # Two guards, because 'audit-project' is a generic enough name to collide with a skill you
 # wrote yourself:
@@ -31,8 +31,9 @@ usage() {
 uninstall-bob-skill.sh — remove this repository's skills from IBM Bob.
 
 Removes setup-agentic-scaffolding, scaffold-project, and audit-project from .bob/skills/.
-Leaves .bob/mcp.json (the Quarkus Agents MCP + context7 servers), .bob/rules/, and every
-other skill alone. Safe to re-run.
+Leaves your MCP registration (.bob/mcp.json in a project, ~/.bob/settings/mcp.json with
+--global — the Quarkus Agents MCP + context7 servers), .bob/rules/, and every other skill
+alone. Safe to re-run.
 
 Usage:
   uninstall-bob-skill.sh                    from ./.bob/skills/         (current directory)
