@@ -80,7 +80,15 @@ Conventions and templates should reflect how real Quarkus + LangChain4j systems 
 This artifact uses semantic versioning. Keep the version header identical across `README.md`,
 `CLAUDE.md`, `AGENTS.md`, the three `skills/*/SKILL.md` files, `.claude-plugin/plugin.json`,
 `.codex-plugin/plugin.json`, and `gemini-extension.json` (nine files, enforced by
-`ci/check-version-consistency.sh`), and record every change in `CHANGELOG.md`.
+`ci/check-version-consistency.sh`), and record every change in `CHANGELOG.md`. A version bump also
+reaches the two seed copies the setup skill ships —
+`skills/setup-agentic-scaffolding/templates/conventions-{CLAUDE,AGENTS}.md` — so re-copy the root
+files over them; `ci/check-conventions-parity.sh` fails on the drift otherwise.
+
+The launch command for the Quarkus Agents MCP is hand-maintained in ~15 places, and
+`ci/check-mcp-command-consistency.sh` couples them: every published registration must carry
+`--java 21+` and the same pinned GAV version. `CHANGELOG.md` and `docs/` are exempt, because they
+quote older commands as a record.
 
 ## License
 

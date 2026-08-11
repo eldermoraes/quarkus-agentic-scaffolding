@@ -260,6 +260,14 @@ pick the servers up immediately — opencode hot-reloads, and Bob watches its `m
 the servers whose entry changed (`Restarting changed servers` in `~/.bob/logs/shell/`) — so no
 restart is required for those three.
 
+**Bob still needs a new conversation, for a different reason.** The restart above is the server
+process only; Bob loads skills and the conventions file **once per conversation**, so a run that also
+wrote `AGENTS.md` (Phase C) ends in a conversation that has not read it. Close with:
+
+> The MCP servers are live in this conversation. `AGENTS.md` and the skills load once per
+> conversation, so **start a new conversation** in Bob before running `/scaffold-project` — otherwise
+> the conventions are not in context and §1's tooling rule will stop the work.
+
 ## 6. Superpowers (detect and guide — never auto-install)
 
 `superpowers` skills are used wherever applicable in this stack, but they are a **third-party

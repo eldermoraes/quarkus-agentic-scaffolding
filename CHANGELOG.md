@@ -18,8 +18,9 @@ versioning.
   The `quarkus-agent-mcp@quarkusio` alias is not an escape hatch: it *does* declare
   `java-version: 21+`, but JBang 0.125.x ignores that for a GAV `script-ref` and fails identically
   (also verified). `21+` is a floor rather than a pin, so a machine already on 25 reuses it instead
-  of downloading JDK 21. Touches the four `mcp add` rows and the JSON snippet in the setup skill,
-  the Codex/Gemini/Bob commands and both snippets in `README.md`, and `gemini-extension.json`. The
+  of downloading JDK 21. Touches all five `mcp add` rows, the args line in §5, and the JSON snippet
+  in the setup skill, the Claude/Codex/Gemini/Bob commands and both snippets in `README.md`, and
+  `gemini-extension.json` — 16 occurrences, now coupled by a gate (below) rather than by hand. The
   Renovate pin still resolves — its `matchStrings` anchor on the GAV, which the flag precedes.
 - **Bob's global MCP file was documented at a path Bob never reads.** We published
   `~/.bob/mcp.json` (with a hedge toward `mcp_settings.json`); Bob 2.0.0's own constants are
@@ -55,10 +56,45 @@ versioning.
   `.bob/mcp.json` as the MCP registration the uninstall must not touch — which under `--global` is
   now `~/.bob/settings/mcp.json`. Both scopes are spelled out, in the script and in the README's Bob
   uninstall paragraph. Behavior unchanged: the script never touched those files.
-- **The upstream Claude plugin carries the same JDK trap, and the README now says so.**
-  `quarkus-agent@quarkus-tools` launches `jbang quarkus-agent-mcp@quarkusio` with no JDK pin, so the
-  Claude manual-fallback path points at the pinned `claude mcp add` command as the fix if that
-  server never comes up.
+- **New gate: `ci/check-mcp-command-consistency.sh`.** The command is hand-maintained in 16 places;
+  the version gate couples the *version* and Renovate the *GAV*, but nothing coupled the *command*,
+  so `--java 21+` could be present in one artifact and missing in another with every check green —
+  a class of drift this repo has already hit (`9fdb9d2`). The script normalizes each published
+  surface (markdown, CLI, JSON args, `add-json` payload) and fails unless every occurrence is
+  preceded by the pin and carries the same version. Wired into `quality.yml`; `CHANGELOG.md` and
+  `docs/` are exempt, since they quote older commands as a record. Proven to fail on a
+  single unpinned copy before being committed.
+- **Verification now reads the stored command, not the server's name.** Every Verify cell checked
+  only that something called `quarkus-agent` was listed — which an unpinned entry from an earlier
+  release or from the upstream Claude plugin satisfies, so no existing install was ever repaired and
+  all of them were reported verified. §5 requires comparing the printed command to the canonical
+  string and treating a mismatch as a repair (replace the entry: `add-json` for Bob, remove + re-add
+  elsewhere), and reporting both strings.
+- **`jbang` itself may be unreachable, which no JDK flag can fix.** A GUI- or IDE-launched client
+  starts from launchd/systemd with a minimal PATH (`launchctl getenv PATH` is empty on macOS →
+  `/usr/bin:/bin:/usr/sbin:/sbin`), where none of SDKMAN, Homebrew, or the upstream installer put
+  `jbang`; the symptom is `spawn jbang ENOENT`. "`jbang` must be on PATH — that is Phase A's job"
+  was the same category error this release fixes for `JAVA_HOME`: Phase A probes the login shell,
+  not the spawn environment. Both files now say to register the absolute path from
+  `command -v jbang` when a client fails that way.
+- **Phase A installs a 21+ JDK for JBang instead of letting the first handshake do it.** With no
+  JBang-managed 21+ and no visible `JAVA_HOME`, `--java 21+` makes JBang download a JDK *inside* MCP
+  startup: `initialize` times out and reads as "the MCP is broken" on first run. Phase A now checks
+  `jbang jdk list` and offers `jbang jdk install 21` in the foreground.
+- **Bob's route no longer hard-depends on the `bob` binary**, and its handoff is honest. §5.1 probes
+  `command -v bob` and keeps a hand-write path (read-modify-write, both real paths, verified in the
+  UI's MCP tab) for IDE-only machines. And while Bob restarts changed *servers* by itself, it loads
+  skills and the conventions file once per conversation — §5.2 now closes a Bob run by telling the
+  user to start a new conversation before `/scaffold-project`.
+- **The upstream Claude plugin carries the same JDK trap, and the README now says so** — with the
+  right reason. `quarkus-agent@quarkus-tools` launches `jbang quarkus-agent-mcp@quarkusio`: the
+  alias *does* declare `java-version: 21+` and JBang 0.125.x ignores it for a GAV `script-ref`, and
+  `RELEASE` resolution means two machines run different code. The Claude manual fallback leads with
+  the pinned `claude mcp add` (both servers at `-s user`), and the plugin is presented as the
+  alternative with the name-collision warning the repo already gives for Gemini.
+- **`ci/test-uninstall-bob-skill.sh` now covers the `--global` half of the MCP boundary.** Case 6
+  redirects `HOME` but never fixtured `~/.bob/settings/mcp.json`, so the file this release promises
+  to preserve under `--global` — where `BASE="$HOME"` — was asserted nowhere. Two asserts close it.
 
 ## v0.17.0 — 2026-08-10
 - **Documented how to uninstall this artifact — and only this artifact.** New `## Uninstall`

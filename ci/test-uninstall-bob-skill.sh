@@ -93,8 +93,15 @@ H="$TMP/home"
 mkdir -p "$H"
 HOME="$H" "$INSTALL" --global >/dev/null
 for s in "${SKILLS[@]}"; do assert_exists "$H/.bob/skills/$s" "case6: global install $s"; done
+# The global MCP registration Bob 2.0.0 actually reads. --global sets BASE="$HOME",
+# so this file is inside the blast radius and the script promises to leave it alone.
+mkdir -p "$H/.bob/settings"
+printf '{"mcpServers":{}}\n' >"$H/.bob/settings/mcp.json"
 HOME="$H" "$UNINSTALL" --global >"$TMP/out6" 2>&1
 for s in "${SKILLS[@]}"; do assert_absent "$H/.bob/skills/$s" "case6: global remove $s"; done
+assert_exists "$H/.bob/settings/mcp.json" \
+  "case6: ~/.bob/settings/mcp.json survives (the global MCP boundary)"
+assert_exists "$H/.bob/skills" "case6: ~/.bob/skills/ itself survives"
 
 # --- Case 7: --help and a bad directory ---------------------------------------
 if "$UNINSTALL" --help >"$TMP/out7" 2>&1; then

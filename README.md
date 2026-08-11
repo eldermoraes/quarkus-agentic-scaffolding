@@ -68,21 +68,27 @@ registers the **Quarkus Agents MCP** and **context7** MCP servers, and drops `CL
 project root. `CLAUDE.md` §1 makes those two MCP servers non-negotiable for this stack, and the
 setup skill is what puts them in place.
 
-*Manual fallback,* if you would rather wire it by hand: install the Quarkus Agents MCP with
-`/plugin marketplace add quarkusio/quarkus-agent-mcp` then `/plugin install quarkus-agent@quarkus-tools`
-— that plugin launches `jbang quarkus-agent-mcp@quarkusio`, which pins no JDK, so if the server never
-comes up, register it yourself with
-`claude mcp add -s user quarkus-agent -- jbang --java 21+ io.quarkus:quarkus-agent-mcp:1.2.5:runner`.
-JBang picks its own JDK and defaults to 17 when the process that launched it exports no `JAVA_HOME`,
-and the server needs 21 — a login shell that sets `JAVA_HOME` hides this, the desktop app and the IDE
-extensions may not;
-add context7 with `claude mcp add context7 -- npx -y @upstash/context7-mcp@4.0.0` (for higher rate limits
+*Manual fallback,* if you would rather wire it by hand: register the Quarkus Agents MCP with the
+pinned command
+`claude mcp add -s user quarkus-agent -- jbang --java 21+ io.quarkus:quarkus-agent-mcp:1.2.5:runner`;
+add context7 with `claude mcp add -s user context7 -- npx -y @upstash/context7-mcp@4.0.0` (for higher rate limits
 `export CONTEXT7_API_KEY=…` in your shell — the server picks it up from the environment, so no key
 belongs on the command line); optionally install superpowers with
 `/plugin marketplace add obra/superpowers-marketplace` then
 `/plugin install superpowers@superpowers-marketplace`; and copy [`CLAUDE.md`](CLAUDE.md) into your
 project root yourself (Claude only auto-loads it from a project root or `~/.claude/`, so no plugin
 can ship it for you).
+
+Quarkus also ships the server as a Claude plugin — `/plugin marketplace add
+quarkusio/quarkus-agent-mcp` then `/plugin install quarkus-agent@quarkus-tools`. Two things to know
+before you pick that route over the command above. It launches `jbang quarkus-agent-mcp@quarkusio`,
+and that alias resolves `io.quarkus:quarkus-agent-mcp:RELEASE:runner`, so what runs is whatever was
+newest when the server started — two machines set up a week apart run different code. And it passes
+no `--java`: the alias *does* declare `java-version: 21+`, but JBang 0.125.x ignores that for a GAV
+script-ref, so the server runs on JBang's default JDK 17 and dies with `UnsupportedClassVersionError`
+unless whatever launched it happens to export a JDK 21+ `JAVA_HOME`. Use one route or the other, not
+both — the plugin's server and a `claude mcp add` entry are both named `quarkus-agent`, so uninstall
+the plugin (`/plugin uninstall quarkus-agent@quarkus-tools`) before registering by hand.
 
 **Try it.** Open your project and use a trigger phrase such as *"scaffold a new Quarkus +
 LangChain4j project"*, *"create a new AI service"*, or *"set up a new RAG pipeline"* —
