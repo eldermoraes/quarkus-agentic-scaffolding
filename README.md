@@ -152,7 +152,9 @@ keeping:
 At global scope Bob creates the file and its directory for you. On a name that is already registered, `add` refuses
 (`Error: MCP server "quarkus-agent" already exists`) — to *replace* a stale entry use
 `bob mcp add-json -s global quarkus-agent '{"command":"jbang","args":["--java","21+","io.quarkus:quarkus-agent-mcp:1.2.5:runner"]}'`,
-which overwrites in place.
+which overwrites in place. Read what `bob mcp list` prints, not just the name: an entry from an older
+setup shows its own command (an unpinned `jbang quarkus-agent-mcp@quarkusio`, say) and is exactly the
+case `add-json` is for.
 
 To write the JSON by hand instead, the global file is `~/.bob/settings/mcp.json` and the project
 file is `<project>/.bob/mcp.json` (a same-named server at project scope overrides global). Older
@@ -176,8 +178,11 @@ there has never loaded. Contents either way:
 }
 ```
 
-(`jbang` must be on your PATH — install it with a package manager, e.g. `sdk install jbang` or
-`brew install jbang`. `--java 21+` is not optional: the MCP server is compiled for Java 21, and JBang
+(`jbang` must be on the PATH of whatever *starts* Bob — install it with a package manager, e.g.
+`sdk install jbang` or `brew install jbang`. A GUI-launched client gets a minimal PATH that contains
+none of the usual install locations, so if the server fails with `spawn jbang ENOENT`, put the
+absolute path from `command -v jbang` in `command` and keep the args as they are. `--java 21+` is not
+optional: the MCP server is compiled for Java 21, and JBang
 resolves its own JDK — it falls back to its default, currently 17, whenever the process that spawned
 it hands over no `JAVA_HOME`, which is exactly what Bob and other GUI-launched clients do. For higher
 rate limits `export CONTEXT7_API_KEY=…` in your environment rather than writing a literal key into

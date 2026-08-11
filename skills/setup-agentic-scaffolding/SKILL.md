@@ -68,6 +68,13 @@ Rules for Phase A:
 
 - **Report "already installed vs missing" honestly.** Show the probe output; never fabricate a
   version or a success.
+- **Give JBang a 21+ JDK here, not at the first MCP start.** Once JBang is present, check
+  `jbang jdk list`; if nothing 21 or newer is installed, run `jbang jdk install 21` (with approval —
+  it is a JDK-sized download). Skip this and JBang does that download *inside* the MCP handshake the
+  first time a client starts the server: it fetches a full JDK before the first protocol byte, the
+  client's `initialize` times out, and the user reads it as "the MCP is broken". Record
+  `command -v jbang`'s absolute path while you are here — §5 needs it for clients that spawn the
+  server without your PATH.
 - **Install only what the user approves**, one tool at a time, and **re-probe** after each install
   to confirm.
 - **Never pipe a downloaded script into a shell — not even with approval.** A package manager is
@@ -166,7 +173,27 @@ The `.cursor/mcp.json`, `opencode.json`, and `.bob/mcp.json` map has the same sh
 ```
 
 (opencode uses the top-level `mcp` key rather than `mcpServers`; keep the two server entries the
-same. `jbang` must be on PATH — that is Phase A's job.)
+same. Bob is not in that list — its paths and its CLI are §5.1.)
+
+**Verify the stored command, not just the name.** Each `mcp list` above prints the command its
+servers will run; that string is the verification. "A server called `quarkus-agent` is listed" proves
+nothing — an entry left by an earlier release of this skill, by the upstream Quarkus Claude plugin,
+or by hand satisfies it while running an unpinned `jbang quarkus-agent-mcp@quarkusio`. Read the
+command back, compare it to `jbang --java 21+ io.quarkus:quarkus-agent-mcp:1.2.5:runner`, and treat a
+mismatch as a **repair**, not a skip — that is what makes the idempotent re-run worth anything.
+Repair means replacing the entry, never adding a second one under the same name: `bob mcp add-json`
+overwrites in place (§5.1), and elsewhere remove then re-add with the pinned command
+(`claude mcp remove -s user quarkus-agent`; for the other CLIs check `<cli> mcp --help` for the
+removal form rather than guessing it). Show the user the before and after strings.
+
+**`jbang` must be resolvable by the process that spawns the server — which is not the shell Phase A
+probed.** A GUI- or IDE-launched client is started by launchd (or systemd) with a minimal PATH: on
+macOS `launchctl getenv PATH` is typically empty, so the child gets `/usr/bin:/bin:/usr/sbin:/sbin`,
+and none of `sdk install jbang` (`~/.sdkman/…`), `brew install jbang` (`/opt/homebrew/bin`), or the
+upstream installer (`~/.jbang/bin`) puts `jbang` there. The symptom is `spawn jbang ENOENT` before
+`--java 21+` gets a chance to matter, and Phase A cannot see it — its probe runs in your login shell.
+When a client fails that way, register the **absolute path** from `command -v jbang` as the command,
+with the same arguments.
 
 ### 5.1 Bob: which file, and the `--` separator
 
@@ -209,6 +236,14 @@ three the CLI enforces, one Bob's loader does.
 A same-named server at workspace scope overrides global, and a deeper `.bob/mcp.json` overrides a
 shallower one in the same workspace. When something still fails to start, Bob's own log is the
 evidence: `~/.bob/logs/shell/` — a `UnsupportedClassVersionError` there is the JDK trap from §5.
+
+**No `bob` on PATH?** Probe with `command -v bob` before you plan the registration: a Bob-IDE-only
+machine has no CLI, and the whole route above is unavailable. Then hand-write the file — global
+`~/.bob/settings/mcp.json`, project `<project>/.bob/mcp.json` — read-modify-write so the user's other
+servers survive, with the entries from §5 including `--java 21+`. Verify in the UI's **MCP** tab,
+which lists what Bob actually loaded; that is the one verification that needs no binary. Every rule
+above still applies: not the legacy name, not a truncating write, and Bob reloads changed servers on
+its own.
 
 ### 5.2 Restart handoff
 
