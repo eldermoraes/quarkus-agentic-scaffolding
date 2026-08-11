@@ -170,9 +170,19 @@ same. `jbang` must be on PATH — that is Phase A's job.)
 
 ### 5.1 Bob: which file, and the `--` separator
 
-Bob 2.0.0 ships `bob mcp add|list|remove`, so prefer the CLI over hand-writing JSON — it writes the
-file Bob actually reads and `bob mcp list` is a real verification. Three rules the CLI enforces:
+Bob 2.0.0 ships `bob mcp add|add-json|list|remove`, so prefer the CLI over hand-writing JSON — it
+writes the file Bob actually reads and `bob mcp list` is a real verification. Four things to know:
+three the CLI enforces, one Bob's loader does.
 
+- **Probe for the legacy file BEFORE the first `add` — this ordering is load-bearing.** Bob migrates
+  `~/.bob/settings/mcp_settings.json` into `mcp.json` **only when `mcp.json` does not yet exist**.
+  `bob mcp add -s global` creates `mcp.json`, so registering first blocks that migration
+  permanently: on a machine whose global config still lives in the legacy file, our two servers land
+  in a fresh `mcp.json` and **every other server the user configured silently stops loading**. So:
+  if the legacy file exists and `mcp.json` does not, have the user start Bob once and let it migrate
+  (it announces *"your global MCP configuration has been migrated to mcp.json"*), confirm the
+  servers survived, and only then register. Never resolve this by copying files around yourself
+  without showing the user both files first.
 - **`--` before the server's own arguments is mandatory.** `bob mcp add … jbang --java 21+ <GAV>`
   fails with `error: unknown option '--java'`, because Bob parses the flag as its own. With the
   separator (`… jbang -- --java 21+ <GAV>`) the arguments land verbatim in the entry's `args`.
@@ -185,17 +195,16 @@ file Bob actually reads and `bob mcp list` is a real verification. Three rules t
   before overwriting; `bob mcp remove` then `add` works too, but loses the entry if the add fails.
 - **`-s global` writes `~/.bob/settings/mcp.json`**, creating the file and directory if needed.
   `-s workspace` (the default) writes `<project>/.bob/mcp.json` but does **not** create it — it exits
-  with `Fatal error: ENOENT … .bob/mcp.json`. Create the file first
-  (`mkdir -p .bob && echo '{"mcpServers":{}}' > .bob/mcp.json`) or use global scope.
-- **Never write `mcp_settings.json`.** Older Bob docs name that file in the same settings directory;
-  Bob 2.0.0 treats it as legacy and migrates it **only when `mcp.json` does not yet exist** (and it
-  says so: *"your global MCP configuration has been migrated to mcp.json"*). Where `mcp.json` is
-  already there — which one `bob mcp add -s global` is enough to cause — a registration written to
-  the legacy name is silently ignored, and the MCP looks registered while Bob never loads it. Check
-  `~/.bob/mcp.json` and `~/.bob/mcp_settings.json` as well — one directory **above** the settings
-  directory, where releases of this skill before v0.18.0 told agents to write. Bob reads neither and
-  migrates neither, so a machine set up by an earlier run may hold a registration there that has
-  never loaded. If you find any of the three, report it and register through the CLI instead.
+  with `Fatal error: ENOENT … .bob/mcp.json`. Seed it **only when it is missing**, because `>`
+  truncates and an existing file holds the user's other servers:
+  `[ -f .bob/mcp.json ] || { mkdir -p .bob && printf '{"mcpServers":{}}\n' > .bob/mcp.json; }` — or
+  just use global scope, where Bob creates the file itself.
+- **Never write `mcp_settings.json` yourself** (Bob's loader, not the CLI). A registration written
+  there on a machine that already has `mcp.json` is silently ignored — it looks registered and Bob
+  never loads it. Check `~/.bob/mcp.json` and `~/.bob/mcp_settings.json` too: one directory **above**
+  the settings directory, where releases of this skill before v0.18.0 told agents to write. Bob reads
+  neither and migrates neither, so a machine set up by an earlier run may hold a registration there
+  that has never loaded. If you find one, report it and register through the CLI instead.
 
 A same-named server at workspace scope overrides global, and a deeper `.bob/mcp.json` overrides a
 shallower one in the same workspace. When something still fails to start, Bob's own log is the

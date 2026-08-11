@@ -141,9 +141,15 @@ bob mcp list
 
 The `--` is required: without it Bob parses `--java` as one of its own options and exits with
 `error: unknown option '--java'`. Use `-s workspace` to register in the current project instead —
-but at that scope the file must already exist, or the command dies with `ENOENT … .bob/mcp.json`;
-run `mkdir -p .bob && echo '{"mcpServers":{}}' > .bob/mcp.json` first. At global scope Bob creates
-the file and its directory for you. On a name that is already registered, `add` refuses
+but at that scope the file must already exist, or the command dies with `ENOENT … .bob/mcp.json`.
+Seed it **only if it is missing** — `>` truncates, and an existing file holds registrations worth
+keeping:
+
+```
+[ -f .bob/mcp.json ] || { mkdir -p .bob && printf '{"mcpServers":{}}\n' > .bob/mcp.json; }
+```
+
+At global scope Bob creates the file and its directory for you. On a name that is already registered, `add` refuses
 (`Error: MCP server "quarkus-agent" already exists`) — to *replace* a stale entry use
 `bob mcp add-json -s global quarkus-agent '{"command":"jbang","args":["--java","21+","io.quarkus:quarkus-agent-mcp:1.2.5:runner"]}'`,
 which overwrites in place.
@@ -152,7 +158,11 @@ To write the JSON by hand instead, the global file is `~/.bob/settings/mcp.json`
 file is `<project>/.bob/mcp.json` (a same-named server at project scope overrides global). Older
 Bob docs name `mcp_settings.json` in that same settings directory; Bob 2.0.0 treats it as legacy and
 migrates it **only when `mcp.json` does not yet exist**, so on a machine that already has `mcp.json`
-anything written to the legacy name is silently ignored. If you set Bob up with a version of this
+anything written to the legacy name is silently ignored. That cuts both ways, so **look before you
+register**: if `~/.bob/settings/mcp_settings.json` exists and `mcp.json` does not, start Bob once and
+let it migrate (it says so — *"your global MCP configuration has been migrated to mcp.json"*) before
+running any `bob mcp add`. Adding first creates `mcp.json` yourself, and the migration then never
+runs — your old servers stay in the legacy file, unread. If you set Bob up with a version of this
 guide before v0.18.0, also look for `~/.bob/mcp.json` and `~/.bob/mcp_settings.json` — one directory
 above `settings/`, which is where we used to point you; Bob reads neither, so a registration sitting
 there has never loaded. Contents either way:
@@ -267,7 +277,9 @@ copying the file into each project:
   context file. (Bob also loads global *rules* from `~/.bob/rules/`, so
   `~/.bob/rules/quarkus-langchain4j.md` works too if you would rather keep them separate from your
   general context.) Install the skills globally with `./scripts/install-bob-skill.sh --global`
-  (into `~/.bob/skills/`), and add shared MCP servers from the **MCP** tab's **Edit Global MCP**.
+  (into `~/.bob/skills/`), and add the shared MCP servers with the `bob mcp add -s global` commands
+  from [How to use with Bob](#how-to-use-with-bob) — not by hand in the **MCP** tab, which is how a
+  registration ends up without the `--java 21+` pin.
 
 **Trade-off (stated explicitly):** the global files apply to **all** work on your machine or
 agent profile. If you also work in other stacks (other languages, frameworks, or non-AI Java
@@ -297,9 +309,13 @@ them with your agent's own MCP commands; nothing here does it for you.
 | The global conventions, if you did the [Advanced](#advanced--personal-use-optional-global-install) install | `~/.claude/CLAUDE.md`, `~/.codex/AGENTS.md`, `~/.bob/AGENTS.md` or `~/.bob/rules/<your-file>.md` |
 
 The MCP config files `/setup-agentic-scaffolding` may have written are **kept**: `.cursor/mcp.json`,
-`opencode.json`, and Bob's `.bob/mcp.json` (project) or `~/.bob/settings/mcp.json` (global). Their
-entire content is the two MCP servers this boundary protects, so deleting them would remove exactly
-what you asked to keep.
+`opencode.json`, and Bob's `.bob/mcp.json` (project) or `~/.bob/settings/mcp.json` (global).
+Deleting them would remove exactly what this boundary protects — and for the two Bob files that is
+not even the whole story: `bob mcp add` merges into whatever is already there, so a global
+`~/.bob/settings/mcp.json` typically holds servers that have nothing to do with this artifact
+(possibly with credentials in them). If you do want our two servers gone, remove them **by entry**,
+never by file: `bob mcp remove -s global quarkus-agent` and `bob mcp remove -s global context7`
+(`-s workspace` for a project file), then `bob mcp list` to confirm what remains.
 
 ### 1. The skills
 
