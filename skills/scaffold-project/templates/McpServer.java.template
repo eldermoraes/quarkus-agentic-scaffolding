@@ -7,8 +7,10 @@ import io.quarkiverse.mcp.server.ToolArg;
 import jakarta.inject.Inject;
 
 /*
- * MCP server — offers this application's capabilities as MCP tools that any MCP-capable
+ * MCP server — offers this application's capabilities as MCP tools that an MCP-capable
  * agent (Claude Code, an IDE, another Quarkus app via quarkus-langchain4j-mcp) can call.
+ * In production, restrict access to trusted, authorized clients — put the /mcp endpoint
+ * behind the application's normal access layer (HTTP auth policies or a gateway).
  * Requires the mcp-server-http extension (io.quarkiverse.mcp — managed by the platform's
  * quarkus-mcp-server-bom, so NO version pin). Streamable HTTP endpoint: /mcp by default
  * (quarkus.mcp.server.http.root-path; see application.properties.template). Use the

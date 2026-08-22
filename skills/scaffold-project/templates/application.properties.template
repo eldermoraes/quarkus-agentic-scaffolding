@@ -28,15 +28,19 @@ quarkus.langchain4j.ollama.smaller.chat-model.temperature=0
 quarkus.langchain4j.ollama.smaller.chat-model.num-predict=1024
 quarkus.langchain4j.ollama.smaller.timeout=60s
 
-# --- Observability: log prompts and responses during development. ---
-quarkus.langchain4j.log-requests=true
-quarkus.langchain4j.log-responses=true
+# --- Observability: log prompts and responses in dev mode only (they record user content). ---
+%dev.quarkus.langchain4j.log-requests=true
+%dev.quarkus.langchain4j.log-responses=true
 
 # --- Dev Services off: a real Ollama endpoint is configured above. ---
 quarkus.langchain4j.devservices.enabled=false
 
 # ============================================================================
 # Cloud models (alternative to local). Requires an Ollama cloud account.
+# Privacy note: the default configuration above is local — prompts never leave
+# the machine. Switching to a cloud model sends prompt content (e.g. support
+# tickets) to that provider; apply your organization's consent, redaction, and
+# data-retention rules first.
 #   quarkus.langchain4j.ollama.chat-model.model-id=deepseek-v4-pro:cloud
 #   quarkus.langchain4j.ollama.smaller.chat-model.model-id=gpt-oss:20b-cloud
 # ============================================================================
@@ -53,21 +57,37 @@ quarkus.langchain4j.devservices.enabled=false
 # MCP client — uncomment when the langchain4j-mcp extension is present. Declares
 # a named client ("ops") whose tools an AI service imports with @McpToolBox("ops").
 # streamable-http is the recommended transport; stdio spawns a local server process.
+# Point clients only at MCP servers you operate or explicitly trust — their tool
+# descriptions and results enter the model's context.
 # ============================================================================
 # quarkus.langchain4j.mcp.ops.transport-type=streamable-http
 # quarkus.langchain4j.mcp.ops.url=http://localhost:8081/mcp
-## stdio alternative (local subprocess):
+## stdio alternative (local subprocess; pin the version of a server you trust):
 # quarkus.langchain4j.mcp.ops.transport-type=stdio
-# quarkus.langchain4j.mcp.ops.command=npm,exec,@modelcontextprotocol/server-everything
+# quarkus.langchain4j.mcp.ops.command=npm,exec,your-mcp-server@x.y.z
 
 # ============================================================================
 # MCP server — uncomment when the mcp-server-http extension is present. The
 # Streamable HTTP endpoint is served at /mcp by default. Traffic logging prints
-# every JSON-RPC exchange during development.
+# every JSON-RPC exchange during development. In production, restrict /mcp to
+# trusted, authorized clients (see the Security block below).
 # ============================================================================
 # quarkus.mcp.server.http.root-path=/mcp
 # quarkus.mcp.server.traffic-logging.enabled=true
 # quarkus.mcp.server.traffic-logging.text-limit=500
+
+# ============================================================================
+# Security (production) — the scaffolded endpoints ship open so dev mode runs
+# without an identity store. Before exposing them beyond local dev or an
+# internal gateway, add an auth extension (e.g. quarkus-oidc) and protect the
+# HTTP surface; @Authenticated / @RolesAllowed work on WebSockets Next
+# endpoints, and an HttpUpgradeCheck can gate the handshake (websockets-next
+# reference, "Security"; quarkus-langchain4j secure-sql-chatbot sample).
+# ============================================================================
+# quarkus.oidc.auth-server-url=https://your-idp.example.com/realms/app
+# quarkus.oidc.client-id=your-client-id
+# quarkus.http.auth.permission.authenticated.paths=/ws/triage,/mcp
+# quarkus.http.auth.permission.authenticated.policy=authenticated
 
 # ============================================================================
 # Observability — uncomment when quarkus-micrometer-registry-prometheus and

@@ -3,6 +3,43 @@
 All notable changes to this artifact are documented here. This project adheres to semantic
 versioning.
 
+## v0.20.0 — 2026-08-21
+- **Security-audit hardening: the skills' instruction text now states its trust posture
+  explicitly, and the one remaining download-and-execute path is gone.** Driven by the skills.sh
+  audit results (Snyk agent-scan and Gen Agent Trust Hub flagged all three skills at Warn);
+  the goal is zero risk indicators per skill.
+  - *Setup: no installer scripts, ever.* The JBang last-resort install no longer downloads
+    `https://sh.jbang.dev` at all — not even as the reviewed three-step flow v0.18.0 introduced.
+    Package managers are the only install path the skill performs; on a machine without one, the
+    user installs JBang themselves per the official documentation and the skill re-probes. The
+    Phase A rule, the JBang table row, and `SECURITY.md` were rewritten accordingly.
+  - *Setup: registration is configuration, not execution.* §5 now states that the skill never
+    runs `jbang`/`npx` itself — it writes the pinned command into the agent's MCP config and the
+    agent runtime resolves the artifact from its official registry on first server start.
+    `jbang jdk install 21` is labeled an external JDK download needing explicit approval, config
+    file registrations are read-modify-write with an approved diff, `CONTEXT7_API_KEY` presence
+    is checked with `test -n` (never echoed), and Phase C documents that the conventions
+    templates are static, versioned content the skill never injects runtime text into.
+  - *Scaffold: the agent example is an internal support-console workflow.* The templates and §8
+    no longer describe the ticket as "outsider-authored free text from outside": an operator or
+    application code submits a customer-authored ticket, which stays guarded (PromptInjectionGuard,
+    `<ticket>` delimiting, edge validation). The `TriageSocket` javadoc became a production note
+    pointing at WebSockets Next security and the `secure-sql-chatbot` sample; a commented
+    Security block (OIDC + HTTP auth policy) landed in `application.properties.template`.
+  - *Scaffold: every free-text prompt slot is delimited.* `{problem}` (AiService), `{request}`
+    (McpClient), `{question}` (RagSetup), and the supervisor-variant ticket are wrapped in
+    markers with "data, not instructions" system-message language; the MCP client/server
+    templates call for trusted servers and authorized clients; the unpinned
+    `server-everything` stdio sample became a pin-your-own placeholder; request/response
+    logging moved under `%dev.` (conventions §4 and the audit checks updated to match); RAG
+    documents are described as curated, first-party content.
+  - *Audit: content provenance stated.* A §2 subsection records that the audit reads only
+    local, user-selected project files, follows no URLs or feeds, uses the MCP for targeted
+    doc validation whose results are evidence — never instructions — and never starts or
+    stops services; report evidence quotes the minimum and redacts secrets.
+  - *Conventions:* the GraalVM release-train citation moved from the Medium post to the
+    official release calendar, and dev logging is now spelled `%dev.`-scoped.
+
 ## v0.19.1 — 2026-08-11
 - **Audit scenario (a) is now footprint-based, closing a routing gap for off-lineage LangChain4j.**
   Scenario (a) literally required the `quarkus-langchain4j-bom` import while (b) required no

@@ -1,7 +1,7 @@
 <!-- BEGIN quarkus-agentic-scaffolding conventions (managed block; do not edit inside. Re-run /setup-agentic-scaffolding to update.) -->
 
 # Quarkus + LangChain4j + AI Stack — Project Conventions
-# Version: 0.19.1
+# Version: 0.20.0
 
 These conventions apply whenever code is written, reviewed, or configured in a Quarkus +
 LangChain4j project. They are always-on. Procedural scaffolding steps and starter code live in
@@ -42,7 +42,7 @@ generic web search.
   targets: GraalVM ships no releases for JDK 26, 27, or 28, so native-image stays on the JDK 25
   baseline (with quarterly updates) until JDK 29 lands (September 2027) — projects that build a
   native binary keep `maven.compiler.release` at 25 until then
-  ([GraalVM release-train announcement](https://medium.com/graalvm/accelerating-the-graalvm-release-train-26b0d7cff2ab)).
+  ([GraalVM release calendar](https://www.graalvm.org/release-calendar/)).
 - **Default to Virtual Threads for I/O-bound and blocking concurrent work.** Platform threads
   are acceptable only when the runtime or a critical dependency forbids virtual threads (for
   example, a JDBC driver that pins the carrier). When a blocking AI or tool call must run inside
@@ -164,9 +164,9 @@ generic web search.
   `quarkus.langchain4j.easy-rag.path` at a documents folder and let it ingest on startup. Move to
   a hand-built `RetrievalAugmentor` (a CDI-produced `EmbeddingStore` + `EmbeddingStoreContentRetriever`)
   only when a project needs control Easy RAG does not provide.
-- **Enable request/response logging.** Set `quarkus.langchain4j.log-requests=true` and
-  `quarkus.langchain4j.log-responses=true` so prompts and model output are observable during
-  development.
+- **Enable request/response logging in dev.** Set `%dev.quarkus.langchain4j.log-requests=true` and
+  `%dev.quarkus.langchain4j.log-responses=true` so prompts and model output are observable during
+  development without recording user content in production.
 
 ---
 
