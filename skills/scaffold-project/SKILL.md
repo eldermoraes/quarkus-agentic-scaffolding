@@ -93,7 +93,7 @@ these recommended defaults to the user and confirm before generating:
 
 **Choose the Quarkus version up front.** There is no `streams` parameter. Decide LTS vs. latest
 with the user before generating: pass `quarkusVersion` explicitly to pin a release — the current
-LTS is listed on the Quarkus releases page (https://quarkus.io/releases/), so no number here can
+LTS is listed on the Quarkus releases page (<https://quarkus.io/releases/>), so no number here can
 rot — or omit `quarkusVersion` to take the latest platform release.
 
 **Extension selection is a mandatory user gate.** `quarkus_create`'s own contract requires the

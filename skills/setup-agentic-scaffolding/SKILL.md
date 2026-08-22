@@ -84,7 +84,7 @@ Rules for Phase A:
   tools only through package managers (SDKMAN, Homebrew, Chocolatey, Scoop), which verify what
   they fetch. When the machine has none, do not fetch an installer on the user's behalf: point
   the user at JBang's official installation documentation
-  (https://www.jbang.dev/documentation/jbang/latest/installation.html), let them install it by
+  (<https://www.jbang.dev/documentation/jbang/latest/installation.html>), let them install it by
   the means they choose, and re-probe `jbang --version` once they are done. A streamed or
   downloaded installer script can never be meaningfully reviewed — the server is free to return
   different content on the next fetch, so there is nothing stable to approve — which is why no
