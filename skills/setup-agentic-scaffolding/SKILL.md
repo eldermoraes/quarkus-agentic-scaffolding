@@ -26,7 +26,7 @@ from a task description.
 ## 2. Bootstrap license (read first)
 
 The project conventions (`CLAUDE.md` / `AGENTS.md` §1) make the Quarkus Agents MCP mandatory for
-every Quarkus task and tell the agent to **stop** if required tooling is missing. **That rule does
+every Quarkus task and require stopping when required tooling is missing. **That rule does
 not apply to this skill.** Installing that tooling is precisely this skill's job, so it legitimately
 operates **before and without** the Quarkus Agents MCP and context7. Do not stop or defer to the
 MCP here — proceed with Phases A–C and register the MCP as part of the work.
@@ -117,7 +117,7 @@ MCP, the npm registry for context7) when it first starts the server. The only do
 skill performs itself are the Phase A package-manager installs and the explicitly approved
 `jbang jdk install 21`.
 
-**Both versions are pinned on purpose.** Left floating, `npx @upstash/context7-mcp` and the JBang
+**Both versions are pinned on purpose.** Left floating, an unpinned `@upstash/context7-mcp` and the JBang
 catalog alias `quarkus-agent-mcp@quarkusio` (whose script-ref is the moving
 `io.quarkus:quarkus-agent-mcp:RELEASE:runner`) each fetch whatever is newest at the moment the
 server starts, so two machines set up a week apart run different code and neither the user nor this
