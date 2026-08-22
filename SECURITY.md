@@ -16,9 +16,10 @@ This document states the trust boundary those skills operate under and how to re
   initiative.
 - No installer scripts. The skills never instruct an agent to download or execute an installer
   script — piped or otherwise. Package managers are the only tool-install path the skills
-  perform; the one other download — a 21+ JDK for the MCP server via `jbang jdk install 21` —
-  runs only with the user's explicit approval. When a machine has no package manager, the user
-  is pointed at the tool's official documentation to install it themselves, and the skill
+  perform, and that holds for every tool in the setup skill's Phase A table; the one other
+  download is the JDK described under *External sources* below. When a machine has no package
+  manager, the user is pointed at that tool's official documentation and installs it
+  themselves — manual or archive instructions preferred over a piped installer — and the skill
   re-probes afterwards.
 
 **External sources the skills depend on.**
@@ -26,11 +27,14 @@ This document states the trust boundary those skills operate under and how to re
 - `@upstash/context7-mcp` from the npm registry, and the Quarkus Agents MCP from the
   `quarkusio` organization (JBang/Maven Central). Both are registered with pinned versions —
   the exact pins live in `skills/setup-agentic-scaffolding/SKILL.md` and are kept current by
-  Renovate — and registering them downloads and runs nothing: the skills write the pinned
-  command into the agent's MCP configuration, and the agent runtime resolves the artifact from
-  its official registry when it first starts the server.
+  Renovate. Registration itself only writes that pinned command into the agent's MCP
+  configuration; the agent runtime is what resolves the artifact from its official registry when
+  it first starts the server — which on some agents happens immediately after the write (Copilot
+  CLI, opencode's hot reload, Bob restarting a changed server, or a `claude mcp list` health
+  check).
 - A 21+ JDK for the MCP server, when none is present: `jbang jdk install 21` downloads one from
-  JBang's JDK provider, only with the user's explicit approval.
+  JBang's JDK provider, only with the user's explicit approval. The skills add no checksum or
+  signature verification of that download beyond whatever jbang performs itself.
 
 **Secrets.**
 
@@ -46,10 +50,11 @@ This document states the trust boundary those skills operate under and how to re
 
 **Generated code.**
 
-- The scaffolding templates are secure by default at the ingestion edge: entry points that
-  accept user-authored free text wire input guardrails, delimit that text in
-  prompts, validate at the transport edge, and return generic errors to clients while logging
-  failures fully server-side (RFC 9457 problem details at the REST edge).
+- The scaffolding templates are secure by default at the ingestion edge: entry points that accept
+  free text the application did not author itself — end-user input, inbound email or ticket
+  bodies, webhook payloads, text relayed from an upstream system — wire input guardrails, delimit
+  that text in prompts, validate at the transport edge, and return generic errors to clients
+  while logging failures fully server-side (RFC 9457 problem details at the REST edge).
 
 ## Audits
 

@@ -57,24 +57,27 @@ quarkus.langchain4j.devservices.enabled=false
 # MCP client — uncomment when the langchain4j-mcp extension is present. Declares
 # a named client ("ops") whose tools an AI service imports with @McpToolBox("ops").
 # streamable-http is the recommended transport; stdio spawns a local server process.
-# Point clients only at MCP servers you operate or explicitly trust — their tool
-# descriptions and results enter the model's context.
+# Point clients only at servers you operate or explicitly trust — see the note in
+# McpClient.java.template.
 # ============================================================================
 # quarkus.langchain4j.mcp.ops.transport-type=streamable-http
 # quarkus.langchain4j.mcp.ops.url=http://localhost:8081/mcp
-## stdio alternative (local subprocess; pin the version of a server you trust):
+## stdio alternative (local subprocess). Replace BOTH placeholders below with a
+## server you operate or explicitly trust, pinned to an exact version. `npm exec`
+## needs the package already installed or --yes: a stdio pipe cannot answer a prompt.
 # quarkus.langchain4j.mcp.ops.transport-type=stdio
-# quarkus.langchain4j.mcp.ops.command=npm,exec,your-mcp-server@x.y.z
+# quarkus.langchain4j.mcp.ops.command=npm,exec,--yes,<your-mcp-server>@<exact-version>
 
 # ============================================================================
 # MCP server — uncomment when the mcp-server-http extension is present. The
 # Streamable HTTP endpoint is served at /mcp by default. Traffic logging prints
-# every JSON-RPC exchange during development. In production, restrict /mcp to
-# trusted, authorized clients (see the Security block below).
+# every JSON-RPC exchange, so it is %dev.-scoped below: it records user content.
+# In production, restrict /mcp to trusted, authorized clients (see the Security
+# block below).
 # ============================================================================
 # quarkus.mcp.server.http.root-path=/mcp
-# quarkus.mcp.server.traffic-logging.enabled=true
-# quarkus.mcp.server.traffic-logging.text-limit=500
+# %dev.quarkus.mcp.server.traffic-logging.enabled=true
+# %dev.quarkus.mcp.server.traffic-logging.text-limit=500
 
 # ============================================================================
 # Security (production) — the scaffolded endpoints ship open so dev mode runs
@@ -86,7 +89,14 @@ quarkus.langchain4j.devservices.enabled=false
 # ============================================================================
 # quarkus.oidc.auth-server-url=https://your-idp.example.com/realms/app
 # quarkus.oidc.client-id=your-client-id
-# quarkus.http.auth.permission.authenticated.paths=/ws/triage,/mcp
+## A browser cannot send an Authorization header on a WebSocket upgrade, so browser
+## clients need the web-app (cookie/session) type; bearer-only ("service", the
+## default) suits non-browser clients, which an HttpUpgradeCheck can admit instead.
+# quarkus.oidc.application-type=web-app
+## Permission paths are matched exactly, with no implicit wildcard: list /mcp AND
+## /mcp/*, because the MCP server also serves /mcp/sse and /mcp/messages/* under
+## its root-path.
+# quarkus.http.auth.permission.authenticated.paths=/ws/triage,/mcp,/mcp/*
 # quarkus.http.auth.permission.authenticated.policy=authenticated
 
 # ============================================================================
@@ -97,9 +107,10 @@ quarkus.langchain4j.devservices.enabled=false
 # ============================================================================
 ## Ship traces to an OTLP collector (the default endpoint, shown explicitly):
 # quarkus.otel.exporter.otlp.traces.endpoint=http://localhost:4317
-## Dev-only: copy prompt/completion text onto spans (records user content):
-# quarkus.langchain4j.tracing.include-prompt=true
-# quarkus.langchain4j.tracing.include-completion=true
+## Copy prompt/completion text onto spans (records user content) — %dev.-scoped, so
+## uncommenting cannot leak it from a production profile:
+# %dev.quarkus.langchain4j.tracing.include-prompt=true
+# %dev.quarkus.langchain4j.tracing.include-completion=true
 
 # ============================================================================
 # Error contract (RFC 9457) — nothing to uncomment: the http-problem extension
@@ -112,8 +123,9 @@ quarkus.langchain4j.devservices.enabled=false
 # quarkus.http-problem.constraint-violation.status=422
 ## Copy MDC keys into the problem document (e.g. a correlation id):
 # quarkus.http-problem.include-mdc-properties=uuid
-## Dev-only: echo raw parser messages in "detail" (leaks internal class names):
-# quarkus.http-problem.include-details=true
+## Echo raw parser messages in "detail" (leaks internal class names) — %dev.-scoped,
+## so production keeps the default false:
+# %dev.quarkus.http-problem.include-details=true
 
 # ============================================================================
 # Agent skills — uncomment when the langchain4j-skills extension is present.

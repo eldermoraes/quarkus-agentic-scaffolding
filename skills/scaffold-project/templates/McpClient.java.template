@@ -1,7 +1,9 @@
 package org.acme.ai;
 
+import org.acme.guardrails.PromptInjectionGuard;
 import dev.langchain4j.service.SystemMessage;
 import dev.langchain4j.service.UserMessage;
+import dev.langchain4j.service.guardrail.InputGuardrails;
 import io.quarkiverse.langchain4j.RegisterAiService;
 import io.quarkiverse.langchain4j.mcp.runtime.McpToolBox;
 
@@ -38,5 +40,8 @@ public interface TicketOpsAssistant {
             </request>
             """)
     @McpToolBox("ops")
+    // Entry method with the widest blast radius in this repo: the request text reaches a model
+    // that can call remote tools, so the guard from Guardrails.java.template is mandatory here.
+    @InputGuardrails(PromptInjectionGuard.class)
     String handle(String request);
 }

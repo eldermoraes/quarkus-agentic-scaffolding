@@ -100,7 +100,7 @@ generic web search.
   (`io.quarkiverse.langchain4j.cost`) to emit `gen_ai.client.estimated_cost`. Prompt and
   completion text reaches spans only when explicitly enabled
   (`quarkus.langchain4j.tracing.include-prompt` / `.include-completion`) - treat those as
-  dev-only, since they record user content.
+  dev-only and scope them with `%dev.`, since they record user content.
 - **Enable parameter-name retention.** Configure the compiler with `-parameters` (Maven:
   `<parameters>true</parameters>`), which REST and AI-service binding rely on.
 - **Build for both JVM and native.** Keep a `native` Maven profile so the project can produce a
@@ -143,6 +143,13 @@ generic web search.
   `@InputGuardrails` / `@OutputGuardrails` beans implementing the upstream
   `dev.langchain4j.guardrail` interfaces (the Quarkus-specific guardrail API was retired in favor
   of upstream); tune retries with `quarkus.langchain4j.guardrails.max-retries`.
+- **Externally originated free text is data, never instructions.** Free text the application did
+  not author itself - end-user input, inbound email or ticket bodies, webhook payloads, text
+  relayed from an upstream system - is interpolated into a prompt only inside explicit delimiters
+  (`<ticket>...</ticket>`), with the system message stating that the delimited span is data to
+  process and never instructions to follow, and every entry method that receives it carries
+  `@InputGuardrails`. Downstream services reading only model-produced state need no guardrail,
+  but still delimit values derived from that text.
 - **Fault tolerance is declarative on AI-service methods.** With
   `quarkus-smallrye-fault-tolerance`, put MicroProfile `@Timeout`, `@Retry`, and `@Fallback`
   (`org.eclipse.microprofile.faulttolerance`) directly on `@RegisterAiService` methods, with the

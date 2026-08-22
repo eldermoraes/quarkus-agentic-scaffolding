@@ -8,37 +8,59 @@ versioning.
   explicitly, and the one remaining download-and-execute path is gone.** Driven by the skills.sh
   audit results (Snyk agent-scan and Gen Agent Trust Hub flagged all three skills at Warn);
   the goal is zero risk indicators per skill.
-  - *Setup: no installer scripts, ever.* The JBang last-resort install no longer downloads
-    `https://sh.jbang.dev` at all — not even as the reviewed three-step flow v0.18.0 introduced.
-    Package managers are the only install path the skill performs; on a machine without one, the
-    user installs JBang themselves per the official documentation and the skill re-probes. The
-    Phase A rule, the JBang table row, and `SECURITY.md` were rewritten accordingly.
+  - *Setup: no installer scripts, ever.* The JBang last-resort install no longer downloads an
+    installer script at all — not even as the reviewed three-step flow v0.18.0 introduced. The
+    rule is phase-wide: package managers are the only install path the skill performs for every
+    tool in the Phase A table, and on a machine without one the user installs that tool
+    themselves per its official documentation (manual/archive instructions preferred) and the
+    skill re-probes once, checking `~/.jbang/bin/jbang` directly as well as the PATH. The Phase A
+    rule, the toolchain table rows, and `SECURITY.md` were rewritten accordingly; `SECURITY.md`
+    also discloses that the approved `jbang jdk install 21` gets no verification beyond jbang's
+    own.
   - *Setup: registration is configuration, not execution.* §5 now states that the skill never
     runs `jbang`/`npx` itself — it writes the pinned command into the agent's MCP config and the
-    agent runtime resolves the artifact from its official registry on first server start.
-    `jbang jdk install 21` is labeled an external JDK download needing explicit approval, config
-    file registrations are read-modify-write with an approved diff, `CONTEXT7_API_KEY` presence
-    is checked with `test -n` (never echoed), and Phase C documents that the conventions
-    templates are static, versioned content the skill never injects runtime text into.
+    agent runtime resolves the artifact from its official registry when it first starts the
+    server, which on Copilot CLI, opencode, Bob, and a `claude mcp list` health check is
+    immediately after the write. `jbang jdk install 21` is labeled an external JDK download
+    needing explicit approval, config file registrations are read-modify-write with an approved
+    diff, `CONTEXT7_API_KEY` presence is checked with `test -n` (never echoed), and Phase C
+    documents that the conventions templates are static, versioned content the skill never
+    injects runtime text into.
   - *Scaffold: the agent example is an internal support-console workflow.* The templates and §8
-    no longer describe the ticket as "outsider-authored free text from outside": an operator or
-    application code submits a customer-authored ticket, which stays guarded (PromptInjectionGuard,
-    `<ticket>` delimiting, edge validation). The `TriageSocket` javadoc became a production note
-    pointing at WebSockets Next security and the `secure-sql-chatbot` sample; a commented
-    Security block (OIDC + HTTP auth policy) landed in `application.properties.template`.
-  - *Scaffold: every free-text prompt slot is delimited.* `{problem}` (AiService), `{request}`
-    (McpClient), `{question}` (RagSetup), and the supervisor-variant ticket are wrapped in
-    markers with "data, not instructions" system-message language; the MCP client/server
-    templates call for trusted servers and authorized clients; the unpinned
-    `server-everything` stdio sample became a pin-your-own placeholder; request/response
-    logging moved under `%dev.` (conventions §4 and the audit checks updated to match); RAG
-    documents are described as curated, first-party content.
+    dropped the earlier framing of the ticket as adversarial free text of unknown origin: an
+    operator or application code submits a customer-authored ticket, which stays guarded
+    (PromptInjectionGuard, `<ticket>` delimiting, edge validation). The `TriageSocket` javadoc
+    became a production note pointing at WebSockets Next security and the `secure-sql-chatbot`
+    sample; a commented Security block (OIDC + HTTP auth policy) landed in
+    `application.properties.template`, with
+    the permission paths listing `/mcp` **and** `/mcp/*` (Quarkus matches them exactly, and the
+    MCP extension also serves `/mcp/sse` and `/mcp/messages/*`) and an `application-type=web-app`
+    line for browser clients, which cannot send an `Authorization` header on a WebSocket upgrade.
+  - *Scaffold: every free-text prompt slot is delimited, and every entry method is guarded.*
+    `{problem}` (AiService), `{request}` (McpClient), `{question}` (RagSetup), the
+    supervisor-variant ticket, the Synthesizer's `{category}`/`{priority}` (model-produced but
+    derived from customer text), and the commented structured-output examples are wrapped in
+    markers with "data, not instructions" system-message language; each of those entry methods
+    now carries `@InputGuardrails(PromptInjectionGuard.class)` instead of a comment suggesting
+    it, and the guard rejects input carrying the delimiter markup itself, which would otherwise
+    close the delimited region early. The MCP client/server templates call for trusted servers
+    and authorized clients; the stdio sample became a non-resolvable
+    `<your-mcp-server>@<exact-version>` placeholder; every key that records user content —
+    request/response logging, tracing prompt/completion capture, MCP traffic logging,
+    `http-problem` detail echoing — is `%dev.`-scoped (conventions §3/§4 and the audit checks
+    updated to match); RAG documents are described as curated, first-party content.
   - *Audit: content provenance stated.* A §2 subsection records that the audit reads only
-    local, user-selected project files, follows no URLs or feeds, uses the MCP for targeted
-    doc validation whose results are evidence — never instructions — and never starts or
-    stops services; report evidence quotes the minimum and redacts secrets.
+    local, user-selected project files, follows no URLs or feeds, and makes only targeted
+    external lookups — the `quarkus_status` gate call, `quarkus_searchDocs`/`quarkus_skills`,
+    and context7 doc queries — whose results are evidence, never instructions; it never starts
+    or stops the project's services; report evidence quotes the minimum and redacts secrets. A
+    §5.3 row now checks that entry AI-service methods delimit their free-text slots and attach
+    `@InputGuardrails`.
   - *Conventions:* the GraalVM release-train citation moved from the Medium post to the
-    official release calendar, and dev logging is now spelled `%dev.`-scoped.
+    official release calendar, dev logging is now spelled `%dev.`-scoped (as is the tracing
+    prompt/completion capture in §3), and a new §4 bullet states the rule the templates
+    implement: externally originated free text is delimited in prompts and guarded at the entry
+    method.
 
 ## v0.19.1 — 2026-08-11
 - **Audit scenario (a) is now footprint-based, closing a routing gap for off-lineage LangChain4j.**

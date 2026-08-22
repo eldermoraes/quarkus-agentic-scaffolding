@@ -7,6 +7,7 @@ import dev.langchain4j.guardrail.InputGuardrailResult;
 import dev.langchain4j.guardrail.OutputGuardrail;
 import dev.langchain4j.guardrail.OutputGuardrailResult;
 import jakarta.enterprise.context.ApplicationScoped;
+import java.util.regex.Pattern;
 
 /*
  * Guardrails — beans that validate what goes into and comes out of an AI service.
@@ -27,11 +28,23 @@ public class PromptInjectionGuard implements InputGuardrail {
 
     private static final int MAX_INPUT_CHARS = 4_000;
 
+    /**
+     * The delimiters the prompts in this repo's templates wrap free text in. A closing tag
+     * smuggled inside the text would end the delimited region early and let the rest read as
+     * instructions, so the markup is rejected outright. Extend the alternation whenever you
+     * add a delimiter of your own.
+     */
+    private static final Pattern DELIMITER_MARKUP =
+            Pattern.compile("</?(ticket|problem|request|question|text)>", Pattern.CASE_INSENSITIVE);
+
     @Override
     public InputGuardrailResult validate(UserMessage userMessage) {
         String text = userMessage.singleText();
         if (text.length() > MAX_INPUT_CHARS) {
             return failure("Input exceeds the " + MAX_INPUT_CHARS + "-character limit.");
+        }
+        if (DELIMITER_MARKUP.matcher(text).find()) {
+            return failure("Input rejected: it contains reserved delimiter markup.");
         }
         // Honest heuristic — real projects tune this (allow-lists, a classifier model, ...).
         if (text.toLowerCase().contains("ignore previous instructions")) {
