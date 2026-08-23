@@ -146,8 +146,9 @@ bob mcp list
 ```
 
 The `--` is required: without it Bob parses `--java` as one of its own options and exits with
-`error: unknown option '--java'`. Use `-s workspace` to register in the current project instead —
-but at that scope the file must already exist, or the command dies with `ENOENT … .bob/mcp.json`.
+`error: unknown option '--java'`. The `-s global` above is deliberate: Bob's own default is
+`-s workspace`, so dropping the flag does not mean "no scope" — it registers in the current project,
+and at that scope the file must already exist or the command dies with `ENOENT … .bob/mcp.json`.
 Seed it **only if it is missing** — `>` truncates, and an existing file holds registrations worth
 keeping:
 
