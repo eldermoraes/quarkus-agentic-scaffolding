@@ -213,7 +213,7 @@ f="$TMP/d1.md"
   printf '%s\n' "$END_MARKER"
   printf '```\n\nKEEP-AFTER\n'
 } >"$f"
-expect_verdict "$f" 'OK-SAFE-TO-REMOVE' 'D1 fenced quote (KNOWN false positive)'
+expect_verdict "$f" 'OK-SAFE-TO-REMOVE' 'D1 fenced quote (ACCEPTED residual)'
 remove_block "$f"
 assert_has "$f" 'KEEP-BEFORE' 'D1: content outside the fence survives'
 assert_has "$f" 'KEEP-AFTER'  'D1: content after the fence survives'

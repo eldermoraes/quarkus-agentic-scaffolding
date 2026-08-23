@@ -162,7 +162,7 @@ secrets by design (see the context7 note above), so "exact" is literal: what you
 |---|---|---|---|
 | Claude Code | `claude mcp add -s user quarkus-agent -- jbang --java 21+ io.quarkus:quarkus-agent-mcp:1.2.5:runner` · `claude mcp add -s user context7 -- npx -y @upstash/context7-mcp@4.0.3` | `claude mcp list` | No — restart |
 | Codex CLI | `codex mcp add quarkus-agent -- jbang --java 21+ io.quarkus:quarkus-agent-mcp:1.2.5:runner` · `codex mcp add context7 -- npx -y @upstash/context7-mcp@4.0.3` | `codex mcp list` | No — restart; sandbox may block network |
-| Gemini CLI | `gemini mcp add quarkus-agent jbang --java 21+ io.quarkus:quarkus-agent-mcp:1.2.5:runner` · `gemini mcp add context7 npx -y @upstash/context7-mcp@4.0.3` — **or** install this repo's Gemini extension, which already declares both servers | `gemini mcp list` | No — restart |
+| Gemini CLI | `gemini mcp add quarkus-agent jbang --java 21+ io.quarkus:quarkus-agent-mcp:1.2.5:runner` · `gemini mcp add context7 npx -y @upstash/context7-mcp@4.0.3` (project scope — `gemini mcp add` defaults to `--scope project`; add `-s user` to register them for every project) — **or** install this repo's Gemini extension, which already declares both servers | `gemini mcp list` | No — restart |
 | Cursor | Write `.cursor/mcp.json` with both servers (`mcpServers` map, same command/args) | Settings → MCP shows both; user **toggles them on** | GUI enable |
 | GitHub Copilot CLI | `copilot mcp add quarkus-agent -- jbang --java 21+ io.quarkus:quarkus-agent-mcp:1.2.5:runner` · `copilot mcp add context7 -- npx -y @upstash/context7-mcp@4.0.3` | `copilot mcp list` | **Yes** — live immediately |
 | opencode | Write `opencode.json` `mcp` key with both servers | `/mcp` in session | **Yes** — hot reload |

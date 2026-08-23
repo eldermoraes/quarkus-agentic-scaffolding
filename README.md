@@ -197,9 +197,10 @@ unavailable, the repository's fallback helper installs all three
 skills into `.bob/skills/` for you:
 
 ```
-./scripts/install-bob-skill.sh                   # into <cwd>/.bob/skills/
-./scripts/install-bob-skill.sh /path/to/project  # into that project's .bob/skills/
-./scripts/install-bob-skill.sh --global          # into ~/.bob/skills/
+# Pick one — the three forms are alternatives, not a sequence; uncomment the one you want
+./scripts/install-bob-skill.sh                     # into <cwd>/.bob/skills/
+# ./scripts/install-bob-skill.sh /path/to/project  # into that project's .bob/skills/
+# ./scripts/install-bob-skill.sh --global          # into ~/.bob/skills/
 ```
 
 Bob asks for approval before activating a skill — once per conversation, not once ever; the setting
@@ -388,10 +389,11 @@ is no `/plugins` equivalent). Your MCP servers stay in `[mcp_servers.*]` in `con
 directory is the whole uninstall.
 
 ```
-./scripts/uninstall-bob-skill.sh                   # from <cwd>/.bob/skills/
-./scripts/uninstall-bob-skill.sh /path/to/project  # from that project's .bob/skills/
-./scripts/uninstall-bob-skill.sh --global          # from ~/.bob/skills/
-ls .bob/skills/                                    # verify; and: ls ~/.bob/skills/
+# Pick one — the three forms are alternatives, not a sequence; uncomment the one you want
+./scripts/uninstall-bob-skill.sh                     # from <cwd>/.bob/skills/
+# ./scripts/uninstall-bob-skill.sh /path/to/project  # from that project's .bob/skills/
+# ./scripts/uninstall-bob-skill.sh --global          # from ~/.bob/skills/
+ls .bob/skills/                                      # verify; and: ls ~/.bob/skills/
 ```
 
 Nothing named `setup-agentic-scaffolding`, `scaffold-project`, or `audit-project` should be left in
@@ -472,7 +474,7 @@ perl -i -0777 -pe 's/^<!-- BEGIN quarkus-agentic-scaffolding conventions.*?^<!--
 Now compare what is left against the backup:
 
 ```bash
-# 4. Inspect, then drop the file only if nothing but whitespace is left
+# 4. Inspect what the removal changed
 diff "$(ls -t CLAUDE.md.backup-* | head -1)" CLAUDE.md
 ```
 
@@ -481,6 +483,7 @@ Deleting the file itself is optional, and the line below does it only if no cont
 nothing but whitespace remains:
 
 ```bash
+# 4b. Drop the file itself only if nothing but whitespace is left
 grep -q '[^[:space:]]' CLAUDE.md || rm CLAUDE.md
 ```
 
