@@ -146,11 +146,18 @@ bob mcp list
 ```
 
 The `--` is required: without it Bob parses `--java` as one of its own options and exits with
-`error: unknown option '--java'`. The `-s global` above is deliberate: Bob's own default is
-`-s workspace`, so dropping the flag does not mean "no scope" — it registers in the current project,
-and at that scope the file must already exist or the command dies with `ENOENT … .bob/mcp.json`.
-Seed it **only if it is missing** — `>` truncates, and an existing file holds registrations worth
-keeping:
+`error: unknown option '--java'`.
+
+**Trade-off (stated explicitly):** `-s global` writes `~/.bob/settings/mcp.json` and registers both
+servers for **every workspace on the machine**, not just this project. That is the default here
+because these MCP servers are tools, not conventions — they answer Quarkus and library questions
+and change nothing in projects that never call them — and re-registering them per project is
+friction. If you mix stacks and want nothing of this artifact reaching your other work, register at
+workspace scope instead: `-s workspace` is Bob's own default, so dropping the flag means the same
+thing — it registers in the current project only. One caveat at that scope: Bob does not create
+`<project>/.bob/mcp.json`, so the command dies with `ENOENT … .bob/mcp.json` when the file is
+missing. Seed it **only if it is missing** — `>` truncates, and an existing file holds
+registrations worth keeping:
 
 ```
 [ -f .bob/mcp.json ] || { mkdir -p .bob && printf '{"mcpServers":{}}\n' > .bob/mcp.json; }

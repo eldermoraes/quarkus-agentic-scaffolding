@@ -4,6 +4,13 @@ All notable changes to this artifact are documented here. This project adheres t
 versioning.
 
 ## Unreleased
+- **Bob's `-s global` MCP registration is now a stated choice, not a silent default.** The setup
+  skill's §5 Bob row and §5.1, and the README's *How to use with Bob*, register with `-s global` —
+  which writes `~/.bob/settings/mcp.json` and applies to every workspace on the machine — without
+  saying so, while the equivalent decision for the conventions file carries an explicit trade-off
+  paragraph. All three spots now state the machine-wide scope and why it is the default (the MCPs
+  are tools, not conventions, and re-registering per project is friction), and offer `-s workspace`
+  to users who mix stacks — with the ENOENT seeding caveat §5.1 already documents. (#19)
 - **Pasting a whole Bob fence now runs nothing — all three forms are commented.** The v0.20.1
   "Pick one" comment left the first form active, so uncommenting `--global` and pasting the block
   still ran the `<cwd>` form as well. Both fences (install and uninstall, keeping the symmetry

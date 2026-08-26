@@ -166,7 +166,7 @@ secrets by design (see the context7 note above), so "exact" is literal: what you
 | Cursor | Write `.cursor/mcp.json` with both servers (`mcpServers` map, same command/args) | Settings → MCP shows both; user **toggles them on** | GUI enable |
 | GitHub Copilot CLI | `copilot mcp add quarkus-agent -- jbang --java 21+ io.quarkus:quarkus-agent-mcp:1.2.5:runner` · `copilot mcp add context7 -- npx -y @upstash/context7-mcp@4.0.3` | `copilot mcp list` | **Yes** — live immediately |
 | opencode | Write `opencode.json` `mcp` key with both servers | `/mcp` in session | **Yes** — hot reload |
-| Bob (D3) | `bob mcp add -s global quarkus-agent jbang -- --java 21+ io.quarkus:quarkus-agent-mcp:1.2.5:runner` · `bob mcp add -s global context7 npx -- -y @upstash/context7-mcp@4.0.3` — the `--` is mandatory (see §5.1) | `bob mcp list` shows both, `stdio`, `global` | **Yes** — Bob restarts changed servers |
+| Bob (D3) | `bob mcp add -s global quarkus-agent jbang -- --java 21+ io.quarkus:quarkus-agent-mcp:1.2.5:runner` · `bob mcp add -s global context7 npx -- -y @upstash/context7-mcp@4.0.3` — the `--` is mandatory, and `-s global` is machine-wide: state that to the user and offer `-s workspace` to stack-mixers (both §5.1) | `bob mcp list` shows both, `stdio`, `global` (or `workspace`) | **Yes** — Bob restarts changed servers |
 
 The `.cursor/mcp.json`, `opencode.json`, and `.bob/mcp.json` map has the same shape everywhere:
 
@@ -232,12 +232,18 @@ three the CLI enforces, one Bob's loader does.
   "21+","io.quarkus:quarkus-agent-mcp:1.2.5:runner"]}'`, which overwrites in place — still the CLI,
   so the file Bob reads stays the one being written. Show the user the current entry and confirm
   before overwriting; `bob mcp remove` then `add` works too, but loses the entry if the add fails.
-- **`-s global` writes `~/.bob/settings/mcp.json`**, creating the file and directory if needed.
-  `-s workspace` (the default) writes `<project>/.bob/mcp.json` but does **not** create it — it exits
-  with `Fatal error: ENOENT … .bob/mcp.json`. Seed it **only when it is missing**, because `>`
-  truncates and an existing file holds the user's other servers:
-  `[ -f .bob/mcp.json ] || { mkdir -p .bob && printf '{"mcpServers":{}}\n' > .bob/mcp.json; }` — or
-  just use global scope, where Bob creates the file itself.
+- **`-s global` is a scope decision — state it, never make it silently.** It writes
+  `~/.bob/settings/mcp.json` (creating file and directory if needed) and registers the servers for
+  **every workspace on the machine**, not just this project. That is this skill's default because
+  the servers are tools, not conventions — they change nothing in projects that never call them —
+  and re-registering per project is friction; but tell the user that is the scope they are getting,
+  and offer `-s workspace` to anyone who mixes stacks and wants the registration confined to the
+  current project. `-s workspace` (Bob's own default) writes `<project>/.bob/mcp.json` but does
+  **not** create it — it exits with `Fatal error: ENOENT … .bob/mcp.json`. Seed it **only when it
+  is missing**, because `>` truncates and an existing file holds the user's other servers:
+  `[ -f .bob/mcp.json ] || { mkdir -p .bob && printf '{"mcpServers":{}}\n' > .bob/mcp.json; }`. At
+  workspace scope the verify column reads `workspace`, and the legacy-migration probe in the first
+  bullet still applies before any *global* add.
 - **Never write `mcp_settings.json` yourself** (Bob's loader, not the CLI). A registration written
   there on a machine that already has `mcp.json` is silently ignored — it looks registered and Bob
   never loads it. Check `~/.bob/mcp.json` and `~/.bob/mcp_settings.json` too: one directory **above**
