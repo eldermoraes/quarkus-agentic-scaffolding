@@ -46,9 +46,10 @@ against these tools first.
 3. Make the change in the right place (`CLAUDE.md` / `AGENTS.md` vs `SKILL.md` vs a template).
 4. If you touch a template, **validate it still builds** — see
    [`docs/VALIDATING-TEMPLATES.md`](docs/VALIDATING-TEMPLATES.md).
-5. **Bump the version** (semver) in the version headers of `README.md`, `CLAUDE.md`,
-   `AGENTS.md`, the three `skills/*/SKILL.md` files, `.claude-plugin/plugin.json`,
-   `.codex-plugin/plugin.json`, and `gemini-extension.json`, and add a `CHANGELOG.md` entry.
+5. **Record the change in `CHANGELOG.md` under a `## Unreleased` heading** at the top of the
+   file, creating that section if it is not there. Do not pick a version number and do not touch
+   the version headers: with concurrent PRs the next version is unknowable from a branch, so the
+   bump is the maintainer's job at release time (see [Versioning](#versioning)).
 6. Open a PR that links the issue and summarizes the evidence.
 
 ### Evidence bar for conventions and templates
@@ -80,7 +81,9 @@ Conventions and templates should reflect how real Quarkus + LangChain4j systems 
 This artifact uses semantic versioning. Keep the version header identical across `README.md`,
 `CLAUDE.md`, `AGENTS.md`, the three `skills/*/SKILL.md` files, `.claude-plugin/plugin.json`,
 `.codex-plugin/plugin.json`, and `gemini-extension.json` (nine files, enforced by
-`ci/check-version-consistency.sh`), and record every change in `CHANGELOG.md`. A version bump also
+`ci/check-version-consistency.sh`), and record every change in `CHANGELOG.md` — contributors add
+theirs under `## Unreleased`, and the maintainer renames that section to the new version and bumps
+all nine headers in the same release commit. A version bump also
 reaches the two seed copies the setup skill ships —
 `skills/setup-agentic-scaffolding/templates/conventions-{CLAUDE,AGENTS}.md` — so re-copy the root
 files over them; `ci/check-conventions-parity.sh` fails on the drift otherwise.

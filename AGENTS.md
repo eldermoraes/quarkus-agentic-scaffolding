@@ -1,7 +1,7 @@
 <!-- BEGIN quarkus-agentic-scaffolding conventions (managed block; do not edit inside. Re-run /setup-agentic-scaffolding to update.) -->
 
 # Quarkus + LangChain4j + AI Stack - Project Conventions
-# Version: 0.20.0
+# Version: 0.20.1
 
 These conventions apply whenever Codex or Bob writes, reviews, or configures code in a Quarkus +
 LangChain4j project. They are always-on. Procedural scaffolding steps and starter code live in

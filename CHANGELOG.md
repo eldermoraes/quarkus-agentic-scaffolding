@@ -3,6 +3,24 @@
 All notable changes to this artifact are documented here. This project adheres to semantic
 versioning.
 
+## v0.20.1 — 2026-08-26
+- **The README no longer presents `-s workspace` as opt-in on `bob mcp add`.** Workspace scope is
+  Bob's own default, so dropping the `-s global` flag from the published command registers in the
+  current project — and dies with `ENOENT … .bob/mcp.json` when that file is missing. The
+  paragraph now states the default the way the setup skill's §5.1 always has. (#25, PR #32 by
+  @matheusandre1)
+- **The five consistency nits deferred from the v0.17.0 reviews are closed.** The Bob install and
+  uninstall fences mark their three forms as alternatives, not a sequence; the conventions-removal
+  recipe's optional file drop got its own `# 4b.` comment; fixture D1's label now matches D2/D3
+  (`ACCEPTED residual`); `CONTRIBUTING.md` carries the IBM-internal qualifier the README already
+  had; and the Gemini CLI row states that `gemini mcp add` defaults to `--scope project`. (#17,
+  PR #33 by @matheusandre1)
+- **Contributors no longer have to guess the next version.** `CONTRIBUTING.md` step 5 asked every
+  PR to bump the version headers and name its own changelog section — unknowable from a branch,
+  and two concurrent PRs would conflict on all nine headers. External changes are now recorded
+  under a `## Unreleased` heading in this file (created when absent), and the maintainer renames
+  that section and bumps the headers in the release commit.
+
 ## v0.20.0 — 2026-08-21
 - **Security-audit hardening: the skills' instruction text now states its trust posture
   explicitly, and the one remaining download-and-execute path is gone.** Driven by the skills.sh
