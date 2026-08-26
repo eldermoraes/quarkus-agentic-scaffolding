@@ -163,12 +163,21 @@ registrations worth keeping:
 [ -f .bob/mcp.json ] || { mkdir -p .bob && printf '{"mcpServers":{}}\n' > .bob/mcp.json; }
 ```
 
-At global scope Bob creates the file and its directory for you. On a name that is already registered, `add` refuses
-(`Error: MCP server "quarkus-agent" already exists`) — to *replace* a stale entry use
-`bob mcp add-json -s global quarkus-agent '{"command":"jbang","args":["--java","21+","io.quarkus:quarkus-agent-mcp:1.2.5:runner"]}'`,
-which overwrites in place. Read what `bob mcp list` prints, not just the name: an entry from an older
-setup shows its own command (an unpinned `jbang quarkus-agent-mcp@quarkusio`, say) and is exactly the
-case `add-json` is for.
+At global scope Bob creates the file and its directory for you. On a name that is already
+registered, `add` refuses (`Error: MCP server "quarkus-agent" already exists`) — to *replace* a
+stale entry use `bob mcp add-json`, which overwrites in place. One form per server:
+
+```
+bob mcp add-json -s global quarkus-agent '{"command":"jbang","args":["--java","21+","io.quarkus:quarkus-agent-mcp:1.2.5:runner"]}'
+bob mcp add-json -s global context7 '{"command":"npx","args":["-y","@upstash/context7-mcp@4.0.3"]}'
+```
+
+Read what `bob mcp list` prints, not just the names: an entry from an older setup shows its own
+command, and a stale command is exactly the case `add-json` is for — on **either** server. For
+`quarkus-agent` that looks like an unpinned `jbang quarkus-agent-mcp@quarkusio`; for `context7` it
+is an older version pin, and that is the *frequent* one — the `@upstash/context7-mcp` pin moves
+with every upstream release (Renovate keeps this guide current), so a machine set up before the
+latest bump holds the previous version until you overwrite it.
 
 To write the JSON by hand instead, the global file is `~/.bob/settings/mcp.json` and the project
 file is `<project>/.bob/mcp.json` (a same-named server at project scope overrides global). Older

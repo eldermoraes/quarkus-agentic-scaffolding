@@ -187,16 +187,21 @@ same. Bob is not in that list — its paths and its CLI are §5.1.)
 file, change only these two server entries, show the user the resulting diff, and write only after
 approval — every other byte of the user's config survives untouched.
 
-**Verify the stored command, not just the name.** Each `mcp list` above prints the command its
-servers will run; that string is the verification. "A server called `quarkus-agent` is listed" proves
-nothing — an entry left by an earlier release of this skill, by the upstream Quarkus Claude plugin,
-or by hand satisfies it while running an unpinned `jbang quarkus-agent-mcp@quarkusio`. Read the
-command back, compare it to `jbang --java 21+ io.quarkus:quarkus-agent-mcp:1.2.5:runner`, and treat a
-mismatch as a **repair**, not a skip — that is what makes the idempotent re-run worth anything.
-Repair means replacing the entry, never adding a second one under the same name: `bob mcp add-json`
-overwrites in place (§5.1), and elsewhere remove then re-add with the pinned command
-(`claude mcp remove -s user quarkus-agent`; for the other CLIs check `<cli> mcp --help` for the
-removal form rather than guessing it). Show the user the before and after strings.
+**Verify the stored command, not just the name — for both servers.** Each `mcp list` above prints
+the command its servers will run; that string is the verification. "A server called `quarkus-agent`
+is listed" proves nothing — an entry left by an earlier release of this skill, by the upstream
+Quarkus Claude plugin, or by hand satisfies it while running an unpinned
+`jbang quarkus-agent-mcp@quarkusio`. And `context7` goes stale *more* often, not less: its pin
+moves with every upstream release (Renovate bumps it in this skill), so after every bump each
+already-configured machine holds the previous version. Read each command back, compare it to its
+pinned string — `jbang --java 21+ io.quarkus:quarkus-agent-mcp:1.2.5:runner` for `quarkus-agent`,
+`npx -y @upstash/context7-mcp@4.0.3` for `context7` — and treat a mismatch on either server as a
+**repair**, not a skip — that is what makes the idempotent re-run worth anything. Repair means
+replacing the entry, never adding a second one under the same name: `bob mcp add-json` overwrites
+in place (§5.1 states the form for each server), and elsewhere remove then re-add with the pinned
+command (`claude mcp remove -s user quarkus-agent` and `claude mcp remove -s user context7`; for
+the other CLIs check `<cli> mcp --help` for the removal form rather than guessing it). Show the
+user the before and after strings.
 
 **`jbang` must be resolvable by the process that spawns the server — which is not the shell Phase A
 probed.** A GUI- or IDE-launched client is started by launchd (or systemd) with a minimal PATH: on
@@ -227,11 +232,14 @@ three the CLI enforces, one Bob's loader does.
   separator (`… jbang -- --java 21+ <GAV>`) the arguments land verbatim in the entry's `args`.
 - **`add` never updates an existing entry — `add-json` does.** On a name that is already registered,
   `bob mcp add` exits 1 with `Error: MCP server "…" already exists in …` and leaves the old entry
-  untouched, so an idempotent re-run cannot repair a stale registration (an unpinned command, say)
-  through it. Use `bob mcp add-json -s <scope> quarkus-agent '{"command":"jbang","args":["--java",
-  "21+","io.quarkus:quarkus-agent-mcp:1.2.5:runner"]}'`, which overwrites in place — still the CLI,
-  so the file Bob reads stays the one being written. Show the user the current entry and confirm
-  before overwriting; `bob mcp remove` then `add` works too, but loses the entry if the add fails.
+  untouched, so an idempotent re-run cannot repair a stale registration through it — neither an
+  unpinned `quarkus-agent` command nor the `context7` entry every version bump leaves behind. Use
+  `bob mcp add-json`, which overwrites in place — still the CLI, so the file Bob reads stays the
+  one being written. One form per server:
+  `bob mcp add-json -s <scope> quarkus-agent '{"command":"jbang","args":["--java","21+","io.quarkus:quarkus-agent-mcp:1.2.5:runner"]}'`
+  · `bob mcp add-json -s <scope> context7 '{"command":"npx","args":["-y","@upstash/context7-mcp@4.0.3"]}'`.
+  Show the user the current entry and confirm before overwriting; `bob mcp remove` then `add`
+  works too, but loses the entry if the add fails.
 - **`-s global` is a scope decision — state it, never make it silently.** It writes
   `~/.bob/settings/mcp.json` (creating file and directory if needed) and registers the servers for
   **every workspace on the machine**, not just this project. That is this skill's default because

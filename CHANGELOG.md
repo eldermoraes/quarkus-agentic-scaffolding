@@ -4,6 +4,14 @@ All notable changes to this artifact are documented here. This project adheres t
 versioning.
 
 ## Unreleased
+- **The idempotent re-run's repair path now covers `context7`, not just `quarkus-agent`.** The
+  v0.18.0 stored-command verification rule stated the repair only for `quarkus-agent` — yet
+  `context7` is the more frequent stale entry, since Renovate bumps its pin and every
+  already-configured machine then holds the previous version, dead-ending `add` on
+  `already exists`. The setup skill's §5 verification paragraph now names both pinned strings and
+  both `claude mcp remove` forms, §5.1 and the README's *How to use with Bob* carry one
+  `bob mcp add-json` example per server, and the Renovate custom managers already track the new
+  occurrences. (#20)
 - **Bob's `-s global` MCP registration is now a stated choice, not a silent default.** The setup
   skill's §5 Bob row and §5.1, and the README's *How to use with Bob*, register with `-s global` —
   which writes `~/.bob/settings/mcp.json` and applies to every workspace on the machine — without
