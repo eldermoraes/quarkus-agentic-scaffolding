@@ -3,6 +3,13 @@
 All notable changes to this artifact are documented here. This project adheres to semantic
 versioning.
 
+## Unreleased
+- **Pasting a whole Bob fence now runs nothing — all three forms are commented.** The v0.20.1
+  "Pick one" comment left the first form active, so uncommenting `--global` and pasting the block
+  still ran the `<cwd>` form as well. Both fences (install and uninstall, keeping the symmetry
+  issue #17 asked for) now comment every form, so "uncomment the one you want" applies to each of
+  them; the uninstall fence's read-only `ls` verify line stays active.
+
 ## v0.20.1 — 2026-08-26
 - **The README no longer presents `-s workspace` as opt-in on `bob mcp add`.** Workspace scope is
   Bob's own default, so dropping the `-s global` flag from the published command registers in the

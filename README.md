@@ -199,7 +199,7 @@ skills into `.bob/skills/` for you:
 
 ```
 # Pick one — the three forms are alternatives, not a sequence; uncomment the one you want
-./scripts/install-bob-skill.sh                     # into <cwd>/.bob/skills/
+# ./scripts/install-bob-skill.sh                   # into <cwd>/.bob/skills/
 # ./scripts/install-bob-skill.sh /path/to/project  # into that project's .bob/skills/
 # ./scripts/install-bob-skill.sh --global          # into ~/.bob/skills/
 ```
@@ -391,7 +391,7 @@ directory is the whole uninstall.
 
 ```
 # Pick one — the three forms are alternatives, not a sequence; uncomment the one you want
-./scripts/uninstall-bob-skill.sh                     # from <cwd>/.bob/skills/
+# ./scripts/uninstall-bob-skill.sh                   # from <cwd>/.bob/skills/
 # ./scripts/uninstall-bob-skill.sh /path/to/project  # from that project's .bob/skills/
 # ./scripts/uninstall-bob-skill.sh --global          # from ~/.bob/skills/
 ls .bob/skills/                                      # verify; and: ls ~/.bob/skills/
