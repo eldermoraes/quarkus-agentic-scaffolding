@@ -4,7 +4,7 @@ description: Scaffold Quarkus + LangChain4j projects end-to-end and add agentic 
 ---
 
 # Quarkus + LangChain4j Scaffolding
-# Version: 0.20.1
+# Version: 0.21.0
 
 **Prerequisites.** The Quarkus Agents MCP, context7, and the project conventions file
 (`CLAUDE.md` for Claude, `AGENTS.md` for Codex) should already be configured — if they are

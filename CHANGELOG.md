@@ -3,7 +3,17 @@
 All notable changes to this artifact are documented here. This project adheres to semantic
 versioning.
 
-## Unreleased
+## v0.21.0 — 2026-08-27
+- **Baseline moved to the Quarkus 3.39 line.** `ci/baseline.env` goes to platform `3.39.1`
+  (from `3.38.3`, Renovate PR #35). Nothing required a corrective change: the templates compile
+  green against 3.39.1 in the CI compile job and in a local `ci/build-from-templates.sh 3.39.1`
+  run.
+- **`ci/test-uninstall-bob-skill.sh` now pins the dangling-symlink and bare-invocation
+  branches.** Case 8 pins the conservative choice for a symlink whose target is gone: ownership
+  cannot be verified through a broken link, so the uninstaller leaves it in place and warns.
+  Case 9 pins that a bare invocation (no argument) operates on `$PWD`, exercised from an isolated
+  subshell. Three assertion gaps in cases 4, 6, and 7 are closed — 49 assertions across 9 cases,
+  `scripts/uninstall-bob-skill.sh` itself untouched. (#16, PR #41)
 - **The idempotent re-run's repair path now covers `context7`, not just `quarkus-agent`.** The
   v0.18.0 stored-command verification rule stated the repair only for `quarkus-agent` — yet
   `context7` is the more frequent stale entry, since Renovate bumps its pin and every
@@ -11,14 +21,15 @@ versioning.
   `already exists`. The setup skill's §5 verification paragraph now names both pinned strings and
   both `claude mcp remove` forms, §5.1 and the README's *How to use with Bob* carry one
   `bob mcp add-json` example per server, and the Renovate custom managers already track the new
-  occurrences. (#20)
+  occurrences. (#20, PR #39 by @matheusandre1)
 - **Bob's `-s global` MCP registration is now a stated choice, not a silent default.** The setup
   skill's §5 Bob row and §5.1, and the README's *How to use with Bob*, register with `-s global` —
   which writes `~/.bob/settings/mcp.json` and applies to every workspace on the machine — without
   saying so, while the equivalent decision for the conventions file carries an explicit trade-off
   paragraph. All three spots now state the machine-wide scope and why it is the default (the MCPs
   are tools, not conventions, and re-registering per project is friction), and offer `-s workspace`
-  to users who mix stacks — with the ENOENT seeding caveat §5.1 already documents. (#19)
+  to users who mix stacks — with the ENOENT seeding caveat §5.1 already documents. (#19, PR #38
+  by @matheusandre1)
 - **Pasting a whole Bob fence now runs nothing — all three forms are commented.** The v0.20.1
   "Pick one" comment left the first form active, so uncommenting `--global` and pasting the block
   still ran the `<cwd>` form as well. Both fences (install and uninstall, keeping the symmetry
