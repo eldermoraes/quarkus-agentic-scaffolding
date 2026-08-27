@@ -76,6 +76,7 @@ printf 'x\n' >"$N/.bob/skills/scaffold-project/templates/leftover.txt"
 "$UNINSTALL" "$N" >"$TMP/out4" 2>&1 || true
 assert_exists "$N/.bob/skills/scaffold-project/templates/leftover.txt" \
   "case4: directory without SKILL.md is left in place"
+assert_grep "$TMP/out4" "SKILL.md declares '<none>'" "case4: warns about missing SKILL.md"
 
 # --- Case 5: symlinked skill - unlink the link, never recurse into the target --
 S="$TMP/symlinked"
@@ -102,6 +103,7 @@ for s in "${SKILLS[@]}"; do assert_absent "$H/.bob/skills/$s" "case6: global rem
 assert_exists "$H/.bob/settings/mcp.json" \
   "case6: ~/.bob/settings/mcp.json survives (the global MCP boundary)"
 assert_exists "$H/.bob/skills" "case6: ~/.bob/skills/ itself survives"
+assert_grep "$TMP/out6" "Removed 'setup-agentic-scaffolding' from:" "case6: output reports removal"
 
 # --- Case 7: --help and a bad directory ---------------------------------------
 if "$UNINSTALL" --help >"$TMP/out7" 2>&1; then
@@ -109,14 +111,44 @@ if "$UNINSTALL" --help >"$TMP/out7" 2>&1; then
 else
   fail "case7: --help exits 0"
 fi
-if "$UNINSTALL" "$TMP/does-not-exist" >"$TMP/out8" 2>&1; then
+assert_grep "$TMP/out7" "uninstall-bob-skill.sh" "case7: --help prints usage text"
+if "$UNINSTALL" "$TMP/does-not-exist" >"$TMP/out7b" 2>&1; then
   fail "case7: a missing target directory must fail"
 else
   pass "case7: a missing target directory fails"
 fi
 
+# --- Case 8: dangling symlink - ownership unverifiable, so left alone ----------
+# Intended behavior: ownership cannot be verified through a broken link, so the script
+# leaves the dangling symlink in place rather than deleting blindly.
+D="$TMP/dangling"
+mkdir -p "$D/.bob/skills"
+# $TMP/dangling-target-must-not-exist is intentionally never created — that is what makes
+# this a dangling symlink. Do not create it anywhere else in this file.
+ln -s "$TMP/dangling-target-must-not-exist" "$D/.bob/skills/audit-project"
+"$UNINSTALL" "$D" >"$TMP/out8" 2>&1 || true
+assert_exists "$D/.bob/skills/audit-project" "case8: dangling symlink survives"
+assert_grep "$TMP/out8" "SKILL.md declares '<none>'" "case8: warns about unverifiable dangling symlink"
+assert_grep "$TMP/out8" "Skipped 'setup-agentic-scaffolding': not installed" \
+  "case8: other skills reported not installed"
+assert_grep "$TMP/out8" "Skipped 'scaffold-project': not installed" \
+  "case8: other skills reported not installed (scaffold-project)"
+
+# --- Case 9: bare invocation uses $PWD ----------------------------------------
+# The outer $PWD is the repo root (set at line 7). Run entirely inside a subshell
+# that cd's into a temp directory — never call "$UNINSTALL" with no arguments outside
+# this subshell, or it would operate on the repo's own .bob/skills/.
+mkdir -p "$TMP/bare"
+"$INSTALL" "$TMP/bare" >/dev/null
+for s in "${SKILLS[@]}"; do assert_exists "$TMP/bare/.bob/skills/$s" "case9: installed $s"; done
+( cd "$TMP/bare" && "$UNINSTALL" ) >"$TMP/out9" 2>&1
+for s in "${SKILLS[@]}"; do
+  assert_absent "$TMP/bare/.bob/skills/$s" "case9: bare invocation removed $s"
+  assert_grep "$TMP/out9" "Removed '$s' from:" "case9: reported removal of $s"
+done
+
 if [[ "$failures" == 0 ]]; then
-  echo "OK: uninstall-bob-skill.sh behaves ($(( ${#SKILLS[@]} )) skills, 7 cases)"
+  echo "OK: uninstall-bob-skill.sh behaves ($(( ${#SKILLS[@]} )) skills, 9 cases)"
 else
   echo "FAIL: $failures assertion(s) failed" >&2
   exit 1
