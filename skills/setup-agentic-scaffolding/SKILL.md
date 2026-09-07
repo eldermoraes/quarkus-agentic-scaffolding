@@ -100,7 +100,7 @@ Rules for Phase A:
 
 Register two MCP servers through the running agent's own mechanism:
 
-- **quarkus-agent** — command `jbang`, args `--java 21+ io.quarkus:quarkus-agent-mcp:1.2.5:runner`
+- **quarkus-agent** — command `jbang`, args `--java 21+ io.quarkus:quarkus-agent-mcp:1.2.6:runner`
 - **context7** — command `npx`, args `-y @upstash/context7-mcp@4.0.3`. An API key raises the rate
   limits, but **do not put it on the command line**: over stdio the server falls back to the
   `CONTEXT7_API_KEY` environment variable whenever `--api-key` is absent, and a stdio server
@@ -160,20 +160,20 @@ secrets by design (see the context7 note above), so "exact" is literal: what you
 
 | Agent | Register quarkus-agent + context7 | Verify | Live this session? |
 |---|---|---|---|
-| Claude Code | `claude mcp add -s user quarkus-agent -- jbang --java 21+ io.quarkus:quarkus-agent-mcp:1.2.5:runner` · `claude mcp add -s user context7 -- npx -y @upstash/context7-mcp@4.0.3` | `claude mcp list` | No — restart |
-| Codex CLI | `codex mcp add quarkus-agent -- jbang --java 21+ io.quarkus:quarkus-agent-mcp:1.2.5:runner` · `codex mcp add context7 -- npx -y @upstash/context7-mcp@4.0.3` | `codex mcp list` | No — restart; sandbox may block network |
-| Gemini CLI | `gemini mcp add quarkus-agent jbang --java 21+ io.quarkus:quarkus-agent-mcp:1.2.5:runner` · `gemini mcp add context7 npx -y @upstash/context7-mcp@4.0.3` (project scope — `gemini mcp add` defaults to `--scope project`; add `-s user` to register them for every project) — **or** install this repo's Gemini extension, which already declares both servers | `gemini mcp list` | No — restart |
+| Claude Code | `claude mcp add -s user quarkus-agent -- jbang --java 21+ io.quarkus:quarkus-agent-mcp:1.2.6:runner` · `claude mcp add -s user context7 -- npx -y @upstash/context7-mcp@4.0.3` | `claude mcp list` | No — restart |
+| Codex CLI | `codex mcp add quarkus-agent -- jbang --java 21+ io.quarkus:quarkus-agent-mcp:1.2.6:runner` · `codex mcp add context7 -- npx -y @upstash/context7-mcp@4.0.3` | `codex mcp list` | No — restart; sandbox may block network |
+| Gemini CLI | `gemini mcp add quarkus-agent jbang --java 21+ io.quarkus:quarkus-agent-mcp:1.2.6:runner` · `gemini mcp add context7 npx -y @upstash/context7-mcp@4.0.3` (project scope — `gemini mcp add` defaults to `--scope project`; add `-s user` to register them for every project) — **or** install this repo's Gemini extension, which already declares both servers | `gemini mcp list` | No — restart |
 | Cursor | Write `.cursor/mcp.json` with both servers (`mcpServers` map, same command/args) | Settings → MCP shows both; user **toggles them on** | GUI enable |
-| GitHub Copilot CLI | `copilot mcp add quarkus-agent -- jbang --java 21+ io.quarkus:quarkus-agent-mcp:1.2.5:runner` · `copilot mcp add context7 -- npx -y @upstash/context7-mcp@4.0.3` | `copilot mcp list` | **Yes** — live immediately |
+| GitHub Copilot CLI | `copilot mcp add quarkus-agent -- jbang --java 21+ io.quarkus:quarkus-agent-mcp:1.2.6:runner` · `copilot mcp add context7 -- npx -y @upstash/context7-mcp@4.0.3` | `copilot mcp list` | **Yes** — live immediately |
 | opencode | Write `opencode.json` `mcp` key with both servers | `/mcp` in session | **Yes** — hot reload |
-| Bob (D3) | `bob mcp add -s global quarkus-agent jbang -- --java 21+ io.quarkus:quarkus-agent-mcp:1.2.5:runner` · `bob mcp add -s global context7 npx -- -y @upstash/context7-mcp@4.0.3` — the `--` is mandatory, and `-s global` is machine-wide: state that to the user and offer `-s workspace` to stack-mixers (both §5.1) | `bob mcp list` shows both, `stdio`, `global` (or `workspace`) | **Yes** — Bob restarts changed servers |
+| Bob (D3) | `bob mcp add -s global quarkus-agent jbang -- --java 21+ io.quarkus:quarkus-agent-mcp:1.2.6:runner` · `bob mcp add -s global context7 npx -- -y @upstash/context7-mcp@4.0.3` — the `--` is mandatory, and `-s global` is machine-wide: state that to the user and offer `-s workspace` to stack-mixers (both §5.1) | `bob mcp list` shows both, `stdio`, `global` (or `workspace`) | **Yes** — Bob restarts changed servers |
 
 The `.cursor/mcp.json`, `opencode.json`, and `.bob/mcp.json` map has the same shape everywhere:
 
 ```json
 {
   "mcpServers": {
-    "quarkus-agent": { "command": "jbang", "args": ["--java", "21+", "io.quarkus:quarkus-agent-mcp:1.2.5:runner"] },
+    "quarkus-agent": { "command": "jbang", "args": ["--java", "21+", "io.quarkus:quarkus-agent-mcp:1.2.6:runner"] },
     "context7":      { "command": "npx",   "args": ["-y", "@upstash/context7-mcp@4.0.3"] }
   }
 }
@@ -194,7 +194,7 @@ Quarkus Claude plugin, or by hand satisfies it while running an unpinned
 `jbang quarkus-agent-mcp@quarkusio`. And `context7` goes stale *more* often, not less: its pin
 moves with every upstream release (Renovate bumps it in this skill), so after every bump each
 already-configured machine holds the previous version. Read each command back, compare it to its
-pinned string — `jbang --java 21+ io.quarkus:quarkus-agent-mcp:1.2.5:runner` for `quarkus-agent`,
+pinned string — `jbang --java 21+ io.quarkus:quarkus-agent-mcp:1.2.6:runner` for `quarkus-agent`,
 `npx -y @upstash/context7-mcp@4.0.3` for `context7` — and treat a mismatch on either server as a
 **repair**, not a skip — that is what makes the idempotent re-run worth anything. Repair means
 replacing the entry, never adding a second one under the same name: `bob mcp add-json` overwrites
@@ -236,7 +236,7 @@ three the CLI enforces, one Bob's loader does.
   unpinned `quarkus-agent` command nor the `context7` entry every version bump leaves behind. Use
   `bob mcp add-json`, which overwrites in place — still the CLI, so the file Bob reads stays the
   one being written. One form per server:
-  `bob mcp add-json -s <scope> quarkus-agent '{"command":"jbang","args":["--java","21+","io.quarkus:quarkus-agent-mcp:1.2.5:runner"]}'`
+  `bob mcp add-json -s <scope> quarkus-agent '{"command":"jbang","args":["--java","21+","io.quarkus:quarkus-agent-mcp:1.2.6:runner"]}'`
   · `bob mcp add-json -s <scope> context7 '{"command":"npx","args":["-y","@upstash/context7-mcp@4.0.3"]}'`.
   Show the user the current entry and confirm before overwriting; `bob mcp remove` then `add`
   works too, but loses the entry if the add fails.

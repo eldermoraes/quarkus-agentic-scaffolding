@@ -70,7 +70,7 @@ setup skill is what puts them in place.
 
 *Manual fallback,* if you would rather wire it by hand: register the Quarkus Agents MCP with the
 pinned command
-`claude mcp add -s user quarkus-agent -- jbang --java 21+ io.quarkus:quarkus-agent-mcp:1.2.5:runner`;
+`claude mcp add -s user quarkus-agent -- jbang --java 21+ io.quarkus:quarkus-agent-mcp:1.2.6:runner`;
 add context7 with `claude mcp add -s user context7 -- npx -y @upstash/context7-mcp@4.0.3` (for higher rate limits
 `export CONTEXT7_API_KEY=…` in your shell — the server picks it up from the environment, so no key
 belongs on the command line); optionally install superpowers with
@@ -113,7 +113,7 @@ works for Codex too.)
 registers the **Quarkus Agents MCP** and **context7** MCP servers for Codex, and drops `AGENTS.md`
 into your project root. `AGENTS.md` §1 makes those two MCP servers non-negotiable for this stack.
 
-*Manual fallback:* add the Quarkus Agents MCP with `codex mcp add quarkus-agent -- jbang --java 21+ io.quarkus:quarkus-agent-mcp:1.2.5:runner`;
+*Manual fallback:* add the Quarkus Agents MCP with `codex mcp add quarkus-agent -- jbang --java 21+ io.quarkus:quarkus-agent-mcp:1.2.6:runner`;
 add context7 with `codex mcp add context7 -- npx -y @upstash/context7-mcp@4.0.3` (for higher rate limits
 `export CONTEXT7_API_KEY=…` in your shell — the server picks it up from the environment, so no key
 belongs on the command line); install/enable the Superpowers plugin if you use it; and copy
@@ -140,7 +140,7 @@ is no separate `BOB.md`.
 actually reads:
 
 ```
-bob mcp add -s global quarkus-agent jbang -- --java 21+ io.quarkus:quarkus-agent-mcp:1.2.5:runner
+bob mcp add -s global quarkus-agent jbang -- --java 21+ io.quarkus:quarkus-agent-mcp:1.2.6:runner
 bob mcp add -s global context7 npx -- -y @upstash/context7-mcp@4.0.3
 bob mcp list
 ```
@@ -168,7 +168,7 @@ registered, `add` refuses (`Error: MCP server "quarkus-agent" already exists`) �
 stale entry use `bob mcp add-json`, which overwrites in place. One form per server:
 
 ```
-bob mcp add-json -s global quarkus-agent '{"command":"jbang","args":["--java","21+","io.quarkus:quarkus-agent-mcp:1.2.5:runner"]}'
+bob mcp add-json -s global quarkus-agent '{"command":"jbang","args":["--java","21+","io.quarkus:quarkus-agent-mcp:1.2.6:runner"]}'
 bob mcp add-json -s global context7 '{"command":"npx","args":["-y","@upstash/context7-mcp@4.0.3"]}'
 ```
 
@@ -195,7 +195,7 @@ there has never loaded. Contents either way:
 ```json
 {
   "mcpServers": {
-    "quarkus-agent": { "command": "jbang", "args": ["--java", "21+", "io.quarkus:quarkus-agent-mcp:1.2.5:runner"] },
+    "quarkus-agent": { "command": "jbang", "args": ["--java", "21+", "io.quarkus:quarkus-agent-mcp:1.2.6:runner"] },
     "context7":      { "command": "npx",   "args": ["-y", "@upstash/context7-mcp@4.0.3"] }
   }
 }
@@ -433,7 +433,7 @@ declares with it, so add them back at user scope:
 
 ```
 gemini extensions uninstall quarkus-agentic-scaffolding
-gemini mcp add -s user quarkus-agent jbang --java 21+ io.quarkus:quarkus-agent-mcp:1.2.5:runner
+gemini mcp add -s user quarkus-agent jbang --java 21+ io.quarkus:quarkus-agent-mcp:1.2.6:runner
 gemini mcp add -s user context7 npx -y @upstash/context7-mcp@4.0.3
 gemini extensions list
 gemini mcp list
