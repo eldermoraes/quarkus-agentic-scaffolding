@@ -31,13 +31,23 @@ always-on files instead.
 
 ## Required tooling
 
-The same tooling the stack mandates applies to contributors (see `CLAUDE.md` §1 or `AGENTS.md` §1):
+The mandatory tooling in `CLAUDE.md` §1 and `AGENTS.md` §1 governs using the scaffolding in
+Quarkus + LangChain4j applications. When maintaining this repository itself, apply the
+requirements to the operation being performed:
 
-- **Quarkus Agents MCP** for any Quarkus work (project creation, extensions, version checks, docs).
-- **context7** for any external library/framework API lookup (LangChain4j included).
+- **Quarkus Agents MCP** is required for Quarkus project creation, extension selection,
+  configuration, version verification, API lookup, and troubleshooting.
+- **context7** is required for external library/framework API documentation lookup
+  (LangChain4j included).
+- Repository maintenance — inspecting diffs, editing prose, reviewing PRs, checking CI results,
+  and merging approved changes — may proceed without an MCP that the operation does not use.
+  A dependency bump still requires the relevant tool if its review needs an API or Quarkus
+  version lookup.
 
-Do not change a convention or template from model memory or a generic web search — confirm it
-against these tools first.
+If a required tool is unavailable, report and pause only the operation that needs it; continue
+independent maintenance work. Confirm convention or template changes against the relevant tool
+before encoding library/framework behavior. This maintenance scope does not relax the tooling
+requirements for applications using the scaffolding.
 
 ## Proposing a change
 
