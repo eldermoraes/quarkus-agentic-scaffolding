@@ -4,6 +4,7 @@ All notable changes to this artifact are documented here. This project adheres t
 versioning.
 
 ## Unreleased
+
 - **The README now documents the Gemini CLI install path — and settles #14's open question: the
   extension stays a gallery listing, not a first-class install path.** `v0.17.0` documented
   uninstalling an extension no section had ever taught a reader to install. A short
@@ -18,6 +19,15 @@ versioning.
   Gemini alongside Codex and Bob. Install command verified against Gemini CLI 0.58.0
   (`gemini extensions install <source>`, a git URL or local path); the extension's skill
   delivery and the `.agents/skills/`-overrides-extension conflict observed on 0.35.0. (#14)
+
+- Update the pinned Context7 MCP package from `4.0.3` to `4.0.6` across setup instructions,
+  README commands, and the Gemini extension manifest. (#44)
+- Update the pinned Quarkus Agents MCP runner from `1.2.5` to `1.2.6` throughout the
+  setup instructions, README, and Gemini extension manifest, retaining `--java 21+`. (#42)
+- Update the standalone Quarkus LangChain4j release watcher from `1.13.0` to `1.13.1`.
+  This tracker does not override the extension version managed by the Quarkus platform BOM. (#46)
+- Update the CI Quarkus platform baseline from `3.39.1` to `3.39.2`. The PR's CI
+  validation compiles the templates and test sources with Java 25. (#47)
 
 ## v0.21.0 — 2026-08-27
 - **Baseline moved to the Quarkus 3.39 line.** `ci/baseline.env` goes to platform `3.39.1`
