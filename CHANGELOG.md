@@ -3,6 +3,17 @@
 All notable changes to this artifact are documented here. This project adheres to semantic
 versioning.
 
+## v0.22.1 — 2026-09-09
+
+### Changed
+
+- Load Bob MCP details from a shared on-demand reference, shipped by the fallback installer;
+  keep Java and version-pin imperatives in the setup skill and include references in Renovate
+  and MCP command checks (#22).
+- Setup `SKILL.md` shrank from 28,199 to 21,696 UTF-8 bytes and from 7,246 to 5,545 tokens
+  (v0.22.0 versus v0.22.1, tiktoken 0.14.0, `o200k_base`: 23.5% fewer tokens).
+  This measures the main skill only, not the full package or Bob's additional reference load.
+
 ## v0.22.0 — 2026-09-09
 
 ### Added

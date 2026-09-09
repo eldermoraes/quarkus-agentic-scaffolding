@@ -1,5 +1,5 @@
 # Quarkus + LangChain4j + AI Stack
-# Version: 0.22.0
+# Version: 0.22.1
 
 ## What this repository is
 
@@ -149,80 +149,16 @@ registers the **Quarkus Agents MCP** and **context7** MCP servers for Bob, and d
 into your project root. If you already added `AGENTS.md` for Codex, the same file serves Bob — there
 is no separate `BOB.md`.
 
-*Manual fallback:* register both servers with Bob's own CLI (Bob 2.0.0), which writes the file Bob
-actually reads:
+*Manual fallback:* before registering either server, read the
+[Bob MCP registration guide](skills/setup-agentic-scaffolding/references/bob-mcp.md).
+It is the shared procedure for configuration paths, legacy migration, scope selection, the required
+`--` separator, updating existing entries, and verification with or without the CLI.
 
-```
-bob mcp add -s global quarkus-agent jbang -- --java 21+ io.quarkus:quarkus-agent-mcp:1.2.6:runner
-bob mcp add -s global context7 npx -- -y @upstash/context7-mcp@4.0.6
-bob mcp list
-```
+For GUI launch environments, ensure JBang is resolvable by Bob; if needed use its absolute path
+from `command -v jbang`. Keep `--java 21+` in the arguments. Context7's optional key follows the
+[authentication and launch environment](#context7-authentication-and-launch-environment) guidance.
 
-The `--` is required: without it Bob parses `--java` as one of its own options and exits with
-`error: unknown option '--java'`.
-
-**Trade-off (stated explicitly):** `-s global` writes `~/.bob/settings/mcp.json` and registers both
-servers for **every workspace on the machine**, not just this project. That is the default here
-because these MCP servers are tools, not conventions — they answer Quarkus and library questions
-and change nothing in projects that never call them — and re-registering them per project is
-friction. If you mix stacks and want nothing of this artifact reaching your other work, register at
-workspace scope instead: `-s workspace` is Bob's own default, so dropping the flag means the same
-thing — it registers in the current project only. One caveat at that scope: Bob does not create
-`<project>/.bob/mcp.json`, so the command dies with `ENOENT … .bob/mcp.json` when the file is
-missing. Seed it **only if it is missing** — `>` truncates, and an existing file holds
-registrations worth keeping:
-
-```
-[ -f .bob/mcp.json ] || { mkdir -p .bob && printf '{"mcpServers":{}}\n' > .bob/mcp.json; }
-```
-
-At global scope Bob creates the file and its directory for you. On a name that is already
-registered, `add` refuses (`Error: MCP server "quarkus-agent" already exists`) — to *replace* a
-stale entry use `bob mcp add-json`, which overwrites in place. One form per server:
-
-```
-bob mcp add-json -s global quarkus-agent '{"command":"jbang","args":["--java","21+","io.quarkus:quarkus-agent-mcp:1.2.6:runner"]}'
-bob mcp add-json -s global context7 '{"command":"npx","args":["-y","@upstash/context7-mcp@4.0.6"]}'
-```
-
-Read what `bob mcp list` prints, not just the names: an entry from an older setup shows its own
-command, and a stale command is exactly the case `add-json` is for — on **either** server. For
-`quarkus-agent` that looks like an unpinned `jbang quarkus-agent-mcp@quarkusio`; for `context7` it
-is an older version pin, and that is the *frequent* one — the `@upstash/context7-mcp` pin moves
-with every upstream release (Renovate keeps this guide current), so a machine set up before the
-latest bump holds the previous version until you overwrite it.
-
-To write the JSON by hand instead, the global file is `~/.bob/settings/mcp.json` and the project
-file is `<project>/.bob/mcp.json` (a same-named server at project scope overrides global). Older
-Bob docs name `mcp_settings.json` in that same settings directory; Bob 2.0.0 treats it as legacy and
-migrates it **only when `mcp.json` does not yet exist**, so on a machine that already has `mcp.json`
-anything written to the legacy name is silently ignored. That cuts both ways, so **look before you
-register**: if `~/.bob/settings/mcp_settings.json` exists and `mcp.json` does not, start Bob once and
-let it migrate (it says so — *"your global MCP configuration has been migrated to mcp.json"*) before
-running any `bob mcp add`. Adding first creates `mcp.json` yourself, and the migration then never
-runs — your old servers stay in the legacy file, unread. If you set Bob up with a version of this
-guide before v0.18.0, also look for `~/.bob/mcp.json` and `~/.bob/mcp_settings.json` — one directory
-above `settings/`, which is where we used to point you; Bob reads neither, so a registration sitting
-there has never loaded. Contents either way:
-
-```json
-{
-  "mcpServers": {
-    "quarkus-agent": { "command": "jbang", "args": ["--java", "21+", "io.quarkus:quarkus-agent-mcp:1.2.6:runner"] },
-    "context7":      { "command": "npx",   "args": ["-y", "@upstash/context7-mcp@4.0.6"] }
-  }
-}
-```
-
-(`jbang` must be on the PATH of whatever *starts* Bob — install it with a package manager, e.g.
-`sdk install jbang` or `brew install jbang`. A GUI-launched client gets a minimal PATH that contains
-none of the usual install locations, so if the server fails with `spawn jbang ENOENT`, put the
-absolute path from `command -v jbang` in `command` and keep the args as they are. `--java 21+` is not
-optional: the MCP server is compiled for Java 21, and JBang
-resolves its own JDK — it falls back to its default, currently 17, whenever the process that spawned
-it hands over no `JAVA_HOME`, which is exactly what Bob and other GUI-launched clients do. For Context7's optional key, see
-[authentication and launch environment](#context7-authentication-and-launch-environment); a GUI
-client may not inherit shell exports.) If the skills CLI is
+If the skills CLI is
 unavailable, the repository's fallback helper installs all three
 skills into `.bob/skills/` for you:
 
@@ -336,7 +272,7 @@ copying the file into each project:
   context file. (Bob also loads global *rules* from `~/.bob/rules/`, so
   `~/.bob/rules/quarkus-langchain4j.md` works too if you would rather keep them separate from your
   general context.) Install the skills globally with `./scripts/install-bob-skill.sh --global`
-  (into `~/.bob/skills/`), and add the shared MCP servers with the `bob mcp add -s global` commands
+  (into `~/.bob/skills/`), and add the shared MCP servers with the scope-aware registration procedure
   from [How to use with Bob](#how-to-use-with-bob) — not by hand in the **MCP** tab, which is how a
   registration ends up without the `--java 21+` pin.
 

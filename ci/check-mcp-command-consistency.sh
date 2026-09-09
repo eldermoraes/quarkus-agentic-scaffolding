@@ -18,7 +18,7 @@ cd "$(dirname "${BASH_SOURCE[0]}")/.."
 python3 - <<'PY'
 import glob, re, sys
 
-FILES = ["README.md", "gemini-extension.json"] + sorted(glob.glob("skills/*/SKILL.md"))
+FILES = ["README.md", "gemini-extension.json"] + sorted(glob.glob("skills/*/SKILL.md") + glob.glob("skills/*/references/*.md"))
 GAV = re.compile(r"io\.quarkus:quarkus-agent-mcp:([0-9][^\s\"'`,\]]*):runner")
 # Flatten the punctuation that separates a JSON args array or a wrapped line, so a
 # markdown command, a JSON "args" list, and a quoted add-json payload all normalize
