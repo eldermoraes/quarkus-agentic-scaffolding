@@ -5,6 +5,8 @@ versioning.
 
 ## Unreleased
 
+- Update the pinned Context7 MCP package from `4.0.3` to `4.0.6` across setup instructions,
+  README commands, and the Gemini extension manifest. (#44)
 - Update the pinned Quarkus Agents MCP runner from `1.2.5` to `1.2.6` throughout the
   setup instructions, README, and Gemini extension manifest, retaining `--java 21+`. (#42)
 - Update the standalone Quarkus LangChain4j release watcher from `1.13.0` to `1.13.1`.
