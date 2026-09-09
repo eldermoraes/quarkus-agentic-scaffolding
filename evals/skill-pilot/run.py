@@ -10,6 +10,8 @@ import signal
 import subprocess
 import time
 
+from preflight import check as check_documentation
+
 HERE = Path(__file__).resolve().parent
 REPO = HERE.parent.parent
 PATTERNS = {
@@ -72,8 +74,24 @@ def main():
     output = args.output.resolve()
     if output == REPO or REPO in output.parents or output.exists():
         parser.error('output must be a new directory outside the repository')
+    tracked_roots = ['evals/skill-pilot', 'skills/scaffold-project', 'AGENTS.md']
+    if subprocess.run(['git', 'diff', '--quiet', 'HEAD', '--', *tracked_roots], cwd=REPO).returncode:
+        parser.error('commit changes to pilot inputs before collecting')
     output.mkdir(parents=True)
-    tasks = json.loads((HERE / 'tasks.json').read_text())
+    # Copy only tracked bytes from the recorded revision, never mutable working-tree inputs.
+    revision = subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=REPO, text=True).strip()
+    paths = subprocess.check_output(['git', 'ls-tree', '-r', '--name-only', revision, '--',
+                                     *tracked_roots], cwd=REPO, text=True).splitlines()
+    snapshot = output / 'inputs'
+    hashes = {}
+    for name in paths:
+        data = subprocess.check_output(['git', 'show', f'{revision}:{name}'], cwd=REPO)
+        destination = snapshot / name
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        destination.write_bytes(data)
+        hashes[name] = hashlib.sha256(data).hexdigest()
+    pilot_inputs = snapshot / 'evals/skill-pilot'
+    tasks = json.loads((pilot_inputs / 'tasks.json').read_text())
     env = os.environ.copy()
     for name in list(env):
         if any(word in name.upper() for word in ('API_KEY', 'SECRET', 'TOKEN')):
@@ -87,10 +105,17 @@ def main():
               '-c', 'mcp_servers.context7.args=["-y","@upstash/context7-mcp@4.0.6"]']
     metadata = {'model': 'gpt-6-astra', 'reasoning': 'low', 'timeout_seconds': args.timeout,
                 'codex': subprocess.check_output(['codex', '--version'], text=True).strip(),
-                'source_commit': subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=REPO,text=True).strip(),
+                'source_commit': revision, 'input_sha256': hashes,
                 'tasks_sha256': hashlib.sha256((HERE / 'tasks.json').read_bytes()).hexdigest(),
                 'compile_command': ['mvn', '-B', '-ntp', '-DskipTests', 'test-compile']}
     (output / 'environment.json').write_text(json.dumps(metadata, indent=2)+'\n')
+    try:
+        check_documentation(pilot_inputs / 'starter', env)
+    except (OSError, RuntimeError) as error:
+        (output / 'preflight.json').write_text(json.dumps({'collection_started': False,
+                                                        'error': str(error)}, indent=2)+'\n')
+        parser.exit(1, f'Collection not started: {error}\n')
+    (output / 'preflight.json').write_text('{"collection_started": true}\n')
     results = []
     for task in tasks:
         for repetition in (1, 2):
@@ -99,11 +124,11 @@ def main():
                 run_id = f"{task['id']}-{repetition}-{arm}"
                 run = output / run_id
                 project = run / 'project'
-                shutil.copytree(HERE / 'starter', project, ignore=shutil.ignore_patterns('target', '.git'))
-                shutil.copyfile(REPO / 'AGENTS.md', project / 'AGENTS.md')
+                shutil.copytree(pilot_inputs / 'starter', project, ignore=shutil.ignore_patterns('target', '.git'))
+                shutil.copyfile(snapshot / 'AGENTS.md', project / 'AGENTS.md')
                 subprocess.run(['git', 'init', '-q'], cwd=project, check=True)
                 if arm == 'skill':
-                    shutil.copytree(REPO / 'skills/scaffold-project', project / '.agents/skills/scaffold-project')
+                    shutil.copytree(snapshot / 'skills/scaffold-project', project / '.agents/skills/scaffold-project')
                 treatment = ('Read .agents/skills/scaffold-project/SKILL.md and apply it; its templates are available.'
                              if arm == 'skill' else 'No scaffolding skill is supplied. Work without external skills or templates.')
                 prompt = ("Implement the following component in the supplied project. This is a controlled maintenance evaluation. "

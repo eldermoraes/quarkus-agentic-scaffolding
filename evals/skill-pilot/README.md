@@ -5,10 +5,17 @@ Both arms receive the same Quarkus MCP-generated POM and project conventions. Th
 also receives `scaffold-project` and its templates, with an explicit instruction to read the skill.
 This measures incremental skill assistance with conventions already supplied, not the whole package.
 
+See the [2026-09-09 pilot report](results/2026-09-09/REPORT.md): the first collection was
+inconclusive because documentation prerequisites failed. The report pins the original protocol.
+
 ## Protocol
 
 - Codex `gpt-6-astra`, low reasoning, existing ChatGPT account quota; no API key billing.
 - Fresh Git directory outside this repository for every attempt; no previous-run continuation.
+  Current runs snapshot tracked inputs from one commit and record their hashes.
+- Current runs probe Quarkus and Context7 documentation before invoking Codex. A failed probe
+  records collection-not-started and spends no model executions. A successful probe cannot
+  guarantee service availability or quota throughout collection.
 - Host skill discovery and plugins disabled in both arms. Treatment reads the local skill explicitly.
   `codex debug prompt-input` confirmed the isolation flags remove the host skills catalog before runs.
 - Both arms get Quarkus Agents MCP 1.2.6 with Java 21+ and Context7 4.0.6 without an API key.

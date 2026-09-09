@@ -1,9 +1,11 @@
 """Keep the pilot's mechanical rubric from awarding credit to unrelated text."""
 import importlib.util
 from pathlib import Path
+import sys
 import tempfile
 import unittest
 
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / 'evals/skill-pilot'))
 spec = importlib.util.spec_from_file_location('pilot', Path(__file__).resolve().parent.parent / 'evals/skill-pilot/run.py')
 pilot = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(pilot)

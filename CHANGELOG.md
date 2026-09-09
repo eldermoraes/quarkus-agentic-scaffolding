@@ -3,6 +3,16 @@
 All notable changes to this artifact are documented here. This project adheres to semantic
 versioning.
 
+## v0.23.0 — 2026-09-09
+
+### Added
+
+- Publish a reproducible 12-run scaffold-skill pilot, frozen prompts/scorer and all results.
+  The result is inconclusive: documentation prerequisites blocked all attempts before code
+  generation. Issue #6 remains open for a valid comparison; no efficacy claim is made.
+- Preflight documentation capabilities before future collections and snapshot tracked inputs
+  with hashes so failed prerequisites consume no model executions.
+
 ## v0.22.1 — 2026-09-09
 
 ### Changed

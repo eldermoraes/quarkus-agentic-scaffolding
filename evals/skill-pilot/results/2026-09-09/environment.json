@@ -1,0 +1,15 @@
+{
+  "model": "gpt-6-astra",
+  "reasoning": "low",
+  "timeout_seconds": 900,
+  "codex": "codex-cli 0.153.4",
+  "source_commit": "2237dd1e7e4f73e93bedade13e49abbc434813a4",
+  "tasks_sha256": "b8047dc3539848ac5f194f22459cad195948f5556b1900aea6b9fe7a2c6e9e06",
+  "compile_command": [
+    "mvn",
+    "-B",
+    "-ntp",
+    "-DskipTests",
+    "test-compile"
+  ]
+}
