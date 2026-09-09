@@ -6,7 +6,7 @@
   "mcpServers": {
     "quarkus-agent": {
       "command": "jbang",
-      "args": ["--java", "21+", "io.quarkus:quarkus-agent-mcp:1.2.5:runner"]
+      "args": ["--java", "21+", "io.quarkus:quarkus-agent-mcp:1.2.6:runner"]
     },
     "context7": {
       "command": "npx",
