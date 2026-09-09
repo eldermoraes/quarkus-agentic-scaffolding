@@ -38,6 +38,25 @@ jobs:
       - uses: actions/checkout@v7
       - run: ci/test-uninstall-bob-skill.sh
       - run: ci/test-conventions-block-removal.sh
+      - run: python3 -m unittest discover -s ci -p 'test_*.py'
+
+  mcp-java-floor:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: Install pinned JBang
+        run: |
+          curl -fsSL --retry 3 https://github.com/jbangdev/jbang/releases/download/v0.138.0/jbang-0.138.0.tar -o "$RUNNER_TEMP/jbang.tar"
+          echo "2b83d1322215b597a1a3e9918d8052737f579d70b9f342521be52c9e3013fd0e  $RUNNER_TEMP/jbang.tar" | sha256sum -c -
+          mkdir -p "$RUNNER_TEMP/jbang"
+          tar -xf "$RUNNER_TEMP/jbang.tar" -C "$RUNNER_TEMP/jbang" --strip-components=1
+          echo "$RUNNER_TEMP/jbang/bin" >> "$GITHUB_PATH"
+      - run: python3 ci/check_mcp_java_floor.py
 
   actionlint:
     runs-on: ubuntu-latest

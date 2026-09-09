@@ -103,6 +103,13 @@ The launch command for the Quarkus Agents MCP is hand-maintained in ~15 places, 
 `--java 21+` and the same pinned GAV version. `CHANGELOG.md` and `docs/` are exempt, because they
 quote older commands as a record.
 
+The `mcp-java-floor` quality job also starts the manifest's pinned runner with an exact
+`jbang --java 21` request and requires a valid MCP initialization response. It clears Java/JBang
+runtime overrides and bounds startup time. This checks startup compatibility on the advertised
+minimum JDK, not every tool's runtime behavior. Run `python3 ci/check_mcp_java_floor.py` locally
+with JBang installed; its offline failure-path tests run with
+`python3 -m unittest discover -s ci -p 'test_*.py'`.
+
 ## License
 
 By contributing, you agree your contributions are licensed under the project's
