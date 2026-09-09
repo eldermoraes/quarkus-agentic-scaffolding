@@ -198,7 +198,7 @@ pattern (vercel-labs/agent-skills, ~29k stars) is vendor blog + one-line install
 Also: the skill is already on [jvmskills.com](https://jvmskills.com/) — engage the curator; their
 eval badges ("96% vs 70%") are the emerging quality signal (see 13).
 
-### 13. Publish an eval for the skill *(quality signal)* — 📋 tracked in [issue #6](https://github.com/eldermoraes/quarkus-agentic-scaffolding/issues/6) (design ready; owner decisions pending)
+### 13. Publish an eval for the skill *(quality signal)* — 📋 tracked in [issue #6](https://github.com/eldermoraes/quarkus-agentic-scaffolding/issues/6) (12-run pilot published, inconclusive; documentation prerequisites must be restored)
 SkillsBench ([arxiv 2602.12670](https://arxiv.org/html/2602.12670v1)) found curated skills add
 +16pp average but many skills add nothing — publishable evidence of effectiveness is becoming the
 differentiator (jvmskills badges). Design a small fixed-task eval (scaffold X with vs. without the

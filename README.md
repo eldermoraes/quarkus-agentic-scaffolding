@@ -1,5 +1,5 @@
 # Quarkus + LangChain4j + AI Stack
-# Version: 0.22.1
+# Version: 0.23.0
 
 ## What this repository is
 
@@ -568,6 +568,13 @@ instruction files once at startup.
     └── audit-project/               # User-invoked: audit an existing project vs the conventions
         └── SKILL.md
 ```
+
+## Skill effectiveness pilot
+
+The [12-run pilot](evals/skill-pilot/results/2026-09-09/REPORT.md) was inconclusive: neither arm
+produced Java because required documentation services were unavailable or quota-limited. This
+is not evidence of benefit or parity. The [protocol and runner](evals/skill-pilot/README.md) publish
+fixed tasks, mechanical scoring, and every observed result; a valid comparison remains pending.
 
 ## Versioning and changelog
 
