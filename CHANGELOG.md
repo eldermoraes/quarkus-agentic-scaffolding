@@ -5,6 +5,10 @@ versioning.
 
 ## Unreleased
 
+- Scope maintainer tooling requirements to the operation being performed. Missing MCP tools
+  block only dependent work; independent repository reviews, documentation, CI inspection, and
+  approved merges can proceed. Applications using the scaffolding retain their mandatory tools.
+  Record the override in both conventions files, their seed copies, and CONTRIBUTING.md.
 - Document Gemini CLI installation as a short note after the Bob instructions: Quick install
   is the recommended route, and the gallery extension is optional, delivering all three skills,
   both MCP servers, and conventions. The skills-only route explicitly configures `context.fileName`

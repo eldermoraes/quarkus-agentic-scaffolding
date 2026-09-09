@@ -201,4 +201,10 @@ or override is allowed when justified — for example, pinning a fixed older Jav
 platform threads for a pinning dependency, or selecting a different model provider — and must be
 documented inline near the override so the deviation and its reason stay visible.
 
+When maintaining `eldermoraes/quarkus-agentic-scaffolding` itself, apply the tooling requirements
+per operation as described in `CONTRIBUTING.md` (Required tooling). An unavailable MCP blocks
+only work that needs that tool; independent repository review, documentation, CI inspection,
+and approved merges may continue. This override applies only to maintenance of the scaffolding
+repository; applications using its conventions retain the requirements in section 1.
+
 <!-- END quarkus-agentic-scaffolding conventions -->
