@@ -2,10 +2,9 @@
 import json
 import os
 from pathlib import Path
-import queue
+import selectors
 import signal
 import subprocess
-import threading
 import time
 
 
@@ -16,18 +15,9 @@ class PreflightError(RuntimeError):
 def probe(command, tool, arguments, env, timeout=90):
     process = subprocess.Popen(command, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
                                stderr=subprocess.DEVNULL, text=True, env=env, start_new_session=True)
-    messages = queue.Queue()
-
-    def read():
-        for line in process.stdout:
-            try:
-                messages.put(json.loads(line))
-            except ValueError:
-                pass
-        messages.put(None)
-
-    reader = threading.Thread(target=read, daemon=True)
-    reader.start()
+    selector = selectors.DefaultSelector()
+    selector.register(process.stdout, selectors.EVENT_READ)
+    pending = b''
     deadline = time.monotonic() + timeout
 
     def send(message):
@@ -35,17 +25,28 @@ def probe(command, tool, arguments, env, timeout=90):
         process.stdin.flush()
 
     def receive(identifier):
-        while True:
+        nonlocal pending
+        while time.monotonic() < deadline:
+            if b'\n' not in pending:
+                if not selector.select(max(0, deadline-time.monotonic())):
+                    break
+                chunk = os.read(process.stdout.fileno(), 4096)
+                if not chunk:
+                    raise PreflightError(f'{tool}: MCP process closed')
+                pending += chunk
+                if len(pending) > 1024 * 1024:
+                    raise PreflightError(f'{tool}: oversized MCP response')
+                continue
+            line, pending = pending.split(b'\n', 1)
             try:
-                message = messages.get(timeout=max(0, deadline-time.monotonic()))
-            except queue.Empty as error:
-                raise PreflightError(f'{tool}: documentation probe timed out') from error
-            if message is None:
-                raise PreflightError(f'{tool}: MCP process closed')
+                message = json.loads(line)
+            except ValueError:
+                continue
             if message.get('id') == identifier:
                 if 'error' in message:
                     raise PreflightError(f'{tool}: JSON-RPC error')
                 return message.get('result', {})
+        raise PreflightError(f'{tool}: documentation probe timed out')
 
     try:
         send({'jsonrpc': '2.0', 'id': 1, 'method': 'initialize', 'params': {
@@ -66,11 +67,13 @@ def probe(command, tool, arguments, env, timeout=90):
             raise PreflightError(f'{tool}: documentation probe returned an error or empty response')
     finally:
         process.poll()
-        if process.returncode is None:
+        try:
             os.killpg(process.pid, signal.SIGKILL)
+        except ProcessLookupError:
+            pass
         process.wait()
         process.stdin.close()
-        reader.join(timeout=2)
+        selector.close()
         process.stdout.close()
 
 

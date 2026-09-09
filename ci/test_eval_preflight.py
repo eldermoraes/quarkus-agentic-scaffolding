@@ -3,6 +3,9 @@ import json
 import os
 from pathlib import Path
 import sys
+import tempfile
+import subprocess
+import time
 import unittest
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / 'evals/skill-pilot'))
@@ -30,6 +33,25 @@ for line in sys.stdin:
                        {'content': [{'text': 'Documentation unavailable: Docker or Podman, neither available'}]}):
             with self.subTest(result=result), self.assertRaises(PreflightError):
                 probe(self.command(result), 'docs', {}, os.environ.copy(), timeout=2)
+
+    def test_exited_launcher_does_not_leave_child_holding_stdout(self):
+        with tempfile.TemporaryDirectory() as directory:
+            pid_file = Path(directory) / 'child.pid'
+            script = "import subprocess,sys; from pathlib import Path; p=subprocess.Popen([sys.executable,'-c','import time; time.sleep(60)']); Path(sys.argv[1]).write_text(str(p.pid))"
+            started = time.monotonic()
+            with self.assertRaises(PreflightError):
+                probe([sys.executable, '-c', script, str(pid_file)], 'docs', {},
+                      os.environ.copy(), timeout=2)
+            self.assertLess(time.monotonic() - started, 5)
+            self.assertTrue(pid_file.exists(), 'child fixture must start before probe times out')
+            pid = pid_file.read_text()
+            deadline = time.monotonic() + 3
+            while time.monotonic() < deadline:
+                state = subprocess.run(['ps', '-o', 'stat=', '-p', pid], capture_output=True, text=True).stdout.strip()
+                if not state or state.startswith('Z'):
+                    break
+                time.sleep(0.05)
+            self.assertTrue(not state or state.startswith('Z'), f'child {pid} still running')
 
 
 if __name__ == '__main__':

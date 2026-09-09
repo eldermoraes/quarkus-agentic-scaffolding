@@ -106,7 +106,7 @@ def main():
     metadata = {'model': 'gpt-6-astra', 'reasoning': 'low', 'timeout_seconds': args.timeout,
                 'codex': subprocess.check_output(['codex', '--version'], text=True).strip(),
                 'source_commit': revision, 'input_sha256': hashes,
-                'tasks_sha256': hashlib.sha256((HERE / 'tasks.json').read_bytes()).hexdigest(),
+                'tasks_sha256': hashes['evals/skill-pilot/tasks.json'],
                 'compile_command': ['mvn', '-B', '-ntp', '-DskipTests', 'test-compile']}
     (output / 'environment.json').write_text(json.dumps(metadata, indent=2)+'\n')
     try:
