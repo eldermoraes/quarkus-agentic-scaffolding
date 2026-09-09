@@ -5,6 +5,14 @@ versioning.
 
 ## Unreleased
 
+- Document Gemini CLI installation as a short note after the Bob instructions: Quick install
+  is the recommended route, and the gallery extension is optional, delivering all three skills,
+  both MCP servers, and conventions. The skills-only route explicitly configures `context.fileName`
+  so Gemini loads `AGENTS.md` alongside its default `GEMINI.md`; users verify with `/memory show`.
+  Cross-link uninstall guidance and include Gemini in the conventions readership. Install syntax
+  was checked against local Gemini CLI `0.35.0` and the contributor's `0.58.0` help output;
+  context configuration was confirmed against the CLI source and official docs via Context7. (#14)
+
 - Update the pinned Context7 MCP package from `4.0.3` to `4.0.6` across setup instructions,
   README commands, and the Gemini extension manifest. (#44)
 - Update the pinned Quarkus Agents MCP runner from `1.2.5` to `1.2.6` throughout the

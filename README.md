@@ -5,7 +5,7 @@
 
 A small, opinionated, distribution-ready artifact for building AI and agent applications on the
 Java stack of **Quarkus + LangChain4j**. It pairs drop-in always-on coding conventions
-(`CLAUDE.md` for Claude, `AGENTS.md` for Codex and Bob) with three skills that set up the
+(`CLAUDE.md` for Claude, `AGENTS.md` for Codex, Bob, and Gemini) with three skills that set up the
 prerequisites, scaffold new projects and components, and audit existing projects — all from
 working templates. The conventions and templates reflect real-world Quarkus + LangChain4j
 practice and a baseline of modern Java, so the guidance captures how these systems are actually
@@ -16,7 +16,8 @@ built rather than generic boilerplate.
 [![Skills](https://www.skills.sh/b/eldermoraes/quarkus-agentic-scaffolding)](https://www.skills.sh/eldermoraes/quarkus-agentic-scaffolding)
 
 The fastest install on any agent that supports the [Agent Skills](https://agentskills.io) format —
-Claude Code, Codex, GitHub Copilot, Cursor, Windsurf, opencode, Amp, IBM Bob, and dozens more:
+Claude Code, Codex, Gemini CLI, GitHub Copilot, Cursor, Windsurf, opencode, Amp, IBM Bob, and
+dozens more:
 
 ```
 npx skills add eldermoraes/quarkus-agentic-scaffolding
@@ -229,9 +230,24 @@ skills are only available in Bob's **Advanced** mode.
 `scaffold-project` produces the layout and starter files and `AGENTS.md` governs the conventions.
 Run `/audit-project` to review an existing project.
 
+<a id="how-to-use-with-gemini"></a>
+
+**Gemini CLI.** Use the [Quick install](#quick-install--any-skills-capable-agent): skills go into
+`.agents/skills/` (project) or `~/.gemini/skills/` (global, with `-g`); verify with
+`gemini skills list`, then run `/setup-agentic-scaffolding`. For this route, add `AGENTS.md` to
+[`context.fileName`](https://github.com/google-gemini/gemini-cli/blob/main/docs/cli/gemini-md.md)
+in the project's `.gemini/settings.json` (for example, `"context": {"fileName": ["GEMINI.md", "AGENTS.md"]}`),
+preserving existing settings and context filenames: Gemini defaults to `GEMINI.md`, so copying
+`AGENTS.md` alone does not activate the conventions. Alternatively, the optional gallery
+extension installs with `gemini extensions install https://github.com/eldermoraes/quarkus-agentic-scaffolding`
+(the source may also be a local path). It delivers all three skills, both pinned MCP servers, and
+conventions through `contextFileName: AGENTS.md`; use one route to avoid duplicate skills.
+Restart the session and verify the conventions with `/memory show`, then try *"scaffold a new
+Quarkus + LangChain4j project"*. See [Uninstall](#uninstall) for removal and MCP scope/precedence.
+
 ## What's in `CLAUDE.md` / `AGENTS.md` and why
 
-`CLAUDE.md` (Claude) and `AGENTS.md` (Codex and Bob) are intentionally short and always-on. They
+`CLAUDE.md` (Claude) and `AGENTS.md` (Codex, Bob, and Gemini) are intentionally short and always-on. They
 carry the same project conventions, expressed for the instruction surface each agent reads. Each
 section earns its place:
 
@@ -288,7 +304,7 @@ The split between skill and conventions is deliberate and non-overlapping:
   lay things out, and get them running*, and point at the Quarkus Agents MCP to actually create
   and run the project.
 - **`CLAUDE.md` / `AGENTS.md` are declarative** — they state the conventions the resulting code
-  must follow (`CLAUDE.md` for Claude, `AGENTS.md` for Codex and Bob).
+  must follow (`CLAUDE.md` for Claude, `AGENTS.md` for Codex, Bob, and Gemini).
 
 For Codex distribution, `.agents/plugins/marketplace.json` points to `plugins/quarkus-agentic-scaffolding/`.
 That directory is only a lightweight wrapper with symlinks back to `.codex-plugin/` and `skills/`,
@@ -428,8 +444,9 @@ skill is unlinked, not recursed into. Your MCP registration (`.bob/mcp.json` in 
 left alone. Re-running it is a clean no-op. Skills load once per conversation, so
 **start a new conversation** in Bob afterwards.
 
-**Gemini CLI** — if you installed the extension, uninstalling it takes the two MCP servers it
-declares with it, so add them back at user scope:
+**Gemini CLI** — uninstalling the extension (installed in
+[the Gemini CLI note](#how-to-use-with-gemini)) takes the two MCP servers it declares with it,
+so add them back at user scope:
 
 ```
 gemini extensions uninstall quarkus-agentic-scaffolding
