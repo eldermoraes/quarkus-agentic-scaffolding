@@ -1,5 +1,5 @@
 # Quarkus + LangChain4j + AI Stack
-# Version: 0.21.3
+# Version: 0.21.4
 
 ## What this repository is
 
@@ -458,20 +458,20 @@ left alone. Re-running it is a clean no-op. Skills load once per conversation, s
 
 **Gemini CLI** — uninstalling the extension (installed in
 [the Gemini CLI note](#how-to-use-with-gemini)) takes the two MCP servers it declares with it,
-so add them back at user scope:
+so add them back for the current project:
 
 ```
 gemini extensions uninstall quarkus-agentic-scaffolding
-gemini mcp add -s user quarkus-agent jbang --java 21+ io.quarkus:quarkus-agent-mcp:1.2.6:runner
-gemini mcp add -s user context7 npx -y @upstash/context7-mcp@4.0.6
+gemini mcp add -s project quarkus-agent jbang --java 21+ io.quarkus:quarkus-agent-mcp:1.2.6:runner
+gemini mcp add -s project context7 npx -y @upstash/context7-mcp@4.0.6
 gemini extensions list
 gemini mcp list
 ```
 
 Order matters — uninstall first, then re-add. A `settings.json` registration takes precedence over
 an extension-declared server of the same name, so re-adding *before* uninstalling would silently
-shadow the extension's pinned versions. `gemini mcp add` defaults to `--scope project`, hence
-`-s user`. In `gemini mcp list`, an entry labelled `(from quarkus-agentic-scaffolding)` is still
+shadow the extension's pinned versions. `-s project` makes the CLI's default explicit and keeps registrations in the current project.
+Use `-s user` instead for registrations shared by all projects. In `gemini mcp list`, an entry labelled `(from quarkus-agentic-scaffolding)` is still
 coming from the extension; after a successful uninstall and re-add, both servers appear without
 that label. Restart the session.
 
