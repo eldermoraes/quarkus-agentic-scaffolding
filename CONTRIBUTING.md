@@ -88,15 +88,14 @@ Conventions and templates should reflect how real Quarkus + LangChain4j systems 
 
 ## Versioning
 
-This artifact uses semantic versioning. Keep the version header identical across `README.md`,
-`CLAUDE.md`, `AGENTS.md`, the three `skills/*/SKILL.md` files, `.claude-plugin/plugin.json`,
-`.codex-plugin/plugin.json`, and `gemini-extension.json` (nine files, enforced by
-`ci/check-version-consistency.sh`), and record every change in `CHANGELOG.md` — contributors add
-theirs under `## Unreleased`, and the maintainer renames that section to the new version and bumps
-all nine headers in the same release commit. A version bump also
-reaches the two seed copies the setup skill ships —
-`skills/setup-agentic-scaffolding/templates/conventions-{CLAUDE,AGENTS}.md` — so re-copy the root
-files over them; `ci/check-conventions-parity.sh` fails on the drift otherwise.
+This artifact uses semantic versioning. The canonical file inventory and seed mappings live in
+`ci/versioning.py`; `ci/check-version-consistency.sh` checks their version agreement. Contributors
+record changes under `## Unreleased` in `CHANGELOG.md`. At release time, the maintainer runs
+`ci/bump-version.sh <major.minor.patch>` and renames the changelog section to that version in the
+same commit. The command preserves file formatting and re-copies the root conventions into the
+setup skill's seeds. It validates inputs before writing; it does not provide rollback for a
+filesystem failure during writes. Review the diff and run the version and convention parity
+checks before tagging.
 
 The launch command for the Quarkus Agents MCP is hand-maintained in ~15 places, and
 `ci/check-mcp-command-consistency.sh` couples them: every published registration must carry

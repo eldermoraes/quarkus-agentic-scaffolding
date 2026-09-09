@@ -3,6 +3,12 @@
 All notable changes to this artifact are documented here. This project adheres to semantic
 versioning.
 
+## v0.22.0 — 2026-09-09
+
+### Added
+
+- Automate release version updates and convention seed copies with `ci/bump-version.sh`, using a shared inventory for version checks and seed parity (#24).
+
 ## v0.21.5 — 2026-09-09
 
 ### Fixed
