@@ -5,20 +5,13 @@ versioning.
 
 ## Unreleased
 
-- **The README now documents the Gemini CLI install path — and settles #14's open question: the
-  extension stays a gallery listing, not a first-class install path.** `v0.17.0` documented
-  uninstalling an extension no section had ever taught a reader to install. A short
-  *How to use with Gemini* section after *How to use with Bob* closes the loop: the Quick
-  install covers Gemini CLI as a first-class agent (the skills CLI installs into
-  `.agents/skills/`, or `~/.gemini/skills/` globally) and `/setup-agentic-scaffolding` handles
-  the prerequisites, with the extension offered as an optional one-step extra that delivers all
-  three pieces — the three skills (served from the repo's `skills/` directory), both pinned MCP
-  servers, and the conventions via `contextFileName: AGENTS.md` — keeping `v0.10.0`'s framing of
-  the manifest as a gallery listing. The Uninstall section's *"if you installed the extension"*
-  hedge becomes a cross-link to the new section, and the `AGENTS.md` readership lines name
-  Gemini alongside Codex and Bob. Install command verified against Gemini CLI 0.58.0
-  (`gemini extensions install <source>`, a git URL or local path); the extension's skill
-  delivery and the `.agents/skills/`-overrides-extension conflict observed on 0.35.0. (#14)
+- Document Gemini CLI installation as a short note after the Bob instructions: Quick install
+  is the recommended route, and the gallery extension is optional, delivering all three skills,
+  both MCP servers, and conventions. The skills-only route explicitly configures `context.fileName`
+  so Gemini loads `AGENTS.md` alongside its default `GEMINI.md`; users verify with `/memory show`.
+  Cross-link uninstall guidance and include Gemini in the conventions readership. Install syntax
+  was checked against local Gemini CLI `0.35.0` and the contributor's `0.58.0` help output;
+  context configuration was confirmed against the CLI source and official docs via Context7. (#14)
 
 - Update the pinned Context7 MCP package from `4.0.3` to `4.0.6` across setup instructions,
   README commands, and the Gemini extension manifest. (#44)
