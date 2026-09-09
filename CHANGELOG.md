@@ -5,6 +5,8 @@ versioning.
 
 ## Unreleased
 
+- Update the pinned Quarkus Agents MCP runner from `1.2.5` to `1.2.6` throughout the
+  setup instructions, README, and Gemini extension manifest, retaining `--java 21+`. (#42)
 - Update the standalone Quarkus LangChain4j release watcher from `1.13.0` to `1.13.1`.
   This tracker does not override the extension version managed by the Quarkus platform BOM. (#46)
 - Update the CI Quarkus platform baseline from `3.39.1` to `3.39.2`. The PR's CI
