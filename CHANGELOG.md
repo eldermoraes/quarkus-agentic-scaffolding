@@ -3,6 +3,13 @@
 All notable changes to this artifact are documented here. This project adheres to semantic
 versioning.
 
+## v0.23.1 — 2026-09-09
+
+### Documentation
+
+- Record the deliberate deferral of a global agentic-compensation convention (#48), separating
+  verified upstream behavior from unverified Quarkus wiring and defining concrete adoption tests.
+
 ## v0.23.0 — 2026-09-09
 
 ### Added

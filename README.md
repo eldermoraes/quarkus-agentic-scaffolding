@@ -1,5 +1,5 @@
 # Quarkus + LangChain4j + AI Stack
-# Version: 0.23.0
+# Version: 0.23.1
 
 ## What this repository is
 
@@ -260,6 +260,9 @@ so the Claude and Codex packages share the same skill content. Bob has a marketp
 distributes modes and MCP servers rather than skills (and is IBM-internal), so there is no
 marketplace channel for skills: Bob's are installed by the skills CLI (or
 `scripts/install-bob-skill.sh`) into `.bob/skills/`.
+
+The [agentic compensation decision](docs/AGENTIC-COMPENSATION.md) records why compensation
+remains outside the default conventions and what runtime evidence would justify adopting it.
 
 ## Advanced — personal use (optional global install)
 
