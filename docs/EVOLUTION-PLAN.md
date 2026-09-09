@@ -14,7 +14,7 @@
 | quarkus-langchain4j | (platform-managed) | Standalone BOM **1.12.0** (tracks LangChain4j 1.17.2); platform 3.37.2 ships 1.11.2 (LC4j 1.16.2) |
 | LangChain4j core | 1.14.1 / agentic beta24 | **1.17.2 / agentic 1.17.2-beta27** — still experimental, plus `@LoopAgent`, `@ConditionalAgent`, `@PlannerAgent`, `@ErrorHandler`, human-in-the-loop, guardrails module, A2A 1.0.0.Final |
 | Java | 25 LTS floor (correct) | 26 is current GA; 27 GA 2026-09-14; **GraalVM ships no 26/27/28 releases** — native stays on the 25 baseline until JDK 29 (Sept 2027) |
-| Distribution | self-hosted marketplace only | Official Anthropic plugin directory (submission form), skills.sh (`npx skills add`, 72+ agents), Gemini CLI gallery (topic-driven), AGENTS.md now a Linux Foundation (AAIF) standard |
+| Distribution | self-hosted marketplace only | Anthropic community marketplace (submission form), skills.sh (`npx skills add`, 72+ agents), Gemini CLI gallery (topic-driven), AGENTS.md now a Linux Foundation (AAIF) standard |
 | Repo visibility | — | **0 stars, no GitHub description, no topics, no homepage** (verified via GitHub API); already listed on jvmskills.com |
 
 The three user-declared open questions — adoption, staying current with Quarkus/LangChain4j, and
@@ -48,13 +48,13 @@ leaderboard ranks purely by install telemetry, so every documented install compo
 Add this as the first install option in the README, keeping `/plugin marketplace add` for Claude
 and the Codex/Bob paths as-is.
 
-### 3. Submit to the official Anthropic plugin directory *(one form; adoption)* — ⏳ pending user action: submission kit ready in [issue #4](https://github.com/eldermoraes/quarkus-agentic-scaffolding/issues/4)
-Anthropic now runs a curated directory ([claude.com/plugins](https://claude.com/plugins),
-[anthropics/claude-plugins-official](https://github.com/anthropics/claude-plugins-official)) plus a
-community tier ([anthropics/claude-plugins-community](https://github.com/anthropics/claude-plugins-community))
-surfaced in Claude Code's `/plugin` Discover tab. Submission is via the form at
-**clau.de/plugin-directory-submission** (direct PRs are auto-closed). This is the single
-highest-surface listing available for the Claude side.
+### 3. Submit for Anthropic community-marketplace review *(one form; adoption)* — ⏳ pending authenticated submission
+
+The [current submission kit](ANTHROPIC-SUBMISSION.md) supersedes the v0.8.0 worksheet in
+[issue #4](https://github.com/eldermoraes/quarkus-agentic-scaffolding/issues/4). Use the
+[Console form](https://platform.claude.com/plugins/submit) for an individual author. The form
+submits to the community marketplace; inclusion in the separately curated official marketplace
+has no application process. Authentication and a submission receipt are still outstanding.
 
 ### 4. Refresh the model defaults *(small template edit)* — ✅ done 2026-08-10 (v0.15.0: qwen3:4b / qwen3:1.7b and bge-small-en-v15-q)
 - **Chat:** the official quarkus-langchain4j Ollama guide now uses **`qwen3:1.7b`**
