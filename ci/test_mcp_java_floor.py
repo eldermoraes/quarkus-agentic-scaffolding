@@ -3,6 +3,7 @@ from pathlib import Path
 import subprocess
 import sys
 import tempfile
+import time
 import unittest
 
 from check_mcp_java_floor import probe, runner_coordinate
@@ -39,11 +40,18 @@ class JavaFloorTest(unittest.TestCase):
                       "child=subprocess.Popen([sys.executable,'-c','import time; time.sleep(30)']); "
                       f"open({str(pidfile)!r},'w').write(str(child.pid)); time.sleep(30)")
             with self.assertRaisesRegex(RuntimeError, "timed out"):
-                probe([sys.executable, "-c", script], 0.5)
+                probe([sys.executable, "-c", script], 5)
+            self.assertTrue(pidfile.exists(), "fixture did not become ready within 5 seconds")
             # A killed child may briefly remain a zombie until the OS reaps it.
-            result = subprocess.run(["ps", "-o", "stat=", "-p", pidfile.read_text()],
-                                    capture_output=True, text=True)
-            self.assertTrue(not result.stdout.strip() or result.stdout.strip().startswith("Z"))
+            deadline = time.monotonic() + 3
+            while time.monotonic() < deadline:
+                result = subprocess.run(["ps", "-o", "stat=", "-p", pidfile.read_text()],
+                                        capture_output=True, text=True)
+                if not result.stdout.strip() or result.stdout.strip().startswith("Z"):
+                    break
+                time.sleep(0.05)
+            else:
+                self.fail("MCP child process survived timeout cleanup")
 
     def test_coordinate_validation(self):
         with tempfile.TemporaryDirectory() as directory:
