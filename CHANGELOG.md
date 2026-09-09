@@ -3,6 +3,12 @@
 All notable changes to this artifact are documented here. This project adheres to semantic
 versioning.
 
+## v0.21.5 — 2026-09-09
+
+### Fixed
+
+- Align the uninstall precheck with the full END marker required by removal, and guard the complete published AWK program against drift (#15).
+
 ## v0.21.4 — 2026-09-09
 
 - Align Gemini MCP registration examples on explicit project scope, with user scope as the

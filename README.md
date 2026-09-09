@@ -1,5 +1,5 @@
 # Quarkus + LangChain4j + AI Stack
-# Version: 0.21.4
+# Version: 0.21.5
 
 ## What this repository is
 
@@ -504,7 +504,7 @@ cp CLAUDE.md "CLAUDE.md.backup-$(date +%Y%m%d-%H%M%S)"
 
 # 2. Precheck — proceed ONLY on OK-SAFE-TO-REMOVE
 awk '/^<!-- BEGIN quarkus-agentic-scaffolding conventions/{b++;bl=NR}
-     /^<!-- END quarkus-agentic-scaffolding conventions/{e++;el=NR}
+     /^<!-- END quarkus-agentic-scaffolding conventions -->/{e++;el=NR}
      END{printf "BEGIN=%d END=%d beginLine=%d endLine=%d -> %s\n", b,e,bl,el,
          (b==1 && e==1 && bl<el) ? "OK-SAFE-TO-REMOVE" : "REFUSE - remove the block by hand"}' CLAUDE.md
 ```
