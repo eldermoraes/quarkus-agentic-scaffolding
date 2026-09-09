@@ -1,5 +1,6 @@
 .tmp-audit/
 target/
+__pycache__/
 # Session bookkeeping from agent-driven development - never committed
 .superpowers/
 docs/superpowers/

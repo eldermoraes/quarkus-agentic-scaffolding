@@ -3,6 +3,12 @@
 All notable changes to this artifact are documented here. This project adheres to semantic
 versioning.
 
+## v0.21.2 — 2026-09-09
+
+- Check the pinned Quarkus Agents MCP runner on Java 21 in CI using a bounded MCP
+  initialization handshake. Offline tests reject invalid responses and startup failures and
+  verify timeout cleanup, so Renovate updates cannot silently raise the advertised Java floor. (#23)
+
 ## v0.21.1 — 2026-09-09
 
 - Scope maintainer tooling requirements to the operation being performed. Missing MCP tools
