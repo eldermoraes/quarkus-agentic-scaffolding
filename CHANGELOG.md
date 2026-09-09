@@ -3,6 +3,32 @@
 All notable changes to this artifact are documented here. This project adheres to semantic
 versioning.
 
+## v0.23.2 — 2026-09-09
+
+### Documentation
+
+- Refresh the Anthropic community-marketplace submission kit with the current three-skill
+  identity, accurate execution scope and validator results (#4). Actual authenticated submission
+  remains pending; no listing or acceptance is claimed.
+- Add the marketplace description required to clear its validator warning.
+
+## v0.23.1 — 2026-09-09
+
+### Documentation
+
+- Record the deliberate deferral of a global agentic-compensation convention (#48), separating
+  verified upstream behavior from unverified Quarkus wiring and defining concrete adoption tests.
+
+## v0.23.0 — 2026-09-09
+
+### Added
+
+- Publish a reproducible 12-run scaffold-skill pilot, frozen prompts/scorer and all results.
+  The result is inconclusive: documentation prerequisites blocked all attempts before code
+  generation. Issue #6 remains open for a valid comparison; no efficacy claim is made.
+- Preflight documentation capabilities before future collections and snapshot tracked inputs
+  with hashes so failed prerequisites consume no model executions.
+
 ## v0.22.1 — 2026-09-09
 
 ### Changed

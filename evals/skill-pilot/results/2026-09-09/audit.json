@@ -1,0 +1,158 @@
+[
+  {
+    "run": "classifier-1-baseline",
+    "documentation_failures": [
+      {
+        "server": "quarkus-agent",
+        "tool": "quarkus_searchDocs",
+        "reason": "missing_container_runtime"
+      }
+    ],
+    "pom_sha256": "24fdc08ce9e567acc83a6695761947e2fddaa4a32295deee05be9652a02a8939",
+    "java_file_count": 0,
+    "treatment_skill_read": false
+  },
+  {
+    "run": "classifier-1-skill",
+    "documentation_failures": [
+      {
+        "server": "quarkus-agent",
+        "tool": "quarkus_searchDocs",
+        "reason": "missing_container_runtime"
+      }
+    ],
+    "pom_sha256": "24fdc08ce9e567acc83a6695761947e2fddaa4a32295deee05be9652a02a8939",
+    "java_file_count": 0,
+    "treatment_skill_read": true
+  },
+  {
+    "run": "classifier-2-skill",
+    "documentation_failures": [
+      {
+        "server": "quarkus-agent",
+        "tool": "quarkus_searchDocs",
+        "reason": "missing_container_runtime"
+      }
+    ],
+    "pom_sha256": "24fdc08ce9e567acc83a6695761947e2fddaa4a32295deee05be9652a02a8939",
+    "java_file_count": 0,
+    "treatment_skill_read": true
+  },
+  {
+    "run": "classifier-2-baseline",
+    "documentation_failures": [
+      {
+        "server": "quarkus-agent",
+        "tool": "quarkus_searchDocs",
+        "reason": "missing_container_runtime"
+      }
+    ],
+    "pom_sha256": "24fdc08ce9e567acc83a6695761947e2fddaa4a32295deee05be9652a02a8939",
+    "java_file_count": 0,
+    "treatment_skill_read": false
+  },
+  {
+    "run": "parallel-1-baseline",
+    "documentation_failures": [
+      {
+        "server": "quarkus-agent",
+        "tool": "quarkus_searchDocs",
+        "reason": "missing_container_runtime"
+      }
+    ],
+    "pom_sha256": "24fdc08ce9e567acc83a6695761947e2fddaa4a32295deee05be9652a02a8939",
+    "java_file_count": 0,
+    "treatment_skill_read": false
+  },
+  {
+    "run": "parallel-1-skill",
+    "documentation_failures": [
+      {
+        "server": "context7",
+        "tool": "resolve-library-id",
+        "reason": "context7_quota"
+      }
+    ],
+    "pom_sha256": "24fdc08ce9e567acc83a6695761947e2fddaa4a32295deee05be9652a02a8939",
+    "java_file_count": 0,
+    "treatment_skill_read": true
+  },
+  {
+    "run": "parallel-2-skill",
+    "documentation_failures": [
+      {
+        "server": "context7",
+        "tool": "resolve-library-id",
+        "reason": "context7_quota"
+      }
+    ],
+    "pom_sha256": "24fdc08ce9e567acc83a6695761947e2fddaa4a32295deee05be9652a02a8939",
+    "java_file_count": 0,
+    "treatment_skill_read": true
+  },
+  {
+    "run": "parallel-2-baseline",
+    "documentation_failures": [
+      {
+        "server": "context7",
+        "tool": "resolve-library-id",
+        "reason": "context7_quota"
+      }
+    ],
+    "pom_sha256": "24fdc08ce9e567acc83a6695761947e2fddaa4a32295deee05be9652a02a8939",
+    "java_file_count": 0,
+    "treatment_skill_read": false
+  },
+  {
+    "run": "rag-1-baseline",
+    "documentation_failures": [
+      {
+        "server": "context7",
+        "tool": "resolve-library-id",
+        "reason": "context7_quota"
+      }
+    ],
+    "pom_sha256": "24fdc08ce9e567acc83a6695761947e2fddaa4a32295deee05be9652a02a8939",
+    "java_file_count": 0,
+    "treatment_skill_read": false
+  },
+  {
+    "run": "rag-1-skill",
+    "documentation_failures": [
+      {
+        "server": "context7",
+        "tool": "resolve-library-id",
+        "reason": "context7_quota"
+      }
+    ],
+    "pom_sha256": "24fdc08ce9e567acc83a6695761947e2fddaa4a32295deee05be9652a02a8939",
+    "java_file_count": 0,
+    "treatment_skill_read": true
+  },
+  {
+    "run": "rag-2-skill",
+    "documentation_failures": [
+      {
+        "server": "context7",
+        "tool": "resolve-library-id",
+        "reason": "context7_quota"
+      }
+    ],
+    "pom_sha256": "24fdc08ce9e567acc83a6695761947e2fddaa4a32295deee05be9652a02a8939",
+    "java_file_count": 0,
+    "treatment_skill_read": true
+  },
+  {
+    "run": "rag-2-baseline",
+    "documentation_failures": [
+      {
+        "server": "context7",
+        "tool": "resolve-library-id",
+        "reason": "context7_quota"
+      }
+    ],
+    "pom_sha256": "24fdc08ce9e567acc83a6695761947e2fddaa4a32295deee05be9652a02a8939",
+    "java_file_count": 0,
+    "treatment_skill_read": false
+  }
+]

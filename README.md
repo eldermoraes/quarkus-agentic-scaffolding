@@ -1,5 +1,5 @@
 # Quarkus + LangChain4j + AI Stack
-# Version: 0.22.1
+# Version: 0.23.2
 
 ## What this repository is
 
@@ -260,6 +260,9 @@ so the Claude and Codex packages share the same skill content. Bob has a marketp
 distributes modes and MCP servers rather than skills (and is IBM-internal), so there is no
 marketplace channel for skills: Bob's are installed by the skills CLI (or
 `scripts/install-bob-skill.sh`) into `.bob/skills/`.
+
+The [agentic compensation decision](docs/AGENTIC-COMPENSATION.md) records why compensation
+remains outside the default conventions and what runtime evidence would justify adopting it.
 
 ## Advanced — personal use (optional global install)
 
@@ -568,6 +571,16 @@ instruction files once at startup.
     └── audit-project/               # User-invoked: audit an existing project vs the conventions
         └── SKILL.md
 ```
+
+## Skill effectiveness pilot
+
+The [12-run pilot](evals/skill-pilot/results/2026-09-09/REPORT.md) was inconclusive: neither arm
+produced Java because required documentation services were unavailable or quota-limited. This
+is not evidence of benefit or parity. The [protocol and runner](evals/skill-pilot/README.md) publish
+fixed tasks, mechanical scoring, and every observed result; a valid comparison remains pending.
+
+The [Anthropic community submission kit](docs/ANTHROPIC-SUBMISSION.md) is prepared and validated;
+submission remains pending authentication. No community or official-directory listing is claimed.
 
 ## Versioning and changelog
 
