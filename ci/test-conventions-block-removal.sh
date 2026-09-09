@@ -23,8 +23,9 @@ BEGIN_MARKER='<!-- BEGIN quarkus-agentic-scaffolding conventions (managed block;
 END_MARKER='<!-- END quarkus-agentic-scaffolding conventions -->'
 
 # --- The two published commands, defined once. ---------------------------------
+# BEGIN remains prefix-matched in both commands; END requires the same full literal.
 AWK_PROG='/^<!-- BEGIN quarkus-agentic-scaffolding conventions/{b++;bl=NR}
-     /^<!-- END quarkus-agentic-scaffolding conventions/{e++;el=NR}
+     /^<!-- END quarkus-agentic-scaffolding conventions -->/{e++;el=NR}
      END{printf "BEGIN=%d END=%d beginLine=%d endLine=%d -> %s\n", b,e,bl,el,
          (b==1 && e==1 && bl<el) ? "OK-SAFE-TO-REMOVE" : "REFUSE - remove the block by hand"}'
 PERL_SUB='s/^<!-- BEGIN quarkus-agentic-scaffolding conventions.*?^<!-- END quarkus-agentic-scaffolding conventions -->[ \t]*\r?\n?//msg'
@@ -180,6 +181,11 @@ printf "KEEP\n\nI removed the \`%s\` line by hand.\n\n%s\n\nMORE-OF-MINE\n" \
   "$BEGIN_MARKER" "$END_MARKER" >"$f"
 run_group_b 'B6 prose BEGIN plus a real END' "$f"
 
+# B7: a hand-edited END must not pass when the remover cannot match it.
+f="$TMP/b7.md"
+printf 'KEEP\n%s\nrule one\n<!-- END quarkus-agentic-scaffolding conventions (v0.16) -->\nTAIL\n' "$BEGIN_MARKER" >"$f"
+run_group_b 'B7 hand-edited END' "$f"
+
 # ============================================================================
 # Group C - two complete blocks. The precheck refuses on count, deliberately, so a
 # human eyeballs a duplicated block. The removal is NOT run: perl's /g would happily
@@ -269,14 +275,29 @@ if grep -Fq "perl -i -0777 -pe '$PERL_SUB'" README.md; then
 else
   fail 'README no longer publishes the validated perl command - it drifted from this test'
 fi
-for frag in 'b++;bl=NR' 'e++;el=NR' 'b==1 && e==1 && bl<el' 'OK-SAFE-TO-REMOVE' \
-            "grep -q '[^[:space:]]'"; do
-  if grep -Fq "$frag" README.md; then
-    pass "README still carries the precheck fragment: $frag"
-  else
-    fail "README lost the precheck fragment: $frag"
-  fi
-done
+if python3 - "$AWK_PROG" <<'PYTHON'
+from pathlib import Path
+import re
+import sys
+
+programs = re.findall(r"\bawk '([^']+)' CLAUDE\.md", Path("README.md").read_text())
+# Ignore indentation only, preserving whitespace inside expressions and strings.
+def normalize(program):
+    return "\n".join(line.strip() for line in program.splitlines())
+
+if len(programs) != 1 or normalize(programs[0]) != normalize(sys.argv[1]):
+    sys.exit("README must publish exactly one copy of the validated AWK program")
+PYTHON
+then
+  pass 'README publishes the complete validated AWK program'
+else
+  fail 'README AWK program drifted from this test'
+fi
+if grep -Fq "grep -q '[^[:space:]]'" README.md; then
+  pass 'README carries the whitespace-only file check'
+else
+  fail 'README lost the whitespace-only file check'
+fi
 if grep -Eq "sed -i.*(BEGIN|END) quarkus-agentic-scaffolding" README.md; then
   fail 'README publishes a sed -i procedure for the managed block - see spec Finding 1'
 else
@@ -289,7 +310,7 @@ else
 fi
 
 if [[ "$failures" == 0 ]]; then
-  echo 'OK: managed-block removal behaves as documented on all 15 fixtures, and README matches'
+  echo 'OK: managed-block removal behaves as documented on all 16 fixtures, and README matches'
 else
   echo "FAIL: $failures assertion(s) failed" >&2
   exit 1
