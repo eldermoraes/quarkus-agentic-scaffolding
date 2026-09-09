@@ -1,5 +1,5 @@
 # Quarkus + LangChain4j + AI Stack
-# Version: 0.21.5
+# Version: 0.22.0
 
 ## What this repository is
 
@@ -638,7 +638,8 @@ instruction files once at startup.
 This artifact uses semantic versioning. `README.md`, `CLAUDE.md`, `AGENTS.md`, the three
 `skills/*/SKILL.md` files (`setup-agentic-scaffolding`, `scaffold-project`, `audit-project`),
 `.claude-plugin/plugin.json`, `.codex-plugin/plugin.json`, and `gemini-extension.json` each carry
-a matching version header — nine files, enforced in CI by `ci/check-version-consistency.sh`. See
+a matching version header, enforced in CI by `ci/check-version-consistency.sh` using the inventory
+in `ci/versioning.py`. Maintainers update them with `ci/bump-version.sh <major.minor.patch>`. See
 [`CHANGELOG.md`](CHANGELOG.md) for release history.
 
 ## License

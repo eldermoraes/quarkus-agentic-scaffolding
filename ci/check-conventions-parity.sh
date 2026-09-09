@@ -66,6 +66,7 @@ fi
 # --- Seed-copy parity: the setup skill ships byte-for-byte copies of the root -
 # conventions files (it drops them into the user's project in Phase C). These are
 # plain copies, not normalized twins, so a plain diff must match exactly.
+seed_pairs="$(python3 ci/versioning.py seeds)"
 seed_fail=0
 while IFS='|' read -r root seed; do
   if seed_diff="$(diff -u "$root" "$seed")"; then
@@ -79,8 +80,5 @@ while IFS='|' read -r root seed; do
     } >&2
     seed_fail=1
   fi
-done <<'SEEDS'
-CLAUDE.md|skills/setup-agentic-scaffolding/templates/conventions-CLAUDE.md
-AGENTS.md|skills/setup-agentic-scaffolding/templates/conventions-AGENTS.md
-SEEDS
+done <<<"$seed_pairs"
 [[ "$seed_fail" == 0 ]] || exit 1

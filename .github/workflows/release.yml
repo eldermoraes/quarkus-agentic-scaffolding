@@ -4,7 +4,7 @@ name: release
 #
 #   git tag -a v0.16.0 -m v0.16.0 && git push origin v0.16.0
 #
-# The job refuses to publish unless the tag, the nine versioned files, and the
+# The job refuses to publish unless the tag, the versioned files, and the
 # changelog all agree — a tag pushed at the wrong commit fails loudly instead of
 # producing a release whose notes describe something else.
 on:
@@ -20,7 +20,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
-      - name: The nine versioned files agree with each other
+      - name: The versioned files agree with each other
         run: ci/check-version-consistency.sh
 
       - name: ...and with the tag
