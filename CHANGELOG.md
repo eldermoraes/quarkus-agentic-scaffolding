@@ -3,7 +3,7 @@
 All notable changes to this artifact are documented here. This project adheres to semantic
 versioning.
 
-## Unreleased
+## v0.21.1 — 2026-09-09
 
 - Scope maintainer tooling requirements to the operation being performed. Missing MCP tools
   block only dependent work; independent repository reviews, documentation, CI inspection, and
