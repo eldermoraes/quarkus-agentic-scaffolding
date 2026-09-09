@@ -36,6 +36,19 @@ for path in FILES:
             unpinned.append((path, flat[max(0, m.start() - 60):m.end()].strip()))
 
 fail = False
+# Check executable Gemini examples, not prose describing the optional user scope.
+gemini = re.compile(r"gemini\s+mcp\s+add(?P<scope>(?:\s+--?[\w-]+\s+\w+)*)"
+                    r"\s+(?P<server>quarkus-agent|context7)\s+(?:jbang|npx)")
+for path in ("README.md", "skills/setup-agentic-scaffolding/SKILL.md"):
+    examples = list(gemini.finditer(open(path, encoding="utf-8").read()))
+    if {match.group("server") for match in examples} != {"quarkus-agent", "context7"}:
+        fail = True
+        print(f"FAIL: {path} must publish both Gemini MCP registration examples", file=sys.stderr)
+    for match in examples:
+        if match.group("scope").split() not in (["-s", "project"], ["--scope", "project"]):
+            fail = True
+            print(f"FAIL: {path} Gemini {match.group('server')} must use explicit project scope",
+                  file=sys.stderr)
 if unpinned:
     fail = True
     print("FAIL: a published registration is missing the `--java 21+` JDK pin.", file=sys.stderr)

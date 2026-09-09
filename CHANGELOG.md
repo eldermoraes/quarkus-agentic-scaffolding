@@ -3,6 +3,12 @@
 All notable changes to this artifact are documented here. This project adheres to semantic
 versioning.
 
+## v0.21.4 — 2026-09-09
+
+- Align Gemini MCP registration examples on explicit project scope, with user scope as the
+  machine-wide alternative. Check both named-server examples in the README and setup skill
+  so missing scope, mismatched scope, or missing recipes fail CI. (#49)
+
 ## v0.21.3 — 2026-09-09
 
 - Correct Context7 key-delivery guidance for GUI/IDE clients: shell exports apply only to
