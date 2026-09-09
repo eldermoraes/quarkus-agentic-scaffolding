@@ -1,5 +1,5 @@
 # Quarkus + LangChain4j + AI Stack
-# Version: 0.23.1
+# Version: 0.23.2
 
 ## What this repository is
 
@@ -578,6 +578,9 @@ The [12-run pilot](evals/skill-pilot/results/2026-09-09/REPORT.md) was inconclus
 produced Java because required documentation services were unavailable or quota-limited. This
 is not evidence of benefit or parity. The [protocol and runner](evals/skill-pilot/README.md) publish
 fixed tasks, mechanical scoring, and every observed result; a valid comparison remains pending.
+
+The [Anthropic community submission kit](docs/ANTHROPIC-SUBMISSION.md) is prepared and validated;
+submission remains pending authentication. No community or official-directory listing is claimed.
 
 ## Versioning and changelog
 

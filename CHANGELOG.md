@@ -3,6 +3,15 @@
 All notable changes to this artifact are documented here. This project adheres to semantic
 versioning.
 
+## v0.23.2 — 2026-09-09
+
+### Documentation
+
+- Refresh the Anthropic community-marketplace submission kit with the current three-skill
+  identity, accurate execution scope and validator results (#4). Actual authenticated submission
+  remains pending; no listing or acceptance is claimed.
+- Add the marketplace description required to clear its validator warning.
+
 ## v0.23.1 — 2026-09-09
 
 ### Documentation
