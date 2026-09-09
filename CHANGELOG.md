@@ -3,6 +3,13 @@
 All notable changes to this artifact are documented here. This project adheres to semantic
 versioning.
 
+## Unreleased
+
+- Update the standalone Quarkus LangChain4j release watcher from `1.13.0` to `1.13.1`.
+  This tracker does not override the extension version managed by the Quarkus platform BOM. (#46)
+- Update the CI Quarkus platform baseline from `3.39.1` to `3.39.2`. The PR's CI
+  validation compiles the templates and test sources with Java 25. (#47)
+
 ## v0.21.0 — 2026-08-27
 - **Baseline moved to the Quarkus 3.39 line.** `ci/baseline.env` goes to platform `3.39.1`
   (from `3.38.3`, Renovate PR #35). Nothing required a corrective change: the templates compile
