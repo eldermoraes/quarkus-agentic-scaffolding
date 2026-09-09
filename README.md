@@ -1,5 +1,5 @@
 # Quarkus + LangChain4j + AI Stack
-# Version: 0.21.2
+# Version: 0.21.3
 
 ## What this repository is
 
@@ -50,6 +50,22 @@ per-agent sections below) namespaces them by the plugin id — `/quarkus-agentic
 `/quarkus-agentic-scaffolding:scaffold-project`, `/quarkus-agentic-scaffolding:audit-project`. Both refer to the same
 skills; use whichever your install produced.
 
+## Context7 authentication and launch environment
+
+The Context7 API key is optional and raises rate limits. The stdio server reads
+`CONTEXT7_API_KEY` from the environment of the agent that launches it. For a terminal-launched
+agent, export the key in that terminal (preferably obtained from a secret manager) **before**
+starting the agent. A GUI/IDE started from the desktop may not inherit shell-profile exports.
+For those clients, use a supported secure environment/secret mechanism, or launch the client
+from the configured terminal if it supports that route. Fully restart an existing client after
+changing its launch environment.
+
+Keep the key out of registration arguments and plaintext configuration. An `${ENV_VAR}`
+reference is valid only when that client supports expansion; some clients store it literally.
+If no secure delivery route is available, use the optional-key server without authentication
+and expect its lower limits. A successful MCP connection, or a presence check in an unrelated
+terminal/login shell, does not prove the server inherited the key. Never print the key to verify it.
+
 ## How to use with Claude
 
 **Install the skills (plugin).** Add this repository as a plugin marketplace and install it:
@@ -72,9 +88,7 @@ setup skill is what puts them in place.
 *Manual fallback,* if you would rather wire it by hand: register the Quarkus Agents MCP with the
 pinned command
 `claude mcp add -s user quarkus-agent -- jbang --java 21+ io.quarkus:quarkus-agent-mcp:1.2.6:runner`;
-add context7 with `claude mcp add -s user context7 -- npx -y @upstash/context7-mcp@4.0.6` (for higher rate limits
-`export CONTEXT7_API_KEY=…` in your shell — the server picks it up from the environment, so no key
-belongs on the command line); optionally install superpowers with
+add context7 with `claude mcp add -s user context7 -- npx -y @upstash/context7-mcp@4.0.6` (see [authentication and launch environment](#context7-authentication-and-launch-environment)); optionally install superpowers with
 `/plugin marketplace add obra/superpowers-marketplace` then
 `/plugin install superpowers@superpowers-marketplace`; and copy [`CLAUDE.md`](CLAUDE.md) into your
 project root yourself (Claude only auto-loads it from a project root or `~/.claude/`, so no plugin
@@ -115,9 +129,7 @@ registers the **Quarkus Agents MCP** and **context7** MCP servers for Codex, and
 into your project root. `AGENTS.md` §1 makes those two MCP servers non-negotiable for this stack.
 
 *Manual fallback:* add the Quarkus Agents MCP with `codex mcp add quarkus-agent -- jbang --java 21+ io.quarkus:quarkus-agent-mcp:1.2.6:runner`;
-add context7 with `codex mcp add context7 -- npx -y @upstash/context7-mcp@4.0.6` (for higher rate limits
-`export CONTEXT7_API_KEY=…` in your shell — the server picks it up from the environment, so no key
-belongs on the command line); install/enable the Superpowers plugin if you use it; and copy
+add context7 with `codex mcp add context7 -- npx -y @upstash/context7-mcp@4.0.6` (see [authentication and launch environment](#context7-authentication-and-launch-environment)); install/enable the Superpowers plugin if you use it; and copy
 [`AGENTS.md`](AGENTS.md) into your project root (Codex reads project instructions from the project
 tree).
 
@@ -208,9 +220,9 @@ none of the usual install locations, so if the server fails with `spawn jbang EN
 absolute path from `command -v jbang` in `command` and keep the args as they are. `--java 21+` is not
 optional: the MCP server is compiled for Java 21, and JBang
 resolves its own JDK — it falls back to its default, currently 17, whenever the process that spawned
-it hands over no `JAVA_HOME`, which is exactly what Bob and other GUI-launched clients do. For higher
-rate limits `export CONTEXT7_API_KEY=…` in your environment rather than writing a literal key into
-the file; the server reads it from there.) If the skills CLI is
+it hands over no `JAVA_HOME`, which is exactly what Bob and other GUI-launched clients do. For Context7's optional key, see
+[authentication and launch environment](#context7-authentication-and-launch-environment); a GUI
+client may not inherit shell exports.) If the skills CLI is
 unavailable, the repository's fallback helper installs all three
 skills into `.bob/skills/` for you:
 

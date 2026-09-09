@@ -5,7 +5,7 @@ disable-model-invocation: true
 ---
 
 # Setup Agentic Scaffolding
-# Version: 0.21.2
+# Version: 0.21.3
 
 ## 1. When to use this skill
 
@@ -101,16 +101,16 @@ Rules for Phase A:
 Register two MCP servers through the running agent's own mechanism:
 
 - **quarkus-agent** — command `jbang`, args `--java 21+ io.quarkus:quarkus-agent-mcp:1.2.6:runner`
-- **context7** — command `npx`, args `-y @upstash/context7-mcp@4.0.6`. An API key raises the rate
-  limits, but **do not put it on the command line**: over stdio the server falls back to the
-  `CONTEXT7_API_KEY` environment variable whenever `--api-key` is absent, and a stdio server
-  inherits the agent's environment. So have the user export the key in their shell profile (ideally
-  from a secret manager) and register the server with **no key argument at all**. If a config file
-  must name it, use the entry's `env` map with a reference such as `${CONTEXT7_API_KEY}` where the
-  agent supports expansion — never the literal value. Do not "helpfully" inline the key: a
-  `--api-key $CONTEXT7_API_KEY` typed at a shell is expanded *before* the agent sees it, so the
-  registration command writes the secret into the config in plaintext. And never echo the key to
-  verify it — check presence with `test -n "$CONTEXT7_API_KEY"`, which prints nothing.
+- **context7** — command `npx`, args `-y @upstash/context7-mcp@4.0.6`. The optional
+  `CONTEXT7_API_KEY` raises rate limits and is read from the launching agent's environment.
+  For terminal-launched agents, export it before starting the agent, preferably from a secret
+  manager. Desktop-launched GUI/IDE clients may not inherit shell-profile exports: use a
+  supported secure environment/secret mechanism or launch from the configured terminal where
+  supported, then fully restart the client. If neither is available, explicitly report that
+  the server can run without the optional key at lower limits. Register with **no key argument**
+  and no literal secret in configuration. Use an `env` reference only after verifying that the
+  client expands it; otherwise it may be stored literally. Never print the key. A connection or
+  a key-presence check in a separate terminal/login shell does not prove MCP authentication.
 
 **Registration writes configuration — this skill never runs `jbang` or `npx` itself.** It writes
 the pinned command into the agent's MCP configuration; the agent runtime is what resolves that
