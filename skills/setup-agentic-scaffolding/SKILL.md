@@ -5,7 +5,7 @@ disable-model-invocation: true
 ---
 
 # Setup Agentic Scaffolding
-# Version: 0.22.0
+# Version: 0.22.1
 
 ## 1. When to use this skill
 
@@ -120,32 +120,10 @@ immediately — Copilot CLI registers live, opencode hot-reloads, Bob restarts c
 even a `claude mcp list` health check launches each server it lists — so tell the user plainly
 that the download happens at that moment, not at some later first use.
 
-**Both versions are pinned on purpose.** Left floating, `@upstash/context7-mcp` and the JBang
-catalog alias `quarkus-agent-mcp@quarkusio` (whose script-ref is the moving
-`io.quarkus:quarkus-agent-mcp:RELEASE:runner`) each fetch whatever is newest at the moment the
-server starts, so two machines set up a week apart run different code and neither the user nor this
-skill can say which. A pinned version makes the artifact the runtime resolves from its official
-registry explicit, and every upgrade a reviewable change. Register the exact strings above — do
-not drop the version to "get the latest". Keeping them current is automation's job: Renovate
-watches these pins (`renovate.json`, `customManagers`) and opens a PR when upstream publishes a
-new release. Two notes on the pinned
-GAV: it is the same artifact the `quarkusio` catalog alias points at, only resolved to an explicit
-version, and a raw GAV drops the alias's `java-version: 21+` hint — which is why the registration
-carries `--java 21+` explicitly (see below).
-
-**`--java 21+` is part of the command, not decoration.** Do not drop it, and do not assume Phase A
-covers it. Phase A proves the *machine* has a JDK 25; it does not decide which JDK JBang picks.
-JBang resolves that itself, and it falls back to its own default JDK — 17 on JBang 0.125.x —
-whenever the process that spawned it exports no `JAVA_HOME` (GUI- and IDE-launched agents typically
-do not) or points at a JDK older than 21. Switching to the `quarkus-agent-mcp@quarkusio` alias does
-not save you either: the catalog entry does declare `java-version: 21+`, but JBang 0.125.x ignores
-it for a GAV `script-ref`, so the alias fails identically. The server is compiled for Java 21, so it
-then dies at boot with
-`UnsupportedClassVersionError: … class file version 65.0 … only recognizes … up to 61.0`, the client
-retries a few times and gives up, and the failure looks like "the MCP is not working" rather than a
-JDK mismatch. A terminal-launched agent that inherits a modern `JAVA_HOME` gets away without the
-flag by accident of the environment — which is precisely why the flag belongs in the command.
-`21+` is a floor, not a pin: JBang reuses an already-installed newer JDK instead of downloading 21.
+**Register the exact pinned versions above, including `--java 21+`.** Renovate maintains both
+pins; keep upgrades reviewable. Phase A verifies the machine's JDK, but JBang selects its own:
+`21+` enforces the server's Java floor while allowing an installed newer JDK. The historical
+JDK failure and catalog-alias analysis are recorded in the repository's v0.18.0 changelog.
 
 **Never handle a secret in plaintext.** Do not ask the user to paste an API key into the chat, do
 not embed a literal key in a command or a config file you write, and do not echo one back in
@@ -166,7 +144,7 @@ secrets by design (see the context7 note above), so "exact" is literal: what you
 | Cursor | Write `.cursor/mcp.json` with both servers (`mcpServers` map, same command/args) | Settings → MCP shows both; user **toggles them on** | GUI enable |
 | GitHub Copilot CLI | `copilot mcp add quarkus-agent -- jbang --java 21+ io.quarkus:quarkus-agent-mcp:1.2.6:runner` · `copilot mcp add context7 -- npx -y @upstash/context7-mcp@4.0.6` | `copilot mcp list` | **Yes** — live immediately |
 | opencode | Write `opencode.json` `mcp` key with both servers | `/mcp` in session | **Yes** — hot reload |
-| Bob (D3) | `bob mcp add -s global quarkus-agent jbang -- --java 21+ io.quarkus:quarkus-agent-mcp:1.2.6:runner` · `bob mcp add -s global context7 npx -- -y @upstash/context7-mcp@4.0.6` — the `--` is mandatory, and `-s global` is machine-wide: state that to the user and offer `-s workspace` to stack-mixers (both §5.1) | `bob mcp list` shows both, `stdio`, `global` (or `workspace`) | **Yes** — Bob restarts changed servers |
+| Bob (D3; read §5.1 first) | `bob mcp add -s global quarkus-agent jbang -- --java 21+ io.quarkus:quarkus-agent-mcp:1.2.6:runner` · `bob mcp add -s global context7 npx -- -y @upstash/context7-mcp@4.0.6` — the `--` is mandatory, and `-s global` is machine-wide: state that to the user and offer `-s workspace` to stack-mixers (both §5.1) | `bob mcp list` shows both, `stdio`, `global` (or `workspace`) | **Yes** — Bob restarts changed servers |
 
 The `.cursor/mcp.json`, `opencode.json`, and `.bob/mcp.json` map has the same shape everywhere:
 
@@ -212,64 +190,11 @@ manual install per JBang's docs (`~/.jbang/bin`) puts `jbang` there. The symptom
 probe runs in your login shell. When a client fails that way, register the **absolute path** from
 `command -v jbang` as the command, with the same arguments.
 
-### 5.1 Bob: which file, and the `--` separator
+### 5.1 Bob registration reference
 
-Bob 2.0.0 ships `bob mcp add|add-json|list|remove`, so prefer the CLI over hand-writing JSON — it
-writes the file Bob actually reads and `bob mcp list` is a real verification. Four things to know:
-three the CLI enforces, one Bob's loader does.
-
-- **Probe for the legacy file BEFORE the first `add` — this ordering is load-bearing.** Bob migrates
-  `~/.bob/settings/mcp_settings.json` into `mcp.json` **only when `mcp.json` does not yet exist**.
-  `bob mcp add -s global` creates `mcp.json`, so registering first blocks that migration
-  permanently: on a machine whose global config still lives in the legacy file, our two servers land
-  in a fresh `mcp.json` and **every other server the user configured silently stops loading**. So:
-  if the legacy file exists and `mcp.json` does not, have the user start Bob once and let it migrate
-  (it announces *"your global MCP configuration has been migrated to mcp.json"*), confirm the
-  servers survived, and only then register. Never resolve this by copying files around yourself
-  without showing the user both files first.
-- **`--` before the server's own arguments is mandatory.** `bob mcp add … jbang --java 21+ <GAV>`
-  fails with `error: unknown option '--java'`, because Bob parses the flag as its own. With the
-  separator (`… jbang -- --java 21+ <GAV>`) the arguments land verbatim in the entry's `args`.
-- **`add` never updates an existing entry — `add-json` does.** On a name that is already registered,
-  `bob mcp add` exits 1 with `Error: MCP server "…" already exists in …` and leaves the old entry
-  untouched, so an idempotent re-run cannot repair a stale registration through it — neither an
-  unpinned `quarkus-agent` command nor the `context7` entry every version bump leaves behind. Use
-  `bob mcp add-json`, which overwrites in place — still the CLI, so the file Bob reads stays the
-  one being written. One form per server:
-  `bob mcp add-json -s <scope> quarkus-agent '{"command":"jbang","args":["--java","21+","io.quarkus:quarkus-agent-mcp:1.2.6:runner"]}'`
-  · `bob mcp add-json -s <scope> context7 '{"command":"npx","args":["-y","@upstash/context7-mcp@4.0.6"]}'`.
-  Show the user the current entry and confirm before overwriting; `bob mcp remove` then `add`
-  works too, but loses the entry if the add fails.
-- **`-s global` is a scope decision — state it, never make it silently.** It writes
-  `~/.bob/settings/mcp.json` (creating file and directory if needed) and registers the servers for
-  **every workspace on the machine**, not just this project. That is this skill's default because
-  the servers are tools, not conventions — they change nothing in projects that never call them —
-  and re-registering per project is friction; but tell the user that is the scope they are getting,
-  and offer `-s workspace` to anyone who mixes stacks and wants the registration confined to the
-  current project. `-s workspace` (Bob's own default) writes `<project>/.bob/mcp.json` but does
-  **not** create it — it exits with `Fatal error: ENOENT … .bob/mcp.json`. Seed it **only when it
-  is missing**, because `>` truncates and an existing file holds the user's other servers:
-  `[ -f .bob/mcp.json ] || { mkdir -p .bob && printf '{"mcpServers":{}}\n' > .bob/mcp.json; }`. At
-  workspace scope the verify column reads `workspace`, and the legacy-migration probe in the first
-  bullet still applies before any *global* add.
-- **Never write `mcp_settings.json` yourself** (Bob's loader, not the CLI). A registration written
-  there on a machine that already has `mcp.json` is silently ignored — it looks registered and Bob
-  never loads it. Check `~/.bob/mcp.json` and `~/.bob/mcp_settings.json` too: one directory **above**
-  the settings directory, where releases of this skill before v0.18.0 told agents to write. Bob reads
-  neither and migrates neither, so a machine set up by an earlier run may hold a registration there
-  that has never loaded. If you find one, report it and register through the CLI instead.
-
-A same-named server at workspace scope overrides global, and a deeper `.bob/mcp.json` overrides a
-shallower one in the same workspace. When something still fails to start, Bob's own log is the
-evidence: `~/.bob/logs/shell/` — a `UnsupportedClassVersionError` there is the JDK trap from §5.
-
-**No `bob` on PATH?** Probe with `command -v bob` before you plan the registration: a Bob-IDE-only
-machine has no CLI, and the whole route above is unavailable. Then hand-write the file — global
-`~/.bob/settings/mcp.json`, project `<project>/.bob/mcp.json` — read-modify-write so the user's
-other servers survive, with the entries from §5 including `--java 21+`. Verify in the UI's **MCP**
-tab, which lists what Bob actually loaded; that is the one verification that needs no binary.
-Every rule above still applies: not the legacy name, not a truncating write, and Bob reloads
-changed servers on its own.
+**If running in Bob, read [Bob MCP registration](references/bob-mcp.md) before any registration.**
+It covers legacy migration before the first add, scope, safe updates, missing-CLI fallback, and
+verification. Preserve the `--` separator and state the selected scope to the user.
 
 ### 5.2 Restart handoff
 

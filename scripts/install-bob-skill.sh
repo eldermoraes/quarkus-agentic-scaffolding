@@ -7,7 +7,7 @@
 # ~/.bob/skills/), so prefer that. Use this script when you cannot run the skills CLI.
 #
 # IBM Bob discovers skills under .bob/skills/ (per project) or ~/.bob/skills/ (global).
-# This copies each skill's SKILL.md and its templates/ (when present) into the chosen
+# This copies each skill's SKILL.md and its templates/ and references/ (when present) into the chosen
 # location. All three skills are installed: setup-agentic-scaffolding, scaffold-project,
 # and audit-project.
 #
@@ -59,10 +59,12 @@ for SKILL_NAME in "${SKILL_NAMES[@]}"; do
   # metadata and is intentionally not copied.
   mkdir -p "$DEST"
   cp "$SRC/SKILL.md" "$DEST/SKILL.md"
-  rm -rf "$DEST/templates"
-  if [[ -d "$SRC/templates" ]]; then
-    cp -R "$SRC/templates" "$DEST/templates"
-  fi
+  for support in templates references; do
+    rm -rf "${DEST:?}/${support:?}"
+    if [[ -d "$SRC/$support" ]]; then
+      cp -R "$SRC/$support" "$DEST/$support"
+    fi
+  done
 
   echo "Installed '$SKILL_NAME' into: $DEST"
 done
