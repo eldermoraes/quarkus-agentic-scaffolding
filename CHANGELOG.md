@@ -3,6 +3,12 @@
 All notable changes to this artifact are documented here. This project adheres to semantic
 versioning.
 
+## v0.21.3 — 2026-09-09
+
+- Correct Context7 key-delivery guidance for GUI/IDE clients: shell exports apply only to
+  clients launched from that environment. Document secure delivery, full restart, optional-key
+  operation, and verification limits without placing secrets in commands or configuration. (#21)
+
 ## v0.21.2 — 2026-09-09
 
 - Check the pinned Quarkus Agents MCP runner on Java 21 in CI using a bounded MCP
