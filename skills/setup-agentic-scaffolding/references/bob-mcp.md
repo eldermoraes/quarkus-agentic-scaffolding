@@ -23,7 +23,7 @@ three the CLI enforces, one Bob's loader does.
   `bob mcp add-json`, which overwrites in place — still the CLI, so the file Bob reads stays the
   one being written. One form per server:
   `bob mcp add-json -s <scope> quarkus-agent '{"command":"jbang","args":["--java","21+","io.quarkus:quarkus-agent-mcp:1.2.6:runner"]}'`
-  · `bob mcp add-json -s <scope> context7 '{"command":"npx","args":["-y","@upstash/context7-mcp@4.0.7"]}'`.
+  · `bob mcp add-json -s <scope> context7 '{"command":"npx","args":["-y","@upstash/context7-mcp@4.1.0"]}'`.
   Show the user the current entry and confirm before overwriting; `bob mcp remove` then `add`
   works too, but loses the entry if the add fails.
 - **`-s global` is a scope decision — state it, never make it silently.** It writes
