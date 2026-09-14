@@ -3,7 +3,7 @@
 All notable changes to this artifact are documented here. This project adheres to semantic
 versioning.
 
-## Unreleased
+## v0.23.4 — 2026-09-14
 
 ### Dependencies
 
