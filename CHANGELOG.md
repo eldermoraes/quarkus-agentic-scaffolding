@@ -3,6 +3,12 @@
 All notable changes to this artifact are documented here. This project adheres to semantic
 versioning.
 
+## Unreleased
+
+### Dependencies
+
+- Update the template-validation CI baseline from Quarkus 3.39.2 to 3.39.3 (#65).
+
 ## v0.23.3 — 2026-09-09
 
 ### Dependencies
