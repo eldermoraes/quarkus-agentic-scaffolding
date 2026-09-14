@@ -1,5 +1,5 @@
 # Quarkus + LangChain4j + AI Stack
-# Version: 0.23.0
+# Version: 0.23.3
 
 ## What this repository is
 
@@ -88,7 +88,7 @@ setup skill is what puts them in place.
 *Manual fallback,* if you would rather wire it by hand: register the Quarkus Agents MCP with the
 pinned command
 `claude mcp add -s user quarkus-agent -- jbang --java 21+ io.quarkus:quarkus-agent-mcp:1.2.6:runner`;
-add context7 with `claude mcp add -s user context7 -- npx -y @upstash/context7-mcp@4.0.6` (see [authentication and launch environment](#context7-authentication-and-launch-environment)); optionally install superpowers with
+add context7 with `claude mcp add -s user context7 -- npx -y @upstash/context7-mcp@4.0.7` (see [authentication and launch environment](#context7-authentication-and-launch-environment)); optionally install superpowers with
 `/plugin marketplace add obra/superpowers-marketplace` then
 `/plugin install superpowers@superpowers-marketplace`; and copy [`CLAUDE.md`](CLAUDE.md) into your
 project root yourself (Claude only auto-loads it from a project root or `~/.claude/`, so no plugin
@@ -129,7 +129,7 @@ registers the **Quarkus Agents MCP** and **context7** MCP servers for Codex, and
 into your project root. `AGENTS.md` §1 makes those two MCP servers non-negotiable for this stack.
 
 *Manual fallback:* add the Quarkus Agents MCP with `codex mcp add quarkus-agent -- jbang --java 21+ io.quarkus:quarkus-agent-mcp:1.2.6:runner`;
-add context7 with `codex mcp add context7 -- npx -y @upstash/context7-mcp@4.0.6` (see [authentication and launch environment](#context7-authentication-and-launch-environment)); install/enable the Superpowers plugin if you use it; and copy
+add context7 with `codex mcp add context7 -- npx -y @upstash/context7-mcp@4.0.7` (see [authentication and launch environment](#context7-authentication-and-launch-environment)); install/enable the Superpowers plugin if you use it; and copy
 [`AGENTS.md`](AGENTS.md) into your project root (Codex reads project instructions from the project
 tree).
 
@@ -260,6 +260,9 @@ so the Claude and Codex packages share the same skill content. Bob has a marketp
 distributes modes and MCP servers rather than skills (and is IBM-internal), so there is no
 marketplace channel for skills: Bob's are installed by the skills CLI (or
 `scripts/install-bob-skill.sh`) into `.bob/skills/`.
+
+The [agentic compensation decision](docs/AGENTIC-COMPENSATION.md) records why compensation
+remains outside the default conventions and what runtime evidence would justify adopting it.
 
 ## Advanced — personal use (optional global install)
 
@@ -399,7 +402,7 @@ so add them back for the current project:
 ```
 gemini extensions uninstall quarkus-agentic-scaffolding
 gemini mcp add -s project quarkus-agent jbang --java 21+ io.quarkus:quarkus-agent-mcp:1.2.6:runner
-gemini mcp add -s project context7 npx -y @upstash/context7-mcp@4.0.6
+gemini mcp add -s project context7 npx -y @upstash/context7-mcp@4.0.7
 gemini extensions list
 gemini mcp list
 ```
@@ -575,6 +578,9 @@ The [12-run pilot](evals/skill-pilot/results/2026-09-09/REPORT.md) was inconclus
 produced Java because required documentation services were unavailable or quota-limited. This
 is not evidence of benefit or parity. The [protocol and runner](evals/skill-pilot/README.md) publish
 fixed tasks, mechanical scoring, and every observed result; a valid comparison remains pending.
+
+The [Anthropic community submission kit](docs/ANTHROPIC-SUBMISSION.md) is prepared and validated;
+submission remains pending authentication. No community or official-directory listing is claimed.
 
 ## Versioning and changelog
 
