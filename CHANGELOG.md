@@ -9,6 +9,14 @@ versioning.
 
 - Update the Quarkus Agents MCP installation pin from 1.2.6 to 1.2.7 (#64).
 
+### Fixed
+
+- Fix the MCP Java-floor probe's macOS cleanup race: a launcher exiting before `killpg`
+  can leave a zombie-only group that returns `EPERM`. Signal before reaping, recover only
+  when the group is confirmed gone, and close pipes even on cleanup failure without masking
+  errors when closing stdin retries a failed request flush. Add a real
+  controlled-race regression and coverage for permission denials and launcher descendants.
+
 ## v0.23.3 — 2026-09-09
 
 ### Dependencies
