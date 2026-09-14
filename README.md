@@ -87,7 +87,7 @@ setup skill is what puts them in place.
 
 *Manual fallback,* if you would rather wire it by hand: register the Quarkus Agents MCP with the
 pinned command
-`claude mcp add -s user quarkus-agent -- jbang --java 21+ io.quarkus:quarkus-agent-mcp:1.2.6:runner`;
+`claude mcp add -s user quarkus-agent -- jbang --java 21+ io.quarkus:quarkus-agent-mcp:1.2.7:runner`;
 add context7 with `claude mcp add -s user context7 -- npx -y @upstash/context7-mcp@4.0.7` (see [authentication and launch environment](#context7-authentication-and-launch-environment)); optionally install superpowers with
 `/plugin marketplace add obra/superpowers-marketplace` then
 `/plugin install superpowers@superpowers-marketplace`; and copy [`CLAUDE.md`](CLAUDE.md) into your
@@ -128,7 +128,7 @@ works for Codex too.)
 registers the **Quarkus Agents MCP** and **context7** MCP servers for Codex, and drops `AGENTS.md`
 into your project root. `AGENTS.md` §1 makes those two MCP servers non-negotiable for this stack.
 
-*Manual fallback:* add the Quarkus Agents MCP with `codex mcp add quarkus-agent -- jbang --java 21+ io.quarkus:quarkus-agent-mcp:1.2.6:runner`;
+*Manual fallback:* add the Quarkus Agents MCP with `codex mcp add quarkus-agent -- jbang --java 21+ io.quarkus:quarkus-agent-mcp:1.2.7:runner`;
 add context7 with `codex mcp add context7 -- npx -y @upstash/context7-mcp@4.0.7` (see [authentication and launch environment](#context7-authentication-and-launch-environment)); install/enable the Superpowers plugin if you use it; and copy
 [`AGENTS.md`](AGENTS.md) into your project root (Codex reads project instructions from the project
 tree).
@@ -401,7 +401,7 @@ so add them back for the current project:
 
 ```
 gemini extensions uninstall quarkus-agentic-scaffolding
-gemini mcp add -s project quarkus-agent jbang --java 21+ io.quarkus:quarkus-agent-mcp:1.2.6:runner
+gemini mcp add -s project quarkus-agent jbang --java 21+ io.quarkus:quarkus-agent-mcp:1.2.7:runner
 gemini mcp add -s project context7 npx -y @upstash/context7-mcp@4.0.7
 gemini extensions list
 gemini mcp list
