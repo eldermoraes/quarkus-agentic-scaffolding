@@ -12,6 +12,7 @@ versioning.
 - Update the Quarkus Agents MCP installation pin from 1.2.6 to 1.2.7 (#64).
 - Update the template-validation CI baseline from Quarkus 3.39.2 to 3.39.3 (#65).
 - Update the skill-pilot starter's Quarkus platform BOMs and Maven plugin from 3.39.2 to 3.39.3 (#66).
+- Update the Context7 MCP installation pin from 4.0.7 to 4.1.1 (#67).
 
 ### Fixed
 
