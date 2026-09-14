@@ -22,6 +22,25 @@ def runner_coordinate(manifest):
     return matches[0]
 
 
+def _stop_process_group(process):
+    # Keep the launcher's PID reserved until after the only destructive signal.
+    try:
+        os.killpg(process.pid, signal.SIGKILL)
+    except ProcessLookupError:
+        pass
+    except PermissionError:
+        # macOS can report EPERM for a group containing only an unreaped zombie.
+        if process.poll() is None:
+            raise
+        try:
+            os.killpg(process.pid, 0)  # Existence/permission check; sends no signal.
+        except ProcessLookupError:
+            pass
+        else:
+            raise
+    process.wait()
+
+
 def probe(command, timeout=180, env=None):
     request = {"jsonrpc": "2.0", "id": 1, "method": "initialize", "params": {
         "protocolVersion": "2024-11-05", "capabilities": {},
@@ -74,14 +93,15 @@ def probe(command, timeout=180, env=None):
             raise RuntimeError(f"{exc}\n{detail}".rstrip()) from exc
         finally:
             # JBang can spawn Java; stop its whole process group even if the launcher exited.
-            process.poll()  # Reap a dead launcher before signalling its process group on macOS.
             try:
-                os.killpg(process.pid, signal.SIGKILL)
-            except ProcessLookupError:
-                pass
-            process.wait()
-            process.stdin.close()
-            process.stdout.close()
+                _stop_process_group(process)
+            finally:
+                try:
+                    process.stdin.close()
+                except BrokenPipeError:
+                    pass  # close() can retry the failed request flush; preserve its reported error.
+                finally:
+                    process.stdout.close()
 
 
 def main():
