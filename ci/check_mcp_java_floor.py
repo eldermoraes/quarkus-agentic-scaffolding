@@ -96,8 +96,12 @@ def probe(command, timeout=180, env=None):
             try:
                 _stop_process_group(process)
             finally:
-                process.stdin.close()
-                process.stdout.close()
+                try:
+                    process.stdin.close()
+                except BrokenPipeError:
+                    pass  # close() can retry the failed request flush; preserve its reported error.
+                finally:
+                    process.stdout.close()
 
 
 def main():

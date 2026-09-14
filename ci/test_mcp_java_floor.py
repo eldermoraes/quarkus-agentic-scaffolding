@@ -1,4 +1,5 @@
 import errno
+import io
 import json
 import os
 from pathlib import Path
@@ -118,6 +119,30 @@ class JavaFloorTest(unittest.TestCase):
                         process.stdin.close()
                         process.stdout.close()
                         process.wait(timeout=4)
+
+    def test_broken_request_pipe_does_not_mask_errors_during_close(self):
+        for cleanup_denied, buffering in ((False, -1), (True, -1), (False, 0), (True, 0)):
+            with self.subTest(cleanup_denied=cleanup_denied, buffering=buffering):
+                read_fd, write_fd = os.pipe()
+                os.close(read_fd)
+                with os.fdopen(write_fd, "wb", buffering=buffering) as stdin, io.BytesIO() as stdout:
+                    process = Mock(pid=12345, stdin=stdin, stdout=stdout)
+                    process.poll.return_value = None
+                    denied = PermissionError(errno.EPERM, "fixture permission denied")
+                    expected = PermissionError if cleanup_denied else RuntimeError
+                    with patch("check_mcp_java_floor.subprocess.Popen", return_value=process), \
+                            patch("check_mcp_java_floor.os.killpg",
+                                  side_effect=denied if cleanup_denied else None):
+                        with self.assertRaises(expected) as raised:
+                            probe(["unused-fixture"], 1)
+                    startup_error = raised.exception
+                    if cleanup_denied:
+                        self.assertIs(startup_error, denied)
+                        startup_error = denied.__context__
+                    self.assertIsInstance(startup_error, RuntimeError)
+                    self.assertIsInstance(startup_error.__cause__, BrokenPipeError)
+                    self.assertTrue(stdin.closed)
+                    self.assertTrue(stdout.closed)
 
     @unittest.skipUnless(sys.platform == "darwin" and hasattr(os, "waitid"),
                          "Exercises macOS killpg on an unreaped process")

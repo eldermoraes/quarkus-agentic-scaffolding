@@ -113,7 +113,8 @@ cannot receive the cleanup signal. On macOS a zombie-only group can return `EPER
 accepts this only after observing launcher termination and confirming that the group disappeared
 with a signal-0 check (which sends no signal). A live launcher or remaining group still makes
 cleanup fail visibly, retaining any startup exception in the exception chain. Pipes close even
-when cleanup fails. The offline tests cover the controlled macOS exit race, genuine-denial
+when cleanup fails; a repeated broken-pipe error while closing stdin does not replace the
+already-reported request or cleanup failure. The offline tests cover the controlled macOS exit race, genuine-denial
 handling, and descendants surviving the launcher.
 
 ## License
