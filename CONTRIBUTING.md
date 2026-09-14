@@ -108,6 +108,13 @@ runtime overrides and bounds startup time. This checks startup compatibility on 
 minimum JDK, not every tool's runtime behavior. Run `python3 ci/check_mcp_java_floor.py` locally
 with JBang installed; its offline failure-path tests run with
 `python3 -m unittest discover -s ci -p 'test_*.py'`.
+The probe signals its isolated process group before reaping the launcher, so a reused PID
+cannot receive the cleanup signal. On macOS a zombie-only group can return `EPERM`; cleanup
+accepts this only after observing launcher termination and confirming that the group disappeared
+with a signal-0 check (which sends no signal). A live launcher or remaining group still makes
+cleanup fail visibly, retaining any startup exception in the exception chain. Pipes close even
+when cleanup fails. The offline tests cover the controlled macOS exit race, genuine-denial
+handling, and descendants surviving the launcher.
 
 ## License
 
