@@ -3,6 +3,12 @@
 All notable changes to this artifact are documented here. This project adheres to semantic
 versioning.
 
+## Unreleased
+
+### Dependencies
+
+- Update the Quarkus Agents MCP installation pin from 1.2.6 to 1.2.7 (#64).
+
 ## v0.23.3 — 2026-09-09
 
 ### Dependencies
