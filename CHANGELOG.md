@@ -3,6 +3,12 @@
 All notable changes to this artifact are documented here. This project adheres to semantic
 versioning.
 
+## Unreleased
+
+### Dependencies
+
+- Update the skill-pilot starter's Maven Compiler Plugin from 3.15.0 to 3.16.0 (#60).
+
 ## v0.23.0 — 2026-09-09
 
 ### Added
