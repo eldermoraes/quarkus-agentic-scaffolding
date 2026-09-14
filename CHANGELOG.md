@@ -3,6 +3,12 @@
 All notable changes to this artifact are documented here. This project adheres to semantic
 versioning.
 
+## Unreleased
+
+### Dependencies
+
+- Update the Context7 MCP installation pin from 4.0.7 to 4.1.1 (#67).
+
 ## v0.23.3 — 2026-09-09
 
 ### Dependencies
