@@ -8,6 +8,7 @@ versioning.
 ### Dependencies
 
 - Update the skill-pilot starter's Maven Compiler Plugin from 3.15.0 to 3.16.0 (#60).
+- Update the skill-pilot starter's Maven Surefire and Failsafe plugins from 3.5.6 to 3.6.0 (#63).
 
 ### Fixed
 
