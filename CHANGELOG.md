@@ -10,6 +10,7 @@ versioning.
 - Update the skill-pilot starter's Maven Compiler Plugin from 3.15.0 to 3.16.0 (#60).
 - Update the skill-pilot starter's Maven Surefire and Failsafe plugins from 3.5.6 to 3.6.0 (#63).
 - Update the template-validation CI baseline from Quarkus 3.39.2 to 3.39.3 (#65).
+- Update the skill-pilot starter's Quarkus platform BOMs and Maven plugin from 3.39.2 to 3.39.3 (#66).
 
 ### Fixed
 
