@@ -56,3 +56,4 @@ other servers survive, with the entries from [setup §5](../SKILL.md#5-phase-b--
 tab, which lists what Bob actually loaded; that is the one verification that needs no binary.
 Every rule above still applies: not the legacy name, not a truncating write, and Bob reloads
 changed servers on its own.
+
