@@ -3,6 +3,12 @@
 All notable changes to this artifact are documented here. This project adheres to semantic
 versioning.
 
+## Unreleased
+
+### Dependencies
+
+- Update the skill-pilot starter's Maven Surefire and Failsafe plugins from 3.5.6 to 3.6.0 (#63).
+
 ## v0.23.3 — 2026-09-09
 
 ### Dependencies
