@@ -1,16 +1,16 @@
 {
   "name": "quarkus-agentic-scaffolding",
-  "version": "0.23.3",
+  "version": "0.23.4",
   "description": "Three-skill flow and always-on conventions for building Quarkus + LangChain4j agentic AI applications: setup (toolchain, MCP servers, conventions file), scaffold-project (create projects and add AI services, agents, RAG, and MCP clients/servers), and audit-project (audit an existing project against the conventions).",
   "contextFileName": "AGENTS.md",
   "mcpServers": {
     "quarkus-agent": {
       "command": "jbang",
-      "args": ["--java", "21+", "io.quarkus:quarkus-agent-mcp:1.2.6:runner"]
+      "args": ["--java", "21+", "io.quarkus:quarkus-agent-mcp:1.2.7:runner"]
     },
     "context7": {
       "command": "npx",
-      "args": ["-y", "@upstash/context7-mcp@4.0.7"]
+      "args": ["-y", "@upstash/context7-mcp@4.1.1"]
     }
   }
 }

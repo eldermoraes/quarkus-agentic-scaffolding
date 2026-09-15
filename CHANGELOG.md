@@ -3,7 +3,16 @@
 All notable changes to this artifact are documented here. This project adheres to semantic
 versioning.
 
-## Unreleased
+## v0.23.4 — 2026-09-14
+
+### Dependencies
+
+- Update the skill-pilot starter's Maven Compiler Plugin from 3.15.0 to 3.16.0 (#60).
+- Update the skill-pilot starter's Maven Surefire and Failsafe plugins from 3.5.6 to 3.6.0 (#63).
+- Update the Quarkus Agents MCP installation pin from 1.2.6 to 1.2.7 (#64).
+- Update the template-validation CI baseline from Quarkus 3.39.2 to 3.39.3 (#65).
+- Update the skill-pilot starter's Quarkus platform BOMs and Maven plugin from 3.39.2 to 3.39.3 (#66).
+- Update the Context7 MCP installation pin from 4.0.7 to 4.1.1 (#67).
 
 ### Fixed
 
