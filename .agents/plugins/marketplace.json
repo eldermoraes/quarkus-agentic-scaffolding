@@ -8,7 +8,7 @@
       "name": "quarkus-agentic-scaffolding",
       "source": {
         "source": "local",
-        "path": "./plugins/quarkus-agentic-scaffolding"
+        "path": "./"
       },
       "policy": {
         "installation": "AVAILABLE",

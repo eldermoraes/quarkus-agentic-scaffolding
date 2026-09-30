@@ -25,6 +25,7 @@
   "skills": "./skills/",
   "interface": {
     "displayName": "Quarkus Agentic Scaffolding",
+    "composerIcon": "./assets/icon.svg",
     "shortDescription": "Set up, scaffold, and audit Quarkus + LangChain4j agentic projects.",
     "longDescription": "Reusable Codex flow of three skills: setup-agentic-scaffolding prepares the prerequisites (toolchain, Quarkus Agents MCP + context7, conventions file); scaffold-project creates Quarkus + LangChain4j applications and adds AI services, declarative agent workflows, RAG pipelines, and MCP clients/servers from opinionated templates; audit-project reviews an existing project against the conventions.",
     "developerName": "Elder Moraes",

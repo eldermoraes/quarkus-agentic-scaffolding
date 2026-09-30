@@ -16,9 +16,13 @@ not from generic boilerplate. Contributions are expected to keep that bar.
 - **`.claude-plugin/`** — `plugin.json` + `marketplace.json` (the Claude installable
   distribution).
 - **`.codex-plugin/`** — `plugin.json` (the Codex plugin manifest).
-- **`.agents/plugins/marketplace.json`** — repo-local Codex marketplace entry.
-- **`plugins/quarkus-agentic-scaffolding/`** — Codex marketplace wrapper with symlinks to `.codex-plugin/`
-  and `skills/`; do not put duplicate skill content here.
+- **`.agents/plugins/marketplace.json`** — repo-local Codex marketplace entry pointing at the root,
+  where the Codex manifest,
+  skills, and icon are real files. Codex CLI 0.158.0 skips the old wrapper's outward symlinks
+  during installation, leaving the installed plugin without skills or assets.
+- **`plugins/quarkus-agentic-scaffolding/`** — legacy wrapper with symlinks to `.codex-plugin/`,
+  `skills/`, and `assets/`; retained for consumers that resolve symlinks. Do not duplicate content
+  here or repoint the Codex marketplace at it.
 - **`scripts/install-bob-skill.sh`** — installs the skill into a project's (or global) `.bob/skills/`
   for Bob (whose marketplace is IBM-internal and distributes modes and MCP servers, not skills).
 - **`scripts/uninstall-bob-skill.sh`** — the mirror of the installer: removes the three skills
@@ -101,6 +105,13 @@ The launch command for the Quarkus Agents MCP is hand-maintained in ~15 places, 
 `ci/check-mcp-command-consistency.sh` couples them: every published registration must carry
 `--java 21+` and the same pinned GAV version. `CHANGELOG.md` and `docs/` are exempt, because they
 quote older commands as a record.
+
+External GitHub Actions are pinned to full commit SHAs, with the tracked version in a comment.
+When updating an Action, resolve its upstream version to a commit and preserve the version
+comment. `ci/test_codex_distribution.py` checks these pins and verifies that the marketplace
+payload contains the same icon, skills, and supporting files as the root plugin. If Codex is
+installed, it also exercises a real install with an isolated `CODEX_HOME`; otherwise that smoke
+test is explicitly skipped.
 
 The `mcp-java-floor` quality job also starts the manifest's pinned runner with an exact
 `jbang --java 21` request and requires a valid MCP initialization response. It clears Java/JBang

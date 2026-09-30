@@ -3,6 +3,24 @@
 All notable changes to this artifact are documented here. This project adheres to semantic
 versioning.
 
+## Unreleased
+
+### Added
+
+- Add an original Codex plugin icon, shared by the root distribution and marketplace wrapper,
+  with regression coverage for skills, supporting files, icon paths, and an isolated Codex
+  install when the CLI is available (#3).
+
+### Fixed
+
+- Point the Codex marketplace at the root plugin instead of the symlink wrapper: Codex CLI
+  0.158.0 otherwise reports installation success but omits the skills and icon (#3).
+
+### Changed
+
+- Pin external GitHub Actions to verified commit SHAs, retaining their existing version
+  references in comments, in preparation for the awesome-codex-plugins submission (#3).
+
 ## v0.23.4 — 2026-09-14
 
 ### Dependencies
