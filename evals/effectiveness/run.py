@@ -134,14 +134,19 @@ def parse_transcript(path):
             event = json.loads(line)
         except ValueError:
             continue
+        if not isinstance(event, dict):
+            continue
         if event.get('type') == 'system' and event.get('subtype') == 'init' and info['init'] is None:
             info['init'] = event
         elif event.get('type') == 'result':
             info['result'] = event
-        content = (event.get('message') or {}).get('content')
+        message = event.get('message')
+        content = message.get('content') if isinstance(message, dict) else None
         if not isinstance(content, list):
             continue
         for block in content:
+            if not isinstance(block, dict):
+                continue
             if block.get('type') == 'tool_use':
                 info['tool_calls'] += 1
                 name, data = block.get('name', ''), block.get('input') or {}

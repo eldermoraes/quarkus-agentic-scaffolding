@@ -19,6 +19,13 @@ GLUE = re.compile(r'\bExecutorService\b|\bCompletableFuture\b|\bExecutors\s*\.|\
 AI_SERVICE_ARGS = r'@RegisterAiService\s*\((?:[^()]|\([^()]*\))*'
 
 
+def _resolve(pom):
+    """Substitute ${name} from the POM's own <properties>, so a property-held artifactId counts."""
+    block = re.search(r'<properties>([\s\S]*?)</properties>', pom)
+    values = dict(re.findall(r'<([\w.-]+)>\s*([^<]*?)\s*</\1>', block.group(1))) if block else {}
+    return re.sub(r'\$\{([\w.-]+)\}', lambda m: values.get(m.group(1), m.group(0)), pom)
+
+
 def strip_java(text):
     return _JAVA_TOKENS.sub(lambda m: '' if m[0].startswith(('//', '/*')) else m[0], text)
 
@@ -50,7 +57,7 @@ class Project:
                         if p.suffix in ('.txt', '.st', '.prompt', '.md') and 'rag' not in p.parts]
         self.prompt_text = self.java + '\n' + '\n'.join(read(p) for p in prompt_files)
         pom = self.root / 'pom.xml'
-        self.pom = _XML_COMMENT.sub('', read(pom)) if pom.is_file() else ''
+        self.pom = _resolve(_XML_COMMENT.sub('', read(pom))) if pom.is_file() else ''
 
     def dependencies(self):
         """<dependency> blocks outside <dependencyManagement> and <plugins>."""
