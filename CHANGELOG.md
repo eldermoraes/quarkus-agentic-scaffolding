@@ -13,6 +13,12 @@ versioning.
   green. Results from 2026-10-05 are published in the README: every run compiled in both arms;
   agent-decided convention checks went from 42.6% without the skill to 86.2% with it. Adds
   `ci/test_effectiveness_scoring.py` for the scorer, the isolation assertion and the schedule.
+- Skill-effectiveness eval, round 2: `run.py --with-claude-md` puts the repository's `CLAUDE.md`
+  in the run directory of both arms (loaded with `--setting-sources project`) and records it per
+  run; without the flag round 1 stays reproducible. The 30 runs of 2026-10-05 are published in
+  `evals/effectiveness/results/2026-10-05-round-2` and compared with round 1 in the README:
+  with `CLAUDE.md` alone, agent-decided convention checks reach 89.2% (42.6% with neither); the
+  skill on top reaches 93.3% (+4.1 pp). Every run compiled in both arms.
 
 ### Changed
 

@@ -1,0 +1,103 @@
+{
+  "run": "parallel-r1-baseline",
+  "task": "parallel",
+  "repetition": 1,
+  "arm": "baseline",
+  "model": "claude-sonnet-5-5",
+  "started_at": "2026-10-05T17:59:09.583578+00:00",
+  "with_claude_md": true,
+  "context_files": [
+    "CLAUDE.md"
+  ],
+  "setting_sources": "project",
+  "status": "completed",
+  "isolation_ok": true,
+  "isolation_error": null,
+  "mcp_status": {
+    "quarkus-agent": "connected",
+    "context7": "connected"
+  },
+  "agent_exit": 0,
+  "agent_timed_out": false,
+  "agent_seconds": 201.4,
+  "agent_is_error": false,
+  "agent_turns": 20,
+  "cost_usd_equivalent": 0.2872614,
+  "usage": {
+    "input_tokens": 22,
+    "cache_creation_input_tokens": 31491,
+    "cache_read_input_tokens": 334767,
+    "output_tokens": 9430,
+    "output_tokens_details": {
+      "thinking_tokens": 844
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 31491,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "not_available",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 632,
+        "cache_read_input_tokens": 42217,
+        "cache_creation_input_tokens": 1181,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 1181
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "final_message": "The project is in `./app` and `mvn -B -ntp -DskipTests test-compile` passes (BUILD SUCCESS). I didn't run the app, the test, or any model call.\n\n**The workflow:** `POST /review` takes the brief as a plain-text body and returns JSON with `technicalReview` and `businessReview`. Both reviewer agents analyse the brief in parallel, and a combine step merges their output into that report.\n\n**Stack:**\n- Ollama is the provider, with `llama3.2` at temperature 0 and the base URL from `OLLAMA_BASE_URL` (default `http://localhost:11434`).\n- Dev Services are off.\n- Both reviewers retry once, time out after 120 s, and fall back to a \"review unavailable\" message if the model call fails.\n- The `quarkus-http-problem` dependency is added.\n- The pom also carries OpenTelemetry and Prometheus.\n\n**Prompt handling:** the brief is wrapped in `<brief>` tags, and the system prompts say it is data, not instructions. The endpoint rejects empty or over-10,000-character briefs with a 400. I did not add `@InputGuardrails`, which `CLAUDE.md` asks for on entry methods that take external text. The size and empty checks are only a partial substitute.\n\n**Test:** `ReviewResourceTest` checks that a blank brief gets a 400. It has not been run.\n\n**Things you might trip over:**\n- `quarkus_create` ignored the target path and made `brief-review/`, so I stopped the auto-started dev instance and renamed the directory to `app`.\n- The `junit5` extension name resolved to a Groovy test extension, so I swapped it for `quarkus-http-problem`.\n- `quarkus_skills` found nothing for langchain4j or agentic, so I wrote the agent code from my own knowledge of the API. It compiles, but I have not run the workflow.",
+  "tool_calls": 19,
+  "failed_tool_calls": 2,
+  "agent_build_commands": 2,
+  "agent_failed_build_commands": 1,
+  "skill_invocations": [],
+  "quarkus_mcp_calls": 4,
+  "context7_calls": 0,
+  "project_dir": "app",
+  "java_files": 5,
+  "conformance": {
+    "ai_service": true,
+    "named_model": true,
+    "record_dto": true,
+    "input_guardrail": false,
+    "delimited_input": true,
+    "no_manual_wiring": true,
+    "smoke_test": true,
+    "dev_logging": true,
+    "devservices_off": true,
+    "agentic_extension": true,
+    "agent_annotation": true,
+    "parallel_agent": true,
+    "no_executor_glue": true
+  },
+  "generator": {
+    "dual_bom": true,
+    "no_extension_version_pins": true,
+    "java_release_25": true,
+    "parameters_flag": true,
+    "native_profile": true
+  },
+  "compile_attempts": [
+    {
+      "exit": 0,
+      "timed_out": false,
+      "seconds": 2.9
+    }
+  ],
+  "compiles_first_attempt": true,
+  "compiles_within_two": true,
+  "build_attempts_to_green": 1,
+  "successful_generation": true
+}

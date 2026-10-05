@@ -578,7 +578,11 @@ instruction files once at startup.
 Does installing `scaffold-project` change what a coding agent builds? Measured on 2026-10-05 with
 `claude-sonnet-5-5` in Claude Code 2.1.289: five fixed tasks, each run three times **without** and
 three times **with** the skill, 30 headless runs, all scored mechanically. The number is published
-as measured; the [protocol](evals/effectiveness/README.md) was committed before collection.
+as measured; the [protocol](evals/effectiveness/README.md) was committed before collection. Two
+rounds were collected: round 1 with no `CLAUDE.md` in either arm, round 2 with this repository's
+`CLAUDE.md` in the working directory of both arms (see [Round 2](#round-2-claudemd-in-both-arms)).
+
+### Round 1: no `CLAUDE.md`
 
 | Task | Arm | Compiles (attempt 1) | Agent-decided convention checks | Mean failed build commands |
 | --- | --- | --- | --- | --- |
@@ -602,18 +606,60 @@ as measured; the [protocol](evals/effectiveness/README.md) was committed before 
   and roughly 1.9x the token use (USD 5.79 vs 3.12 API-equivalent for 15 runs; the runs used a
   subscription, not API billing). The agent itself ran fewer failing builds (1.1 vs 4.5 per run).
 
-**Limitations.** n = 3 per cell, one model, one agent, five tasks, no significance test. The checks
-are regex presence predicates derived from [`CLAUDE.md`](CLAUDE.md), not proof of semantic
-correctness, and the skill was written against the same conventions, so it is evaluated on the
-standard it teaches. Some conventions were missed by both arms (no run named a model, no
-classifier or tools run added `@Timeout`/`@Fallback`). Neither arm received `CLAUDE.md`, which a
-real install adds through `/setup-agentic-scaffolding`. Both arms had the Quarkus Agents MCP and
-context7, but the baseline used the Quarkus MCP in 2 of 15 runs and neither arm queried context7.
-A fixed prompt preamble removes the confirmation questions the skill asks in interactive use. Isolation from
-the globally installed skill came from `--setting-sources ''` and was asserted per run (0 runs
-excluded). One scorer fix was made after collection: the RAG sample-document check now resolves a
-`${ENV:default}` path, which changed one skill run from 12/13 to 13/13. Raw records, transcripts
-and generated sources are in [`evals/effectiveness/results/2026-10-05`](evals/effectiveness/results/2026-10-05/SUMMARY.md).
+Round 1 notes: some conventions were missed by both arms (no run named a model, no classifier or
+tools run added `@Timeout`/`@Fallback`). Both arms had the Quarkus Agents MCP and context7, but the
+baseline used the Quarkus MCP in 2 of 15 runs and neither arm queried context7. One scorer fix was
+made after collection: the RAG sample-document check now resolves a `${ENV:default}` path, which
+changed one skill run from 12/13 to 13/13. Raw records, transcripts and generated sources are in
+[`evals/effectiveness/results/2026-10-05`](evals/effectiveness/results/2026-10-05/SUMMARY.md).
+
+### Round 2: `CLAUDE.md` in both arms
+
+A real install adds `CLAUDE.md` through `/setup-agentic-scaffolding`, and the convention checks are
+derived from it, so round 1 left open how much of the gain the conventions file alone delivers.
+Round 2 repeats the same 30 runs (same tasks, model, MCP pins, permissions and scorer) with
+`run.py --with-claude-md`: the repository's `CLAUDE.md` from the committed revision is copied into
+every run directory in **both** arms and loaded with `--setting-sources project` (the run
+directory has no `.claude/` folder, so no project settings come with it). `CLAUDE.md` does not
+reference `AGENTS.md`, so only `CLAUDE.md` was copied. A probe before collection confirmed that
+`--setting-sources ''` hides a `CLAUDE.md` in the working directory and `project` loads it.
+
+| Round / arm | Compiles (attempt 1) | Agent-decided convention checks | Generator checks | Mean failed build commands | Mean turns | Mean minutes | Runs using the Quarkus MCP | API-equivalent USD (15 runs) |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 1, baseline (no `CLAUDE.md`) | 15/15 | 42.6% | 89.3% | 4.5 | 19.9 | 1.1 | 2/15 | 3.12 |
+| 1, skill (no `CLAUDE.md`) | 15/15 | 86.2% | 100% | 1.1 | 27.9 | 2.1 | 15/15 | 5.79 |
+| 2, baseline + `CLAUDE.md` | 15/15 | 89.2% | 96.0% | 1.7 | 22.9 | 3.5 | 15/15 | 5.03 |
+| 2, skill + `CLAUDE.md` | 15/15 | **93.3%** | 100% | 0.8 | 27.3 | 2.1 | 15/15 | 6.37 |
+
+- **`CLAUDE.md` alone delivers most of the conformance.** Without the skill, adding the conventions
+  file takes agent-decided checks from 42.6% to 89.2% (+46.6 pp), slightly above what the skill
+  alone reached in round 1 (86.2%). It also makes the baseline follow the "Quarkus MCP first" rule
+  (15/15 runs, 2/15 before) and cuts its failing builds from 4.5 to 1.7 per run.
+- **The skill adds a small margin on top: +4.1 pp** (89.2% to 93.3%), about half a check per run.
+  It comes from two checks: `@InputGuardrails` (11/15 to 15/15) and a `@QuarkusTest` smoke test
+  (9/15 to 15/15); the skill arm missed one more named model (6/15 baseline, 5/15 skill). In the
+  generator band the skill removes version pins on extensions (12/15 to 15/15). With n = 3 per
+  cell and no significance test, +4.1 pp is a direction, not a measured effect size.
+- **Cost and time.** With `CLAUDE.md` in place, the skill arm took more turns (27.3 vs 22.9) and
+  about 1.27x the token use, but less wall time (2.1 vs 3.5 minutes per run) and fewer failing
+  builds (0.8 vs 1.7). Both arms called the Quarkus MCP about as often (3.7 vs 3.5 calls per run),
+  so the cause of the baseline's longer time was not isolated; wall time also varies with machine
+  load, which was not controlled.
+- **Compilation: still no difference.** Every run in both arms compiled at the first independent
+  attempt; the repair turn was never used.
+
+Raw records, transcripts and generated sources are in
+[`evals/effectiveness/results/2026-10-05-round-2`](evals/effectiveness/results/2026-10-05-round-2/SUMMARY.md).
+
+**Limitations (both rounds).** n = 3 per cell, one model, one agent, five tasks, no significance
+test. The checks are regex presence predicates derived from [`CLAUDE.md`](CLAUDE.md), not proof of
+semantic correctness, and both the skill and `CLAUDE.md` were written against the same conventions,
+so each is evaluated on the standard it teaches (the rubric is this project's own). Neither arm
+queried context7 in either round. A fixed prompt preamble removes the confirmation questions the
+skill asks in interactive use. Isolation from the globally installed skill came from
+`--setting-sources` (`''` in round 1, `project` in round 2) plus `--strict-mcp-config`, and was
+asserted per run (0 runs excluded in either round). The two rounds ran hours apart on the same
+machine, not interleaved.
 
 Reproduce (Claude Code logged in, JDK 25, Maven, JBang, Node, Python 3):
 
@@ -621,6 +667,7 @@ Reproduce (Claude Code logged in, JDK 25, Maven, JBang, Node, Python 3):
 python3 evals/effectiveness/run.py --dry-run /tmp/qas-eval   # prints the exact command of every run
 python3 evals/effectiveness/run.py /tmp/qas-eval             # 30 runs, at most 3 in parallel
 python3 evals/effectiveness/summarize.py /tmp/qas-eval
+python3 evals/effectiveness/run.py --with-claude-md /tmp/qas-eval-2   # round 2: CLAUDE.md in both arms
 ```
 
 An earlier [12-run Codex pilot](evals/skill-pilot/results/2026-09-09/REPORT.md) was inconclusive
