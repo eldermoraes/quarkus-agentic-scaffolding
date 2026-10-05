@@ -2,7 +2,10 @@
 
 Every run starts in an empty directory outside this repository. Both arms get the same prompt,
 model, MCP servers and permissions; the skill arm additionally loads a plugin that contains only
-the `scaffold-project` skill (with its templates) from the committed revision. Raw transcripts,
+the `scaffold-project` skill (with its templates) from the committed revision. With
+`--with-claude-md`, both arms also find the repository's `CLAUDE.md` (and `AGENTS.md`, when
+`CLAUDE.md` references it) from the same revision in their working directory, loaded through
+`--setting-sources project`; without the flag no settings or memory files load. Raw transcripts,
 generated projects and compile logs stay in the output directory; `summarize.py` aggregates them.
 """
 import argparse
@@ -30,6 +33,7 @@ import score  # noqa: E402
 ARMS = ('baseline', 'skill')
 PLUGIN_NAME = 'quarkus-agentic-scaffolding'
 COMPILE = ['mvn', '-B', '-ntp', '-DskipTests', 'test-compile']
+CONTEXT_FILE = 'CLAUDE.md'
 # Tools are pre-approved so a headless run never waits on a prompt; edits are confined to the
 # run directory by acceptEdits. Anything else is denied, identically in both arms.
 ALLOWED_TOOLS = ['Read', 'Write', 'Edit', 'Glob', 'Grep', 'Skill', 'TodoWrite', 'WebSearch', 'WebFetch',
@@ -77,9 +81,15 @@ def prompt_for(spec, task):
     return spec['preamble'].replace('{artifact}', task['artifact']) + '\n\nTask: ' + task['prompt']
 
 
+def setting_sources(args):
+    """'' loads no settings and no memory files; 'project' loads the CLAUDE.md placed in the run
+    directory (the run directory has no .claude/ folder, so no project settings come with it)."""
+    return 'project' if args.with_claude_md else ''
+
+
 def claude_command(args, output, arm, prompt, resume=None):
     command = ['claude', '-p', prompt, '--model', args.model, '--output-format', 'stream-json',
-               '--verbose', '--setting-sources', '', '--strict-mcp-config',
+               '--verbose', '--setting-sources', setting_sources(args), '--strict-mcp-config',
                '--mcp-config', str(output / 'mcp.json'), '--permission-mode', 'acceptEdits',
                '--allowedTools', ','.join(ALLOWED_TOOLS)]
     if arm == 'skill':
@@ -186,9 +196,14 @@ def run_one(args, spec, output, run, port, stop):
     folder = output / 'runs' / run['id']
     workdir = folder / 'work'
     workdir.mkdir(parents=True)
+    context_files = sorted(p.name for p in (output / 'context').iterdir()) if args.with_claude_md else []
+    for name in context_files:
+        shutil.copyfile(output / 'context' / name, workdir / name)
     env = clean_env(port)
     record = {'run': run['id'], 'task': task['id'], 'repetition': run['repetition'], 'arm': arm,
-              'model': args.model, 'started_at': datetime.datetime.now(datetime.timezone.utc).isoformat()}
+              'model': args.model, 'started_at': datetime.datetime.now(datetime.timezone.utc).isoformat(),
+              'with_claude_md': args.with_claude_md, 'context_files': context_files,
+              'setting_sources': setting_sources(args)}
     if stop.is_set():
         record['status'] = 'not_run_rate_limited'
         return record
@@ -263,8 +278,9 @@ def run_one(args, spec, output, run, port, stop):
     return record
 
 
-def snapshot(output):
-    """Plugin with only scaffold-project, copied from the committed revision; MCP config."""
+def snapshot(args, output):
+    """Plugin with only scaffold-project, copied from the committed revision; optional context
+    files (CLAUDE.md) from the same revision; MCP config."""
     revision = subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=REPO, text=True).strip()
     files = subprocess.check_output(['git', 'ls-tree', '-r', '--name-only', revision, '--',
                                      'skills/scaffold-project'], cwd=REPO, text=True).splitlines()
@@ -279,11 +295,23 @@ def snapshot(output):
     manifest.parent.mkdir(parents=True)
     manifest.write_text(json.dumps({'name': PLUGIN_NAME, 'version': 'eval',
                                     'skills': ['./skills/scaffold-project']}, indent=2) + '\n')
+    context = {}
+    if args.with_claude_md:
+        names = [CONTEXT_FILE]
+        main_file = subprocess.check_output(['git', 'show', f'{revision}:{CONTEXT_FILE}'], cwd=REPO)
+        if re.search(rb'AGENTS\.md', main_file):
+            names.append('AGENTS.md')
+        for name in names:
+            data = subprocess.check_output(['git', 'show', f'{revision}:{name}'], cwd=REPO)
+            target = output / 'context' / name
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_bytes(data)
+            context[name] = hashlib.sha256(data).hexdigest()
     quarkus, context7 = mcp_pins()
     (output / 'mcp.json').write_text(json.dumps({'mcpServers': {
         'quarkus-agent': {'command': 'jbang', 'args': ['--java', '21+', f'io.quarkus:quarkus-agent-mcp:{quarkus}:runner']},
         'context7': {'command': 'npx', 'args': ['-y', f'@upstash/context7-mcp@{context7}']}}}, indent=2) + '\n')
-    return revision, hashes, quarkus, context7
+    return revision, hashes, context, quarkus, context7
 
 
 def main():
@@ -295,6 +323,9 @@ def main():
     parser.add_argument('--model', default='claude-sonnet-5-5')
     parser.add_argument('--timeout', type=int, default=900, help='seconds per agent run')
     parser.add_argument('--repair-timeout', type=int, default=600, help='seconds for the single repair turn')
+    parser.add_argument('--with-claude-md', action='store_true',
+                        help="copy the repository's CLAUDE.md (and AGENTS.md if it is referenced) into every "
+                             'run directory, in both arms, and load it with --setting-sources project')
     parser.add_argument('--dry-run', action='store_true', help='print the plan and commands, run nothing')
     args = parser.parse_args()
     spec = load_tasks()
@@ -303,22 +334,26 @@ def main():
     if args.dry_run:
         quarkus, context7 = mcp_pins()
         print(f'{len(runs)} runs, model {args.model}, parallel {args.parallel}, timeout {args.timeout}s; '
-              f'MCP quarkus-agent-mcp {quarkus}, context7-mcp {context7}')
+              f'MCP quarkus-agent-mcp {quarkus}, context7-mcp {context7}; '
+              f"CLAUDE.md in run directory: {'yes' if args.with_claude_md else 'no'}")
         for run in runs:
             command = claude_command(args, output, run['arm'], prompt_for(spec, run['task']))
             print(f"\n[{run['id']}] cwd={output / 'runs' / run['id'] / 'work'}\n" + shlex.join(command))
         return
     if output == REPO or REPO in output.parents or output.exists():
         parser.error('output must be a new directory outside the repository')
-    if subprocess.run(['git', 'diff', '--quiet', 'HEAD', '--', 'evals/effectiveness', 'skills/scaffold-project'],
+    if subprocess.run(['git', 'diff', '--quiet', 'HEAD', '--', 'evals/effectiveness', 'skills/scaffold-project',
+                       CONTEXT_FILE, 'AGENTS.md'],
                       cwd=REPO).returncode:
         parser.error('commit changes to the eval or the skill before collecting')
     if os.environ.get('ANTHROPIC_API_KEY'):
         print('note: ANTHROPIC_API_KEY is removed from every run; the subscription login is used', flush=True)
     output.mkdir(parents=True)
-    revision, hashes, quarkus, context7 = snapshot(output)
+    revision, hashes, context, quarkus, context7 = snapshot(args, output)
     environment = {
         'date': datetime.date.today().isoformat(), 'source_commit': revision, 'skill_sha256': hashes,
+        'with_claude_md': args.with_claude_md, 'context_files_sha256': context,
+        'setting_sources': setting_sources(args),
         'model': args.model, 'claude_code': subprocess.check_output(['claude', '--version'], text=True).strip(),
         'java': subprocess.run(['java', '-version'], capture_output=True, text=True).stderr.splitlines()[0],
         'maven': subprocess.check_output(['mvn', '-v'], text=True).splitlines()[0],

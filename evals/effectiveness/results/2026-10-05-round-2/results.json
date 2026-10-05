@@ -1,0 +1,3122 @@
+[
+  {
+    "run": "classifier-r1-baseline",
+    "task": "classifier",
+    "repetition": 1,
+    "arm": "baseline",
+    "model": "claude-sonnet-5-5",
+    "started_at": "2026-10-05T17:59:09.583399+00:00",
+    "with_claude_md": true,
+    "context_files": [
+      "CLAUDE.md"
+    ],
+    "setting_sources": "project",
+    "status": "completed",
+    "isolation_ok": true,
+    "isolation_error": null,
+    "mcp_status": {
+      "quarkus-agent": "connected",
+      "context7": "connected"
+    },
+    "agent_exit": 0,
+    "agent_timed_out": false,
+    "agent_seconds": 221.2,
+    "agent_is_error": false,
+    "agent_turns": 31,
+    "cost_usd_equivalent": 0.41714619999999997,
+    "usage": {
+      "input_tokens": 44,
+      "cache_creation_input_tokens": 34692,
+      "cache_read_input_tokens": 825601,
+      "output_tokens": 11317,
+      "output_tokens_details": {
+        "thinking_tokens": 1049
+      },
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 34692,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "not_available",
+      "iterations": [
+        {
+          "input_tokens": 2,
+          "output_tokens": 727,
+          "cache_read_input_tokens": 46116,
+          "cache_creation_input_tokens": 483,
+          "cache_creation": {
+            "ephemeral_5m_input_tokens": 0,
+            "ephemeral_1h_input_tokens": 483
+          },
+          "type": "message"
+        }
+      ],
+      "speed": "standard",
+      "fallback_credit": null
+    },
+    "final_message": "The project is created in `./app`, and `mvn -B -ntp -DskipTests test-compile` passes. I didn't run the tests or call a live model.\n\nI confirmed the Quarkus Agents MCP was reachable (`quarkus_status`) and created the project through it. Quarkus 3.40.1 with the LangChain4j BOM, Java 25, Ollama as the provider.\n\n- **Endpoint:** `POST /classify` takes the ticket as `text/plain` and returns `{\"category\":\"BILLING|TECHNICAL|OTHER\"}`. Blank or oversized text gets a 400. It runs on a virtual thread.\n- **Classifier:** the AI service is `TicketClassifier`, on a named `classifier` model. The prompt wraps the ticket in `<ticket>` tags and tells the model to treat it as data, not instructions. An input guardrail rejects empty or oversized text.\n- **Failure handling:** each call has a 30-second timeout and one retry. If the model call still fails, it falls back to `OTHER`.\n- **Config:**\n  - Dev Services are off.\n  - The Ollama URL and model come from `OLLAMA_BASE_URL` (default `http://localhost:11434`) and `OLLAMA_MODEL` (default `llama3.2`); temperature is 0.\n  - Request/response logging is on in dev only.\n- **Extensions:** besides the Ollama provider, it includes OpenAPI, fault tolerance, `quarkus-http-problem`, Prometheus metrics and OpenTelemetry.\n- **Tests:** `ClassifyResourceTest` mocks the classifier, so it needs no live model. It covers a billing ticket and a blank ticket.\n\n- **Fallback hides outages:** if Ollama is down, `/classify` still returns `OTHER` with a 200, so an outage looks like a real classification. Say if you'd rather it return an error.\n- **Import location:** `InputGuardrails` is in `dev.langchain4j.service.guardrail`, not `dev.langchain4j.guardrail` as I first wrote. I guessed the location and the compile accepted it, because I couldn't inspect the jar.",
+    "tool_calls": 30,
+    "failed_tool_calls": 7,
+    "agent_build_commands": 5,
+    "agent_failed_build_commands": 2,
+    "skill_invocations": [],
+    "quarkus_mcp_calls": 3,
+    "context7_calls": 0,
+    "project_dir": "app",
+    "java_files": 5,
+    "conformance": {
+      "ai_service": true,
+      "named_model": true,
+      "record_dto": true,
+      "input_guardrail": true,
+      "delimited_input": true,
+      "no_manual_wiring": true,
+      "smoke_test": true,
+      "dev_logging": true,
+      "devservices_off": true,
+      "enum_result": true,
+      "zero_temperature": true,
+      "virtual_threads": true,
+      "fault_tolerance": true
+    },
+    "generator": {
+      "dual_bom": true,
+      "no_extension_version_pins": true,
+      "java_release_25": true,
+      "parameters_flag": true,
+      "native_profile": true
+    },
+    "compile_attempts": [
+      {
+        "exit": 0,
+        "timed_out": false,
+        "seconds": 3.3
+      }
+    ],
+    "compiles_first_attempt": true,
+    "compiles_within_two": true,
+    "build_attempts_to_green": 1,
+    "successful_generation": true
+  },
+  {
+    "run": "classifier-r1-skill",
+    "task": "classifier",
+    "repetition": 1,
+    "arm": "skill",
+    "model": "claude-sonnet-5-5",
+    "started_at": "2026-10-05T17:59:09.583053+00:00",
+    "with_claude_md": true,
+    "context_files": [
+      "CLAUDE.md"
+    ],
+    "setting_sources": "project",
+    "status": "completed",
+    "isolation_ok": true,
+    "isolation_error": null,
+    "mcp_status": {
+      "quarkus-agent": "connected",
+      "context7": "connected"
+    },
+    "agent_exit": 0,
+    "agent_timed_out": false,
+    "agent_seconds": 99.2,
+    "agent_is_error": false,
+    "agent_turns": 23,
+    "cost_usd_equivalent": 0.38752420000000004,
+    "usage": {
+      "input_tokens": 24,
+      "cache_creation_input_tokens": 46512,
+      "cache_read_input_tokens": 477191,
+      "output_tokens": 10599,
+      "output_tokens_details": {
+        "thinking_tokens": 290
+      },
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 46512,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "not_available",
+      "iterations": [
+        {
+          "input_tokens": 2,
+          "output_tokens": 698,
+          "cache_read_input_tokens": 57936,
+          "cache_creation_input_tokens": 483,
+          "cache_creation": {
+            "ephemeral_5m_input_tokens": 0,
+            "ephemeral_1h_input_tokens": 483
+          },
+          "type": "message"
+        }
+      ],
+      "speed": "standard",
+      "fallback_credit": null
+    },
+    "final_message": "The ticket classifier is in `./app`, and `mvn -B -ntp -DskipTests test-compile` passes. I did not run the test, start the app, or call a model, so the `/classify` endpoint itself is untested.\n\nI created the project through the Quarkus Agents MCP, which was reachable, on Quarkus 3.40.1 with Java 25. The extensions are `rest`, `rest-jackson`, `smallrye-openapi`, `langchain4j-ollama`, `smallrye-fault-tolerance` and `http-problem`. I skipped `websockets-next` because nothing here streams. The MCP auto-started dev mode, so I stopped it before building.\n\n- **Endpoint:** `POST /classify` takes the ticket as a plain-text body and returns JSON like `{\"category\":\"BILLING\"}`. A blank body returns 400.\n- **Classification:** `TicketClassifier` is a `@RegisterAiService` that returns a `TicketCategory` enum (`BILLING`, `TECHNICAL` or `OTHER`). It uses the named `smaller` model, `qwen3:1.7b`, at temperature 0.\n- **Prompt safety:** the ticket text is wrapped in `<ticket>\u2026</ticket>`, and the system message says it is data, not instructions. `PromptInjectionGuard` rejects tickets over 4,000 characters, tickets containing `<ticket>` tags, and tickets containing \"ignore previous instructions\".\n- **Failure handling:** the classify method has a 60-second timeout. Any failure, including Ollama being unreachable, falls back to `OTHER` rather than an error. Say if you would prefer an error response instead.\n- **Config:** `application.properties` sets Dev Services off and request/response logging in dev only. Running it needs a local Ollama with `ollama pull qwen3:1.7b`.\n- **Test:** there is one `@QuarkusTest` smoke test that only checks the AI service is wired. It needs no live model.\n\nI did not run `git init` (the skill suggests it, and the project was created and started without it) or commit anything.",
+    "tool_calls": 21,
+    "failed_tool_calls": 3,
+    "agent_build_commands": 3,
+    "agent_failed_build_commands": 2,
+    "skill_invocations": [
+      "quarkus-agentic-scaffolding:scaffold-project"
+    ],
+    "quarkus_mcp_calls": 4,
+    "context7_calls": 0,
+    "project_dir": "app",
+    "java_files": 5,
+    "conformance": {
+      "ai_service": true,
+      "named_model": true,
+      "record_dto": true,
+      "input_guardrail": true,
+      "delimited_input": true,
+      "no_manual_wiring": true,
+      "smoke_test": true,
+      "dev_logging": true,
+      "devservices_off": true,
+      "enum_result": true,
+      "zero_temperature": true,
+      "virtual_threads": false,
+      "fault_tolerance": true
+    },
+    "generator": {
+      "dual_bom": true,
+      "no_extension_version_pins": true,
+      "java_release_25": true,
+      "parameters_flag": true,
+      "native_profile": true
+    },
+    "compile_attempts": [
+      {
+        "exit": 0,
+        "timed_out": false,
+        "seconds": 2.8
+      }
+    ],
+    "compiles_first_attempt": true,
+    "compiles_within_two": true,
+    "build_attempts_to_green": 1,
+    "successful_generation": true
+  },
+  {
+    "run": "classifier-r2-baseline",
+    "task": "classifier",
+    "repetition": 2,
+    "arm": "baseline",
+    "model": "claude-sonnet-5-5",
+    "started_at": "2026-10-05T18:08:23.999346+00:00",
+    "with_claude_md": true,
+    "context_files": [
+      "CLAUDE.md"
+    ],
+    "setting_sources": "project",
+    "status": "completed",
+    "isolation_ok": true,
+    "isolation_error": null,
+    "mcp_status": {
+      "quarkus-agent": "connected",
+      "context7": "connected"
+    },
+    "agent_exit": 0,
+    "agent_timed_out": false,
+    "agent_seconds": 198.2,
+    "agent_is_error": false,
+    "agent_turns": 23,
+    "cost_usd_equivalent": 0.3365944,
+    "usage": {
+      "input_tokens": 28,
+      "cache_creation_input_tokens": 38003,
+      "cache_read_input_tokens": 465932,
+      "output_tokens": 9134,
+      "output_tokens_details": {
+        "thinking_tokens": 479
+      },
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 38003,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "not_available",
+      "iterations": [
+        {
+          "input_tokens": 2,
+          "output_tokens": 620,
+          "cache_read_input_tokens": 49457,
+          "cache_creation_input_tokens": 453,
+          "cache_creation": {
+            "ephemeral_5m_input_tokens": 0,
+            "ephemeral_1h_input_tokens": 453
+          },
+          "type": "message"
+        }
+      ],
+      "speed": "standard",
+      "fallback_credit": null
+    },
+    "final_message": "The project is in `./app` and `mvn -B -ntp -DskipTests test-compile` passes. I didn't run the tests, and nothing was run against a live model.\n\n`POST /classify` takes `{\"text\": \"...\"}` and returns `{\"category\": \"BILLING|TECHNICAL|OTHER\"}`. A blank `text` gets a 400. Errors leave the endpoint as RFC 9457 problem-detail responses.\n\n- **Setup:** I created the project through the Quarkus Agents MCP, which was reachable. Ollama is the provider (`quarkus-langchain4j-ollama`, model `llama3.2`, temperature 0), and Dev Services is disabled so no container starts. `llama3.2` is my pick, so change it in `application.properties` if you prefer another model.\n- **Classifier (`TicketClassifier`):** It's a declarative AI service that returns a `Category` enum. The ticket text goes into the prompt inside `<ticket>\u2026</ticket>` tags, and the system message says that content is data, not instructions.\n- **Guardrail:** An input guardrail rejects ticket text that tries to inject its own `<ticket>` tags.\n- **Fault tolerance:** The classify call has a 30-second timeout and one retry. If it still fails, it returns `OTHER` rather than an error.\n- **Tests:** `ClassifyResourceTest` covers the success case and the blank-text 400, with the classifier mocked.\n- **Extensions:** I also added OpenAPI, Prometheus metrics, OpenTelemetry and bean validation.\n- **Not done:** I didn't call the context7 or docs tools, so the LangChain4j guardrail and fault-tolerance APIs come from my own knowledge and one compile fix. I wrote the README by hand only as far as the generated one goes, so it doesn't yet describe the endpoint.",
+    "tool_calls": 22,
+    "failed_tool_calls": 3,
+    "agent_build_commands": 3,
+    "agent_failed_build_commands": 1,
+    "skill_invocations": [],
+    "quarkus_mcp_calls": 3,
+    "context7_calls": 0,
+    "project_dir": "app",
+    "java_files": 4,
+    "conformance": {
+      "ai_service": true,
+      "named_model": false,
+      "record_dto": true,
+      "input_guardrail": true,
+      "delimited_input": true,
+      "no_manual_wiring": true,
+      "smoke_test": true,
+      "dev_logging": true,
+      "devservices_off": true,
+      "enum_result": true,
+      "zero_temperature": true,
+      "virtual_threads": false,
+      "fault_tolerance": true
+    },
+    "generator": {
+      "dual_bom": true,
+      "no_extension_version_pins": true,
+      "java_release_25": true,
+      "parameters_flag": true,
+      "native_profile": true
+    },
+    "compile_attempts": [
+      {
+        "exit": 0,
+        "timed_out": false,
+        "seconds": 2.9
+      }
+    ],
+    "compiles_first_attempt": true,
+    "compiles_within_two": true,
+    "build_attempts_to_green": 1,
+    "successful_generation": true
+  },
+  {
+    "run": "classifier-r2-skill",
+    "task": "classifier",
+    "repetition": 2,
+    "arm": "skill",
+    "model": "claude-sonnet-5-5",
+    "started_at": "2026-10-05T18:07:46.218820+00:00",
+    "with_claude_md": true,
+    "context_files": [
+      "CLAUDE.md"
+    ],
+    "setting_sources": "project",
+    "status": "completed",
+    "isolation_ok": true,
+    "isolation_error": null,
+    "mcp_status": {
+      "quarkus-agent": "connected",
+      "context7": "connected"
+    },
+    "agent_exit": 0,
+    "agent_timed_out": false,
+    "agent_seconds": 86.0,
+    "agent_is_error": false,
+    "agent_turns": 22,
+    "cost_usd_equivalent": 0.37271180000000004,
+    "usage": {
+      "input_tokens": 20,
+      "cache_creation_input_tokens": 47868,
+      "cache_read_input_tokens": 406349,
+      "output_tokens": 9993,
+      "output_tokens_details": {
+        "thinking_tokens": 1017
+      },
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 47868,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "not_available",
+      "iterations": [
+        {
+          "input_tokens": 2,
+          "output_tokens": 809,
+          "cache_read_input_tokens": 59492,
+          "cache_creation_input_tokens": 283,
+          "cache_creation": {
+            "ephemeral_5m_input_tokens": 0,
+            "ephemeral_1h_input_tokens": 283
+          },
+          "type": "message"
+        }
+      ],
+      "speed": "standard",
+      "fallback_credit": null
+    },
+    "final_message": "The project is in `./app`, and `mvn -B -ntp -DskipTests test-compile` passes there. I did not run the tests, start the app against a model, or call a live model.\n\n**How it was built.** The Quarkus Agents MCP was reachable, so I created the project with `quarkus_create` on Quarkus 3.40.1 with Java 25. The extensions are `rest`, `rest-jackson`, `smallrye-openapi`, `langchain4j-ollama`, `smallrye-fault-tolerance` and `http-problem`. I called `quarkus_skills` for the REST and fault-tolerance extensions before writing code. I did not look up LangChain4j in context7 or `quarkus_skills`. I stopped the dev-mode instance that `quarkus_create` auto-started. I did not `git init` the project, because you said not to commit anything.\n\n**Endpoint.** `POST /classify` takes the ticket as a `text/plain` body and returns JSON like `{\"category\":\"BILLING\"}`. The category is one of `BILLING`, `TECHNICAL` or `OTHER`. Blank or over-long (more than 4,000 characters) tickets get a 400. Other escaping exceptions become RFC 9457 problem responses through `http-problem`.\n\n**AI service.** `TicketClassifier` is a `@RegisterAiService` that returns the `Category` enum directly. It uses a named `classifier` model, `qwen3:1.7b` on Ollama with temperature 0. The ticket is wrapped in `<ticket>\u2026</ticket>` and the system message says it is data, not instructions.\n\n**Guardrail and fallback.** `PromptInjectionGuard` rejects oversized input, reserved delimiter markup inside the ticket, and the phrase \"ignore previous instructions\". A rejected ticket returns a 400. The method has a 60-second `@Timeout` and a `@Fallback` that returns `OTHER`. The fallback skips guardrail rejections. It does not skip model errors, so if Ollama is down the endpoint returns `OTHER` rather than an error.\n\n**Test and config.** `TicketClassifierTest` is a `@QuarkusTest` that only checks the AI service wires up, without a model. `application.properties` sets the model, disables Dev Services, and turns on request/response logging fo",
+    "tool_calls": 20,
+    "failed_tool_calls": 2,
+    "agent_build_commands": 2,
+    "agent_failed_build_commands": 1,
+    "skill_invocations": [
+      "quarkus-agentic-scaffolding:scaffold-project"
+    ],
+    "quarkus_mcp_calls": 4,
+    "context7_calls": 0,
+    "project_dir": "app",
+    "java_files": 5,
+    "conformance": {
+      "ai_service": true,
+      "named_model": true,
+      "record_dto": true,
+      "input_guardrail": true,
+      "delimited_input": true,
+      "no_manual_wiring": true,
+      "smoke_test": true,
+      "dev_logging": true,
+      "devservices_off": true,
+      "enum_result": true,
+      "zero_temperature": true,
+      "virtual_threads": false,
+      "fault_tolerance": true
+    },
+    "generator": {
+      "dual_bom": true,
+      "no_extension_version_pins": true,
+      "java_release_25": true,
+      "parameters_flag": true,
+      "native_profile": true
+    },
+    "compile_attempts": [
+      {
+        "exit": 0,
+        "timed_out": false,
+        "seconds": 2.8
+      }
+    ],
+    "compiles_first_attempt": true,
+    "compiles_within_two": true,
+    "build_attempts_to_green": 1,
+    "successful_generation": true
+  },
+  {
+    "run": "classifier-r3-baseline",
+    "task": "classifier",
+    "repetition": 3,
+    "arm": "baseline",
+    "model": "claude-sonnet-5-5",
+    "started_at": "2026-10-05T18:17:18.197933+00:00",
+    "with_claude_md": true,
+    "context_files": [
+      "CLAUDE.md"
+    ],
+    "setting_sources": "project",
+    "status": "completed",
+    "isolation_ok": true,
+    "isolation_error": null,
+    "mcp_status": {
+      "quarkus-agent": "connected",
+      "context7": "connected"
+    },
+    "agent_exit": 0,
+    "agent_timed_out": false,
+    "agent_seconds": 194.4,
+    "agent_is_error": false,
+    "agent_turns": 20,
+    "cost_usd_equivalent": 0.2919764,
+    "usage": {
+      "input_tokens": 26,
+      "cache_creation_input_tokens": 30501,
+      "cache_read_input_tokens": 421802,
+      "output_tokens": 8556,
+      "output_tokens_details": {
+        "thinking_tokens": 484
+      },
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 30501,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "not_available",
+      "iterations": [
+        {
+          "input_tokens": 2,
+          "output_tokens": 647,
+          "cache_read_input_tokens": 41955,
+          "cache_creation_input_tokens": 453,
+          "cache_creation": {
+            "ephemeral_5m_input_tokens": 0,
+            "ephemeral_1h_input_tokens": 453
+          },
+          "type": "message"
+        }
+      ],
+      "speed": "standard",
+      "fallback_credit": null
+    },
+    "final_message": "The project is in `./app` and `mvn -B -ntp -DskipTests test-compile` passes there. I did not run the tests or call a model.\n\n**What it does**\n- `POST /classify` takes the ticket as a plain-text body and returns `{\"category\": \"BILLING\" | \"TECHNICAL\" | \"OTHER\"}`.\n- The classifier uses Ollama at `OLLAMA_BASE_URL` (default `http://localhost:11434`) with model `OLLAMA_MODEL` (default `llama3.2`), at temperature 0. LangChain4j Dev Services is turned off, so no container starts.\n- The ticket is wrapped in `<ticket>` tags, and the system message tells the model to treat it as data, not instructions.\n- A guardrail rejects blank tickets and tickets over 10,000 characters.\n- Calls have a 60-second timeout and 2 retries. If they still fail, the endpoint falls back to `OTHER`, so a model outage returns 200 with `OTHER` rather than an error.\n- I added `ClassifyResourceTest`, which mocks the classifier so it needs no live model.\n\n**Project setup**\n- Created through the Quarkus Agent MCP. It checked out as reachable, and I moved the generated project from `./ticket-classifier` to `./app`.\n- It uses Quarkus 3.40.1 with Java 25.\n- The extensions are REST Jackson, OpenAPI, fault tolerance, Micrometer Prometheus, OpenTelemetry and http-problem, plus the Ollama extension.\n\n**Rough edges**\n- I didn't consult context7 or the Quarkus skills/docs tools. I found the `InputGuardrails` annotation by trial and error: it lives in `dev.langchain4j.service.guardrail`, not in a Quarkiverse package.\n- I didn't add a `README.md` entry for the endpoint, and the `native` profile is only the one the generator produced.",
+    "tool_calls": 19,
+    "failed_tool_calls": 2,
+    "agent_build_commands": 3,
+    "agent_failed_build_commands": 1,
+    "skill_invocations": [],
+    "quarkus_mcp_calls": 3,
+    "context7_calls": 0,
+    "project_dir": "app",
+    "java_files": 4,
+    "conformance": {
+      "ai_service": true,
+      "named_model": true,
+      "record_dto": true,
+      "input_guardrail": true,
+      "delimited_input": true,
+      "no_manual_wiring": true,
+      "smoke_test": true,
+      "dev_logging": true,
+      "devservices_off": true,
+      "enum_result": true,
+      "zero_temperature": true,
+      "virtual_threads": false,
+      "fault_tolerance": true
+    },
+    "generator": {
+      "dual_bom": true,
+      "no_extension_version_pins": true,
+      "java_release_25": true,
+      "parameters_flag": true,
+      "native_profile": true
+    },
+    "compile_attempts": [
+      {
+        "exit": 0,
+        "timed_out": false,
+        "seconds": 3.2
+      }
+    ],
+    "compiles_first_attempt": true,
+    "compiles_within_two": true,
+    "build_attempts_to_green": 1,
+    "successful_generation": true
+  },
+  {
+    "run": "classifier-r3-skill",
+    "task": "classifier",
+    "repetition": 3,
+    "arm": "skill",
+    "model": "claude-sonnet-5-5",
+    "started_at": "2026-10-05T18:18:43.589096+00:00",
+    "with_claude_md": true,
+    "context_files": [
+      "CLAUDE.md"
+    ],
+    "setting_sources": "project",
+    "status": "completed",
+    "isolation_ok": true,
+    "isolation_error": null,
+    "mcp_status": {
+      "quarkus-agent": "connected",
+      "context7": "connected"
+    },
+    "agent_exit": 0,
+    "agent_timed_out": false,
+    "agent_seconds": 73.8,
+    "agent_is_error": false,
+    "agent_turns": 25,
+    "cost_usd_equivalent": 0.3283934,
+    "usage": {
+      "input_tokens": 20,
+      "cache_creation_input_tokens": 46056,
+      "cache_read_input_tokens": 368797,
+      "output_tokens": 7037,
+      "output_tokens_details": {
+        "thinking_tokens": 393
+      },
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 46056,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "not_available",
+      "iterations": [
+        {
+          "input_tokens": 2,
+          "output_tokens": 621,
+          "cache_read_input_tokens": 57148,
+          "cache_creation_input_tokens": 815,
+          "cache_creation": {
+            "ephemeral_5m_input_tokens": 0,
+            "ephemeral_1h_input_tokens": 815
+          },
+          "type": "message"
+        }
+      ],
+      "speed": "standard",
+      "fallback_credit": null
+    },
+    "final_message": "The ticket classifier is in `./app`, and `mvn -B -ntp -DskipTests test-compile` passes. I did not run the tests, start the app, or call a model, so `POST /classify` is untested.\n\n**How it works:** `POST /classify` takes the ticket as `text/plain` and returns `{\"category\":\"BILLING\"|\"TECHNICAL\"|\"OTHER\"}`.\n- **Validation:** blank text or text over 4,000 characters gets a 400.\n- **Model:** the classifier uses Ollama `qwen3:1.7b` at temperature 0, configured in `application.properties`. You need `ollama pull qwen3:1.7b` and a running Ollama to use it for real.\n- **Prompt handling:** the ticket text is wrapped in `<ticket>` tags and the system message treats it as data, not instructions. A guardrail, `PromptInjectionGuard`, also rejects input that is oversized, contains `<ticket>` tags, or contains \"ignore previous instructions\".\n- **Failure behavior:** the model call has a 60-second timeout. If it fails or times out, the classification falls back to `OTHER`.\n- **Error format:** the `http-problem` extension turns errors into RFC 9457 problem responses.\n- **Dev Services:** these are off, since a real Ollama endpoint is configured.\n\n**Test:** one smoke test checks that the classifier service is wired up, without needing a model.\n\n**Deviations from the usual scaffold:**\n- I skipped `websockets-next`, since the task only asks for a REST endpoint.\n- I did not run `git init` in `./app` (the scaffold skill asks for it). The task said not to commit anything, and the MCP didn't need it.\n- I added no `README.md` for the app.\n\n**Dev-mode start:** `quarkus_create` started dev mode automatically; I stopped it after generating the project.",
+    "tool_calls": 23,
+    "failed_tool_calls": 2,
+    "agent_build_commands": 1,
+    "agent_failed_build_commands": 0,
+    "skill_invocations": [
+      "quarkus-agentic-scaffolding:scaffold-project"
+    ],
+    "quarkus_mcp_calls": 4,
+    "context7_calls": 0,
+    "project_dir": "app",
+    "java_files": 5,
+    "conformance": {
+      "ai_service": true,
+      "named_model": true,
+      "record_dto": true,
+      "input_guardrail": true,
+      "delimited_input": true,
+      "no_manual_wiring": true,
+      "smoke_test": true,
+      "dev_logging": true,
+      "devservices_off": true,
+      "enum_result": true,
+      "zero_temperature": true,
+      "virtual_threads": false,
+      "fault_tolerance": true
+    },
+    "generator": {
+      "dual_bom": true,
+      "no_extension_version_pins": true,
+      "java_release_25": true,
+      "parameters_flag": true,
+      "native_profile": true
+    },
+    "compile_attempts": [
+      {
+        "exit": 0,
+        "timed_out": false,
+        "seconds": 2.9
+      }
+    ],
+    "compiles_first_attempt": true,
+    "compiles_within_two": true,
+    "build_attempts_to_green": 1,
+    "successful_generation": true
+  },
+  {
+    "run": "mcp-server-r1-baseline",
+    "task": "mcp-server",
+    "repetition": 1,
+    "arm": "baseline",
+    "model": "claude-sonnet-5-5",
+    "started_at": "2026-10-05T18:02:54.142463+00:00",
+    "with_claude_md": true,
+    "context_files": [
+      "CLAUDE.md"
+    ],
+    "setting_sources": "project",
+    "status": "completed",
+    "isolation_ok": true,
+    "isolation_error": null,
+    "mcp_status": {
+      "quarkus-agent": "connected",
+      "context7": "connected"
+    },
+    "agent_exit": 0,
+    "agent_timed_out": false,
+    "agent_seconds": 239.6,
+    "agent_is_error": false,
+    "agent_turns": 29,
+    "cost_usd_equivalent": 0.4037842,
+    "usage": {
+      "input_tokens": 36,
+      "cache_creation_input_tokens": 35716,
+      "cache_read_input_tokens": 661691,
+      "output_tokens": 12851,
+      "output_tokens_details": {
+        "thinking_tokens": 746
+      },
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 35716,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "not_available",
+      "iterations": [
+        {
+          "input_tokens": 2,
+          "output_tokens": 843,
+          "cache_read_input_tokens": 47492,
+          "cache_creation_input_tokens": 131,
+          "cache_creation": {
+            "ephemeral_5m_input_tokens": 0,
+            "ephemeral_1h_input_tokens": 131
+          },
+          "type": "message"
+        }
+      ],
+      "speed": "standard",
+      "fallback_credit": null
+    },
+    "final_message": "The project is in `./app` (groupId `org.acme`, artifactId `order-tools`), and `mvn -B -ntp -DskipTests test-compile` passes. I did not run the app or call a live model. I also did not run the tests, including the new `OrderServiceTest`; it only compiled.\n\n- **Setup:** I created the project through the Quarkus Agents MCP, which was reachable. It auto-started dev mode, so I stopped it. The project uses Quarkus 3.40.1, Java 25 and Ollama.\n- **Orders:** `OrderService` holds a `ConcurrentHashMap` seeded with sample orders for `alice` (1001\u20131003) and `bob` (2001\u20132002). It looks up an order by id and lists a customer's most recent orders, newest first.\n- **MCP:** `OrderMcpTools` exposes `getOrderStatus` and `listRecentOrders` to remote MCP clients over HTTP, using `quarkus-mcp-server-http`. The endpoint should be `/mcp`, but I haven't started the app to confirm.\n- **`POST /assistant`:** `AssistantResource` takes `{\"question\": \"...\"}` and returns `{\"answer\": \"...\"}`. It runs on a virtual thread and calls `OrderAssistant`, an Ollama-backed assistant. The assistant uses `OrderAiTools`, which exposes the same lookups to the model.\n- **Safeguards on the assistant:**\n  - The question is wrapped in `<question>` tags, and the system message says to treat it as data.\n  - `QuestionGuardrail` rejects empty or overlong input.\n  - `@Timeout`, `@Retry` and `@Fallback` are set.\n- **Config:** The model is named `assistant` and uses `llama3.2` on `http://localhost:11434` at temperature 0. Dev Services are disabled.\n\nI left out some of the optional conventions in CLAUDE.md. There is no WebSockets streaming, no skills extension and no extra native-image setup beyond the generated `native` profile. I also didn't add Quarkus-based tests; `OrderServiceTest` is a plain unit test on the order lookups.\n\nDoc lookup was partly unavailable here. The Quarkus doc search needs a container runtime, and I couldn't search `~/.m2` for the guardrail annotation. I guessed the import as `dev.langchain4j.servic",
+    "tool_calls": 28,
+    "failed_tool_calls": 4,
+    "agent_build_commands": 5,
+    "agent_failed_build_commands": 2,
+    "skill_invocations": [],
+    "quarkus_mcp_calls": 4,
+    "context7_calls": 0,
+    "project_dir": "app",
+    "java_files": 7,
+    "conformance": {
+      "ai_service": true,
+      "named_model": true,
+      "record_dto": true,
+      "input_guardrail": true,
+      "delimited_input": true,
+      "no_manual_wiring": true,
+      "smoke_test": false,
+      "dev_logging": true,
+      "devservices_off": true,
+      "mcp_server_extension": true,
+      "mcp_tool": true,
+      "mcp_tool_arg": true,
+      "llm_tools_wired": true
+    },
+    "generator": {
+      "dual_bom": true,
+      "no_extension_version_pins": true,
+      "java_release_25": true,
+      "parameters_flag": true,
+      "native_profile": true
+    },
+    "compile_attempts": [
+      {
+        "exit": 0,
+        "timed_out": false,
+        "seconds": 3.2
+      }
+    ],
+    "compiles_first_attempt": true,
+    "compiles_within_two": true,
+    "build_attempts_to_green": 1,
+    "successful_generation": true
+  },
+  {
+    "run": "mcp-server-r1-skill",
+    "task": "mcp-server",
+    "repetition": 1,
+    "arm": "skill",
+    "model": "claude-sonnet-5-5",
+    "started_at": "2026-10-05T18:05:45.929419+00:00",
+    "with_claude_md": true,
+    "context_files": [
+      "CLAUDE.md"
+    ],
+    "setting_sources": "project",
+    "status": "completed",
+    "isolation_ok": true,
+    "isolation_error": null,
+    "mcp_status": {
+      "quarkus-agent": "connected",
+      "context7": "connected"
+    },
+    "agent_exit": 0,
+    "agent_timed_out": false,
+    "agent_seconds": 117.3,
+    "agent_is_error": false,
+    "agent_turns": 32,
+    "cost_usd_equivalent": 0.511789,
+    "usage": {
+      "input_tokens": 24,
+      "cache_creation_input_tokens": 60854,
+      "cache_read_input_tokens": 527675,
+      "output_tokens": 16279,
+      "output_tokens_details": {
+        "thinking_tokens": 1048
+      },
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 60854,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "not_available",
+      "iterations": [
+        {
+          "input_tokens": 2,
+          "output_tokens": 740,
+          "cache_read_input_tokens": 71900,
+          "cache_creation_input_tokens": 861,
+          "cache_creation": {
+            "ephemeral_5m_input_tokens": 0,
+            "ephemeral_1h_input_tokens": 861
+          },
+          "type": "message"
+        }
+      ],
+      "speed": "standard",
+      "fallback_credit": null
+    },
+    "final_message": "The project is in `./app` and `mvn -B -ntp -DskipTests test-compile` passes. I didn't run the tests, and nothing was exercised against a live model or an MCP client.\n\n- **Operations:** `OrderStore` is an in-memory map seeded with five sample orders for `alice` and `bob`. `OrderTools` holds two LangChain4j `@Tool` methods: get order status by id, and list a customer's recent orders (newest first, default 5, max 20).\n- **MCP server:** `OrderMcpServer` exposes `get_order_status` and `list_recent_orders` to remote MCP clients over Streamable HTTP at `/mcp`. It calls the same `OrderTools` methods the assistant uses.\n- **`POST /assistant`:** it takes `{\"question\": \"...\"}` and returns `{\"answer\": \"...\"}`. `OrderAssistant` is an AI service with `OrderTools` attached. The question is wrapped in `<question>` delimiters, and a prompt-injection guardrail checks it. The endpoint rejects blank or over-long questions and runs on a virtual thread. If the model call fails or times out (90 s), the endpoint returns a fallback message.\n- **Config:** Ollama is the provider (`qwen3:4b`, temperature 0), with Dev Services disabled. Prompt, response and MCP traffic logging are dev-profile only.\n- **Extensions:** `rest`, `rest-jackson`, `smallrye-openapi`, `langchain4j-ollama`, `mcp-server-http`, `http-problem` and `smallrye-fault-tolerance`. I chose these myself since no one was available to confirm.\n- **Tests:** `OrderAssistantTest` checks that the AI service is wired and that both lookups behave correctly, with no model call.\n- **Access control:** there is no authentication yet. Anyone who can reach `/mcp` or `/assistant` can query any customer's orders, so both need an access layer before production.\n- **Dev mode:** `quarkus_create` also started a dev-mode instance at port 18082. I didn't stop it.\n- **Git:** I did not run `git init` (the scaffold skill asks for it), because nothing here may be committed.",
+    "tool_calls": 30,
+    "failed_tool_calls": 3,
+    "agent_build_commands": 2,
+    "agent_failed_build_commands": 1,
+    "skill_invocations": [
+      "quarkus-agentic-scaffolding:scaffold-project"
+    ],
+    "quarkus_mcp_calls": 3,
+    "context7_calls": 0,
+    "project_dir": "app",
+    "java_files": 10,
+    "conformance": {
+      "ai_service": true,
+      "named_model": false,
+      "record_dto": true,
+      "input_guardrail": true,
+      "delimited_input": true,
+      "no_manual_wiring": true,
+      "smoke_test": true,
+      "dev_logging": true,
+      "devservices_off": true,
+      "mcp_server_extension": true,
+      "mcp_tool": true,
+      "mcp_tool_arg": true,
+      "llm_tools_wired": true
+    },
+    "generator": {
+      "dual_bom": true,
+      "no_extension_version_pins": true,
+      "java_release_25": true,
+      "parameters_flag": true,
+      "native_profile": true
+    },
+    "compile_attempts": [
+      {
+        "exit": 0,
+        "timed_out": false,
+        "seconds": 2.9
+      }
+    ],
+    "compiles_first_attempt": true,
+    "compiles_within_two": true,
+    "build_attempts_to_green": 1,
+    "successful_generation": true
+  },
+  {
+    "run": "mcp-server-r2-baseline",
+    "task": "mcp-server",
+    "repetition": 2,
+    "arm": "baseline",
+    "model": "claude-sonnet-5-5",
+    "started_at": "2026-10-05T18:15:07.121105+00:00",
+    "with_claude_md": true,
+    "context_files": [
+      "CLAUDE.md"
+    ],
+    "setting_sources": "project",
+    "status": "completed",
+    "isolation_ok": true,
+    "isolation_error": null,
+    "mcp_status": {
+      "quarkus-agent": "connected",
+      "context7": "connected"
+    },
+    "agent_exit": 0,
+    "agent_timed_out": false,
+    "agent_seconds": 213.3,
+    "agent_is_error": false,
+    "agent_turns": 22,
+    "cost_usd_equivalent": 0.350314,
+    "usage": {
+      "input_tokens": 20,
+      "cache_creation_input_tokens": 39012,
+      "cache_read_input_tokens": 320730,
+      "output_tokens": 13008,
+      "output_tokens_details": {
+        "thinking_tokens": 876
+      },
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 39012,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "not_available",
+      "iterations": [
+        {
+          "input_tokens": 2,
+          "output_tokens": 643,
+          "cache_read_input_tokens": 49860,
+          "cache_creation_input_tokens": 1059,
+          "cache_creation": {
+            "ephemeral_5m_input_tokens": 0,
+            "ephemeral_1h_input_tokens": 1059
+          },
+          "type": "message"
+        }
+      ],
+      "speed": "standard",
+      "fallback_credit": null
+    },
+    "final_message": "The project is in `./app` and `mvn -B -ntp -DskipTests test-compile` passes. I did not run the tests or start the app, and nothing was run against a live model.\n\n- **Quarkus MCP check:** `quarkus_status` succeeded, so I created the project through `quarkus_create`. It auto-started dev mode, and I stopped it right away.\n- **Order operations:** an in-memory `OrderService` holds 5 sample orders for `CUST-1` and `CUST-2`. It looks up an order by id and lists a customer's recent orders, newest first.\n- **MCP tools:** `get_order_status` and `list_recent_orders` are served to remote clients over HTTP by `quarkus-mcp-server-http`. I expect the endpoint at `/mcp`, but I haven't called it.\n- **`POST /assistant`:** it takes `{customerId, question}` and returns `{answer}`. An Ollama-backed assistant answers using the same two operations as tools. The model is `llama3.2` at `localhost:11434`, temperature 0.\n- **Prompt safety:** the question and customer id are wrapped in delimiters, and the system message tells the model to treat them as data only. An input guardrail rejects empty, oversized or delimiter-breaking input.\n- **Resilience:** the assistant call has a 90-second timeout, one retry, and a fallback message.\n- **Config and extensions:** Dev Services are disabled. Request/response logging is on in the dev profile only. The project also includes OpenAPI, Prometheus metrics and OpenTelemetry. I added `quarkus-http-problem` but haven't tried it.\n- **Tests:** `OrderServiceTest` is a `@QuarkusTest` for lookup by id and recent-order ordering. It has not been run.\n\nNot done: I didn't add a test for the MCP tools or the guardrail, and there is no `native` Maven profile beyond what the generator created.",
+    "tool_calls": 21,
+    "failed_tool_calls": 2,
+    "agent_build_commands": 2,
+    "agent_failed_build_commands": 1,
+    "skill_invocations": [],
+    "quarkus_mcp_calls": 4,
+    "context7_calls": 0,
+    "project_dir": "app",
+    "java_files": 8,
+    "conformance": {
+      "ai_service": true,
+      "named_model": false,
+      "record_dto": true,
+      "input_guardrail": true,
+      "delimited_input": true,
+      "no_manual_wiring": true,
+      "smoke_test": true,
+      "dev_logging": true,
+      "devservices_off": true,
+      "mcp_server_extension": true,
+      "mcp_tool": true,
+      "mcp_tool_arg": true,
+      "llm_tools_wired": true
+    },
+    "generator": {
+      "dual_bom": true,
+      "no_extension_version_pins": true,
+      "java_release_25": true,
+      "parameters_flag": true,
+      "native_profile": true
+    },
+    "compile_attempts": [
+      {
+        "exit": 0,
+        "timed_out": false,
+        "seconds": 3.2
+      }
+    ],
+    "compiles_first_attempt": true,
+    "compiles_within_two": true,
+    "build_attempts_to_green": 1,
+    "successful_generation": true
+  },
+  {
+    "run": "mcp-server-r2-skill",
+    "task": "mcp-server",
+    "repetition": 2,
+    "arm": "skill",
+    "model": "claude-sonnet-5-5",
+    "started_at": "2026-10-05T18:14:03.702850+00:00",
+    "with_claude_md": true,
+    "context_files": [
+      "CLAUDE.md"
+    ],
+    "setting_sources": "project",
+    "status": "completed",
+    "isolation_ok": true,
+    "isolation_error": null,
+    "mcp_status": {
+      "quarkus-agent": "connected",
+      "context7": "connected"
+    },
+    "agent_exit": 0,
+    "agent_timed_out": false,
+    "agent_seconds": 102.8,
+    "agent_is_error": false,
+    "agent_turns": 29,
+    "cost_usd_equivalent": 0.39973040000000004,
+    "usage": {
+      "input_tokens": 28,
+      "cache_creation_input_tokens": 45201,
+      "cache_read_input_tokens": 562002,
+      "output_tokens": 10647,
+      "output_tokens_details": {
+        "thinking_tokens": 714
+      },
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 45201,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "not_available",
+      "iterations": [
+        {
+          "input_tokens": 2,
+          "output_tokens": 688,
+          "cache_read_input_tokens": 56640,
+          "cache_creation_input_tokens": 468,
+          "cache_creation": {
+            "ephemeral_5m_input_tokens": 0,
+            "ephemeral_1h_input_tokens": 468
+          },
+          "type": "message"
+        }
+      ],
+      "speed": "standard",
+      "fallback_credit": null
+    },
+    "final_message": "The project is in `./app` (org.acme:order-tools, Quarkus 3.40.1, Ollama provider), and `mvn -B -ntp -DskipTests test-compile` passes.\n\nI did not run the tests or boot the app, so the Ollama wiring, the `/mcp` endpoint and `POST /assistant` are untested. The Quarkus docs search failed because it needs Docker or Podman, so I wrote the MCP code from memory of the extension's API.\n\nWithout asking, I chose these extensions: `rest`, `rest-jackson`, `smallrye-openapi`, `langchain4j-ollama`, `mcp-server-http`, `http-problem` and `smallrye-fault-tolerance`. I did not run the skill's `git init` and commit step.\n\n- **Order store:** `OrderService` holds the in-memory map, seeded with five orders for `CUST-1` and `CUST-2`. It looks up an order by id and returns a customer's most recent orders, newest first, capped at 50.\n- **Assistant tools:** `OrderTools` exposes the two operations to the LLM.\n- **MCP server:** `OrderMcpServer` offers `get_order_status` and `list_recent_orders` to remote clients over HTTP at `/mcp`. It delegates to `OrderTools`, so both paths use the same code.\n- **`POST /assistant`:** it takes `{customerId, question}` and returns `{answer}`. It rejects blank or over-long input with a 400.\n- **Assistant behaviour:** the question and customer id are wrapped in delimiters in the prompt, and a prompt-injection guard screens the input. The call has a 120-second timeout and a fallback message if the model is unavailable.\n- **Config:** Dev Services is disabled, the model is `llama3.2` at `localhost:11434` with temperature 0, and request/response and MCP traffic logging are on in dev only.\n- **Test:** `OrderWiringTest` is a `@QuarkusTest` that checks the assistant wiring and the ordering of recent orders without calling a model.",
+    "tool_calls": 27,
+    "failed_tool_calls": 4,
+    "agent_build_commands": 2,
+    "agent_failed_build_commands": 0,
+    "skill_invocations": [
+      "quarkus-agentic-scaffolding:scaffold-project"
+    ],
+    "quarkus_mcp_calls": 5,
+    "context7_calls": 0,
+    "project_dir": "app",
+    "java_files": 8,
+    "conformance": {
+      "ai_service": true,
+      "named_model": false,
+      "record_dto": true,
+      "input_guardrail": true,
+      "delimited_input": true,
+      "no_manual_wiring": true,
+      "smoke_test": true,
+      "dev_logging": true,
+      "devservices_off": true,
+      "mcp_server_extension": true,
+      "mcp_tool": true,
+      "mcp_tool_arg": true,
+      "llm_tools_wired": true
+    },
+    "generator": {
+      "dual_bom": true,
+      "no_extension_version_pins": true,
+      "java_release_25": true,
+      "parameters_flag": true,
+      "native_profile": true
+    },
+    "compile_attempts": [
+      {
+        "exit": 0,
+        "timed_out": false,
+        "seconds": 4.1
+      }
+    ],
+    "compiles_first_attempt": true,
+    "compiles_within_two": true,
+    "build_attempts_to_green": 1,
+    "successful_generation": true
+  },
+  {
+    "run": "mcp-server-r3-baseline",
+    "task": "mcp-server",
+    "repetition": 3,
+    "arm": "baseline",
+    "model": "claude-sonnet-5-5",
+    "started_at": "2026-10-05T18:22:59.310010+00:00",
+    "with_claude_md": true,
+    "context_files": [
+      "CLAUDE.md"
+    ],
+    "setting_sources": "project",
+    "status": "completed",
+    "isolation_ok": true,
+    "isolation_error": null,
+    "mcp_status": {
+      "quarkus-agent": "connected",
+      "context7": "connected"
+    },
+    "agent_exit": 0,
+    "agent_timed_out": false,
+    "agent_seconds": 216.4,
+    "agent_is_error": false,
+    "agent_turns": 22,
+    "cost_usd_equivalent": 0.34515160000000006,
+    "usage": {
+      "input_tokens": 26,
+      "cache_creation_input_tokens": 34849,
+      "cache_read_input_tokens": 427018,
+      "output_tokens": 12030,
+      "output_tokens_details": {
+        "thinking_tokens": 748
+      },
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 34849,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "not_available",
+      "iterations": [
+        {
+          "input_tokens": 2,
+          "output_tokens": 725,
+          "cache_read_input_tokens": 45953,
+          "cache_creation_input_tokens": 803,
+          "cache_creation": {
+            "ephemeral_5m_input_tokens": 0,
+            "ephemeral_1h_input_tokens": 803
+          },
+          "type": "message"
+        }
+      ],
+      "speed": "standard",
+      "fallback_credit": null
+    },
+    "final_message": "The project is in `./app` and `mvn -B -ntp -DskipTests test-compile` passes. I did not run the app, call a model, or run the tests, so none of the runtime behaviour is exercised.\n\n- **MCP tools:** `OrderMcpTools` uses `quarkus-mcp-server-http` and exposes `getOrderStatus(orderId)` and `listRecentOrders(customerId, limit)`.\n- **MCP URL:** the transport should be served at `/mcp` per the extension defaults, but I didn't confirm that.\n- **Order data:** `OrderService` holds four seeded orders in a `ConcurrentHashMap`. Both the MCP tools and the assistant tools use it.\n- **`POST /assistant`:** `AssistantResource` takes `{\"question\": \"...\"}` and returns `{\"answer\": \"...\"}`. It runs on a virtual thread and calls `OrderAssistant`, a `@RegisterAiService` backed by Ollama with the same two operations as LangChain4j tools.\n- **Prompt handling:** the question is wrapped in `<question>` tags, and the system message says it is data, not instructions. An input guardrail rejects empty, over-2000-character or tag-breaking questions.\n- **Failure handling:** the assistant method has a 60 s timeout and a fallback message if the model is unreachable.\n- **Config:** the Ollama endpoint is `http://localhost:11434` with model `llama3.2`, and Dev Services are disabled. The project also includes OpenAPI, Prometheus, OpenTelemetry and `quarkus-http-problem`.\n- **Test:** `OrderServiceTest` has two plain unit tests on the store logic.\n\n- **Directory:** `quarkus_create` put the project in `./order-tools`, so I moved it to `./app` after stopping the dev server it auto-started.\n- **Docs:** `quarkus_searchDocs` needs a container runtime and failed, and `quarkus_skills` had nothing for LangChain4j or MCP. I wrote the code from knowledge of the APIs instead; only compilation confirms the imports and annotations.\n- **README:** I did not update the project README.",
+    "tool_calls": 21,
+    "failed_tool_calls": 1,
+    "agent_build_commands": 3,
+    "agent_failed_build_commands": 1,
+    "skill_invocations": [],
+    "quarkus_mcp_calls": 5,
+    "context7_calls": 0,
+    "project_dir": "app",
+    "java_files": 7,
+    "conformance": {
+      "ai_service": true,
+      "named_model": false,
+      "record_dto": true,
+      "input_guardrail": true,
+      "delimited_input": true,
+      "no_manual_wiring": true,
+      "smoke_test": false,
+      "dev_logging": true,
+      "devservices_off": true,
+      "mcp_server_extension": true,
+      "mcp_tool": true,
+      "mcp_tool_arg": true,
+      "llm_tools_wired": true
+    },
+    "generator": {
+      "dual_bom": true,
+      "no_extension_version_pins": true,
+      "java_release_25": true,
+      "parameters_flag": true,
+      "native_profile": true
+    },
+    "compile_attempts": [
+      {
+        "exit": 0,
+        "timed_out": false,
+        "seconds": 3.2
+      }
+    ],
+    "compiles_first_attempt": true,
+    "compiles_within_two": true,
+    "build_attempts_to_green": 1,
+    "successful_generation": true
+  },
+  {
+    "run": "mcp-server-r3-skill",
+    "task": "mcp-server",
+    "repetition": 3,
+    "arm": "skill",
+    "model": "claude-sonnet-5-5",
+    "started_at": "2026-10-05T18:23:47.874519+00:00",
+    "with_claude_md": true,
+    "context_files": [
+      "CLAUDE.md"
+    ],
+    "setting_sources": "project",
+    "status": "completed",
+    "isolation_ok": true,
+    "isolation_error": null,
+    "mcp_status": {
+      "quarkus-agent": "connected",
+      "context7": "connected"
+    },
+    "agent_exit": 0,
+    "agent_timed_out": false,
+    "agent_seconds": 135.1,
+    "agent_is_error": false,
+    "agent_turns": 27,
+    "cost_usd_equivalent": 0.5453796,
+    "usage": {
+      "input_tokens": 22,
+      "cache_creation_input_tokens": 60752,
+      "cache_read_input_tokens": 474088,
+      "output_tokens": 20751,
+      "output_tokens_details": {
+        "thinking_tokens": 1611
+      },
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 60752,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "not_available",
+      "iterations": [
+        {
+          "input_tokens": 2,
+          "output_tokens": 630,
+          "cache_read_input_tokens": 71842,
+          "cache_creation_input_tokens": 817,
+          "cache_creation": {
+            "ephemeral_5m_input_tokens": 0,
+            "ephemeral_1h_input_tokens": 817
+          },
+          "type": "message"
+        }
+      ],
+      "speed": "standard",
+      "fallback_credit": null
+    },
+    "final_message": "The project is in `./app` (`org.acme:order-tools`) and `mvn -B -ntp -DskipTests test-compile` passes. I did not run the tests or the app. I also did not run the wiring test I added, and nothing called a live model, since that needs a running Ollama.\n\n- **What it does:** `get order status by id` and `list recent orders for a customer` run against an in-memory map seeded with five sample orders. The same operations are offered to remote MCP clients over HTTP at `/mcp`, and as tools to the LLM assistant behind `POST /assistant`.\n- **Assistant endpoint:** it takes `{\"question\": \"...\"}` and returns `{\"answer\": \"...\"}`. Blank or over-long questions get a 400, and the question reaches the model only inside `<question>` markers. An input guard also rejects oversized input, those markers, and \"ignore previous instructions\".\n- **Fault tolerance:** the assistant has a 120-second timeout and a fallback message if the model call fails. The REST method runs on a virtual thread.\n- **Quarkus setup:** Quarkus 3.40.1 with Java 25. I added `mcp-server-http`, `langchain4j-ollama` (model `qwen3:4b`, temperature 0), `smallrye-fault-tolerance`, `http-problem`, OpenAPI and REST with Jackson. Dev Services are off, and prompt and response logging is dev-only.\n- **Not done:**\n  - No `git init` in `app`, so the Quarkus Agents MCP tools may refuse to work on it.\n  - The `native` profile from the generated pom is unchanged and was not built.\n  - `/mcp` and `/assistant` have no authentication.\n  - There are no tests for the REST or MCP endpoints.\n\nOne thing to know: `quarkus_create` auto-started dev mode. I never confirmed whether it is still running, and I did not stop it.",
+    "tool_calls": 25,
+    "failed_tool_calls": 4,
+    "agent_build_commands": 3,
+    "agent_failed_build_commands": 2,
+    "skill_invocations": [
+      "quarkus-agentic-scaffolding:scaffold-project"
+    ],
+    "quarkus_mcp_calls": 3,
+    "context7_calls": 0,
+    "project_dir": "app",
+    "java_files": 8,
+    "conformance": {
+      "ai_service": true,
+      "named_model": false,
+      "record_dto": true,
+      "input_guardrail": true,
+      "delimited_input": true,
+      "no_manual_wiring": true,
+      "smoke_test": true,
+      "dev_logging": true,
+      "devservices_off": true,
+      "mcp_server_extension": true,
+      "mcp_tool": true,
+      "mcp_tool_arg": true,
+      "llm_tools_wired": true
+    },
+    "generator": {
+      "dual_bom": true,
+      "no_extension_version_pins": true,
+      "java_release_25": true,
+      "parameters_flag": true,
+      "native_profile": true
+    },
+    "compile_attempts": [
+      {
+        "exit": 0,
+        "timed_out": false,
+        "seconds": 3.0
+      }
+    ],
+    "compiles_first_attempt": true,
+    "compiles_within_two": true,
+    "build_attempts_to_green": 1,
+    "successful_generation": true
+  },
+  {
+    "run": "parallel-r1-baseline",
+    "task": "parallel",
+    "repetition": 1,
+    "arm": "baseline",
+    "model": "claude-sonnet-5-5",
+    "started_at": "2026-10-05T17:59:09.583578+00:00",
+    "with_claude_md": true,
+    "context_files": [
+      "CLAUDE.md"
+    ],
+    "setting_sources": "project",
+    "status": "completed",
+    "isolation_ok": true,
+    "isolation_error": null,
+    "mcp_status": {
+      "quarkus-agent": "connected",
+      "context7": "connected"
+    },
+    "agent_exit": 0,
+    "agent_timed_out": false,
+    "agent_seconds": 201.4,
+    "agent_is_error": false,
+    "agent_turns": 20,
+    "cost_usd_equivalent": 0.2872614,
+    "usage": {
+      "input_tokens": 22,
+      "cache_creation_input_tokens": 31491,
+      "cache_read_input_tokens": 334767,
+      "output_tokens": 9430,
+      "output_tokens_details": {
+        "thinking_tokens": 844
+      },
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 31491,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "not_available",
+      "iterations": [
+        {
+          "input_tokens": 2,
+          "output_tokens": 632,
+          "cache_read_input_tokens": 42217,
+          "cache_creation_input_tokens": 1181,
+          "cache_creation": {
+            "ephemeral_5m_input_tokens": 0,
+            "ephemeral_1h_input_tokens": 1181
+          },
+          "type": "message"
+        }
+      ],
+      "speed": "standard",
+      "fallback_credit": null
+    },
+    "final_message": "The project is in `./app` and `mvn -B -ntp -DskipTests test-compile` passes (BUILD SUCCESS). I didn't run the app, the test, or any model call.\n\n**The workflow:** `POST /review` takes the brief as a plain-text body and returns JSON with `technicalReview` and `businessReview`. Both reviewer agents analyse the brief in parallel, and a combine step merges their output into that report.\n\n**Stack:**\n- Ollama is the provider, with `llama3.2` at temperature 0 and the base URL from `OLLAMA_BASE_URL` (default `http://localhost:11434`).\n- Dev Services are off.\n- Both reviewers retry once, time out after 120 s, and fall back to a \"review unavailable\" message if the model call fails.\n- The `quarkus-http-problem` dependency is added.\n- The pom also carries OpenTelemetry and Prometheus.\n\n**Prompt handling:** the brief is wrapped in `<brief>` tags, and the system prompts say it is data, not instructions. The endpoint rejects empty or over-10,000-character briefs with a 400. I did not add `@InputGuardrails`, which `CLAUDE.md` asks for on entry methods that take external text. The size and empty checks are only a partial substitute.\n\n**Test:** `ReviewResourceTest` checks that a blank brief gets a 400. It has not been run.\n\n**Things you might trip over:**\n- `quarkus_create` ignored the target path and made `brief-review/`, so I stopped the auto-started dev instance and renamed the directory to `app`.\n- The `junit5` extension name resolved to a Groovy test extension, so I swapped it for `quarkus-http-problem`.\n- `quarkus_skills` found nothing for langchain4j or agentic, so I wrote the agent code from my own knowledge of the API. It compiles, but I have not run the workflow.",
+    "tool_calls": 19,
+    "failed_tool_calls": 2,
+    "agent_build_commands": 2,
+    "agent_failed_build_commands": 1,
+    "skill_invocations": [],
+    "quarkus_mcp_calls": 4,
+    "context7_calls": 0,
+    "project_dir": "app",
+    "java_files": 5,
+    "conformance": {
+      "ai_service": true,
+      "named_model": true,
+      "record_dto": true,
+      "input_guardrail": false,
+      "delimited_input": true,
+      "no_manual_wiring": true,
+      "smoke_test": true,
+      "dev_logging": true,
+      "devservices_off": true,
+      "agentic_extension": true,
+      "agent_annotation": true,
+      "parallel_agent": true,
+      "no_executor_glue": true
+    },
+    "generator": {
+      "dual_bom": true,
+      "no_extension_version_pins": true,
+      "java_release_25": true,
+      "parameters_flag": true,
+      "native_profile": true
+    },
+    "compile_attempts": [
+      {
+        "exit": 0,
+        "timed_out": false,
+        "seconds": 2.9
+      }
+    ],
+    "compiles_first_attempt": true,
+    "compiles_within_two": true,
+    "build_attempts_to_green": 1,
+    "successful_generation": true
+  },
+  {
+    "run": "parallel-r1-skill",
+    "task": "parallel",
+    "repetition": 1,
+    "arm": "skill",
+    "model": "claude-sonnet-5-5",
+    "started_at": "2026-10-05T18:00:51.651588+00:00",
+    "with_claude_md": true,
+    "context_files": [
+      "CLAUDE.md"
+    ],
+    "setting_sources": "project",
+    "status": "completed",
+    "isolation_ok": true,
+    "isolation_error": null,
+    "mcp_status": {
+      "quarkus-agent": "connected",
+      "context7": "connected"
+    },
+    "agent_exit": 0,
+    "agent_timed_out": false,
+    "agent_seconds": 106.6,
+    "agent_is_error": false,
+    "agent_turns": 26,
+    "cost_usd_equivalent": 0.4327978,
+    "usage": {
+      "input_tokens": 20,
+      "cache_creation_input_tokens": 56550,
+      "cache_read_input_tokens": 404489,
+      "output_tokens": 12566,
+      "output_tokens_details": {
+        "thinking_tokens": 843
+      },
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 56550,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "not_available",
+      "iterations": [
+        {
+          "input_tokens": 2,
+          "output_tokens": 899,
+          "cache_read_input_tokens": 67383,
+          "cache_creation_input_tokens": 1074,
+          "cache_creation": {
+            "ephemeral_5m_input_tokens": 0,
+            "ephemeral_1h_input_tokens": 1074
+          },
+          "type": "message"
+        }
+      ],
+      "speed": "standard",
+      "fallback_credit": null
+    },
+    "final_message": "The project is in `./app` and `mvn -B -ntp -DskipTests test-compile` passes. I didn't run the wiring test, start the app, or call a live Ollama model, so the workflow itself is untested.\n\n**What it does.** `POST /review` takes `{\"brief\": \"...\"}`. A parallel agent (`ReviewAgent`) runs a `TechnicalReviewer` and a `BusinessReviewer` at the same time. An `@Output` method combines their results into one `ReviewReport` with a `technical` and a `business` section. Each reviewer returns a summary plus two lists (risks and recommendations for technical, opportunities and concerns for business).\n\n**Project setup**\n- I created the project through the Quarkus Agents MCP, after confirming it was reachable.\n- Extensions: `rest`, `rest-jackson`, `smallrye-openapi`, `langchain4j-ollama`, `langchain4j-agentic`, `http-problem` and `smallrye-fault-tolerance`.\n- Quarkus platform 3.40.1, Java 25.\n- Without a user to ask, I picked the extensions, the version and the default models myself.\n- `smallrye-fault-tolerance` is on the classpath but unused: I didn't add `@Timeout`, `@Retry` or `@Fallback` to the agent methods.\n- `./app` is not under git, since you said not to commit. The skill says the MCP needs a git repo for some calls, but `quarkus_status` worked without one and I made no later MCP calls.\n\n**Model configuration.** Both reviewers use a named `smaller` model: `qwen3:1.7b`, temperature 0. The default model is `qwen3:4b`. Dev Services are disabled, and prompt and response logging is dev-only.\n\n**Safety on the brief.** Since the brief is externally written text:\n- It goes into the prompts only inside `<brief>` tags, and the system message says it is data, not instructions.\n- Both reviewers carry `@InputGuardrails(PromptInjectionGuard.class)`.\n- The endpoint rejects blank briefs and briefs over 8,000 characters. `http-problem` turns any escaping exception into an `application/problem+json` response.\n- I rewrote the guard from the skill's template. The template would have rejected ev",
+    "tool_calls": 24,
+    "failed_tool_calls": 3,
+    "agent_build_commands": 2,
+    "agent_failed_build_commands": 1,
+    "skill_invocations": [
+      "quarkus-agentic-scaffolding:scaffold-project"
+    ],
+    "quarkus_mcp_calls": 3,
+    "context7_calls": 0,
+    "project_dir": "app",
+    "java_files": 9,
+    "conformance": {
+      "ai_service": true,
+      "named_model": true,
+      "record_dto": true,
+      "input_guardrail": true,
+      "delimited_input": true,
+      "no_manual_wiring": true,
+      "smoke_test": true,
+      "dev_logging": true,
+      "devservices_off": true,
+      "agentic_extension": true,
+      "agent_annotation": true,
+      "parallel_agent": true,
+      "no_executor_glue": true
+    },
+    "generator": {
+      "dual_bom": true,
+      "no_extension_version_pins": true,
+      "java_release_25": true,
+      "parameters_flag": true,
+      "native_profile": true
+    },
+    "compile_attempts": [
+      {
+        "exit": 0,
+        "timed_out": false,
+        "seconds": 2.9
+      }
+    ],
+    "compiles_first_attempt": true,
+    "compiles_within_two": true,
+    "build_attempts_to_green": 1,
+    "successful_generation": true
+  },
+  {
+    "run": "parallel-r2-baseline",
+    "task": "parallel",
+    "repetition": 2,
+    "arm": "baseline",
+    "model": "claude-sonnet-5-5",
+    "started_at": "2026-10-05T18:10:26.305400+00:00",
+    "with_claude_md": true,
+    "context_files": [
+      "CLAUDE.md"
+    ],
+    "setting_sources": "project",
+    "status": "completed",
+    "isolation_ok": true,
+    "isolation_error": null,
+    "mcp_status": {
+      "quarkus-agent": "connected",
+      "context7": "connected"
+    },
+    "agent_exit": 0,
+    "agent_timed_out": false,
+    "agent_seconds": 212.5,
+    "agent_is_error": false,
+    "agent_turns": 20,
+    "cost_usd_equivalent": 0.3215804,
+    "usage": {
+      "input_tokens": 20,
+      "cache_creation_input_tokens": 34976,
+      "cache_read_input_tokens": 303232,
+      "output_tokens": 12099,
+      "output_tokens_details": {
+        "thinking_tokens": 1884
+      },
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 34976,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "not_available",
+      "iterations": [
+        {
+          "input_tokens": 2,
+          "output_tokens": 864,
+          "cache_read_input_tokens": 41005,
+          "cache_creation_input_tokens": 5878,
+          "cache_creation": {
+            "ephemeral_5m_input_tokens": 0,
+            "ephemeral_1h_input_tokens": 5878
+          },
+          "type": "message"
+        }
+      ],
+      "speed": "standard",
+      "fallback_credit": null
+    },
+    "final_message": "The project is in `./app` and `mvn -B -ntp -DskipTests test-compile` passes. I did not run the tests or the app, and nothing called a live model.\n\n`POST /review` takes `{\"brief\": \"...\"}` and returns `{technicalReview, businessReview, summary}`. `summary` is the combined report in markdown.\n\n- **Workflow:** `TechnicalReviewer` and `BusinessReviewer` are the two agents, and `BriefReviewWorkflow` runs them in parallel. Its `@Output` method puts both reviews into the combined report. `ReviewResource` runs on a virtual thread and rejects an empty brief with a 400.\n- **Brief handling:** the brief goes into the prompt inside `<brief>` tags, and the system message says it is data, not instructions. Both reviewers also check it with `BriefInputGuardrail`, which rejects empty briefs and briefs over 20,000 characters.\n- **Failure behaviour:** each reviewer has a 120 s timeout, one retry, and a fallback that returns an \"unavailable\" message. If the model is down, the endpoint still returns a report rather than an error.\n- **Model setup:** Ollama is the provider. Dev Services is disabled. The base URL defaults to `localhost:11434`, and both reviewers use a named `reviewer` model (`llama3.2`, temperature 0.2). Both can be overridden with `OLLAMA_BASE_URL` and `OLLAMA_MODEL`.\n- **Extensions:** besides the agentic and Ollama extensions, I added OpenAPI, fault tolerance, `quarkus-http-problem`, Prometheus metrics and OpenTelemetry, as the conventions ask.\n- **Test:** `ReviewResourceTest` only checks that a blank brief gets a 400.\n\nThree things differ from what you might expect:\n\n- **Docs lookup:** `quarkus_searchDocs` failed because it needs a container runtime, so I wrote the agentic annotations (`@ParallelAgent`, `@Output`, `@Agent`) from memory. They compile, but I haven't seen them work at runtime. I didn't try the context7 lookup.\n- **Project location:** `quarkus_create` put the project in `brief-review/`, and it auto-started dev mode. I stopped it and renamed the directory to ",
+    "tool_calls": 19,
+    "failed_tool_calls": 1,
+    "agent_build_commands": 2,
+    "agent_failed_build_commands": 1,
+    "skill_invocations": [],
+    "quarkus_mcp_calls": 5,
+    "context7_calls": 0,
+    "project_dir": "app",
+    "java_files": 6,
+    "conformance": {
+      "ai_service": true,
+      "named_model": true,
+      "record_dto": true,
+      "input_guardrail": true,
+      "delimited_input": true,
+      "no_manual_wiring": true,
+      "smoke_test": true,
+      "dev_logging": true,
+      "devservices_off": true,
+      "agentic_extension": true,
+      "agent_annotation": true,
+      "parallel_agent": true,
+      "no_executor_glue": true
+    },
+    "generator": {
+      "dual_bom": true,
+      "no_extension_version_pins": true,
+      "java_release_25": true,
+      "parameters_flag": true,
+      "native_profile": true
+    },
+    "compile_attempts": [
+      {
+        "exit": 0,
+        "timed_out": false,
+        "seconds": 4.9
+      }
+    ],
+    "compiles_first_attempt": true,
+    "compiles_within_two": true,
+    "build_attempts_to_green": 1,
+    "successful_generation": true
+  },
+  {
+    "run": "parallel-r2-skill",
+    "task": "parallel",
+    "repetition": 2,
+    "arm": "skill",
+    "model": "claude-sonnet-5-5",
+    "started_at": "2026-10-05T18:09:15.130180+00:00",
+    "with_claude_md": true,
+    "context_files": [
+      "CLAUDE.md"
+    ],
+    "setting_sources": "project",
+    "status": "completed",
+    "isolation_ok": true,
+    "isolation_error": null,
+    "mcp_status": {
+      "quarkus-agent": "connected",
+      "context7": "connected"
+    },
+    "agent_exit": 0,
+    "agent_timed_out": false,
+    "agent_seconds": 116.7,
+    "agent_is_error": false,
+    "agent_turns": 32,
+    "cost_usd_equivalent": 0.5217733999999999,
+    "usage": {
+      "input_tokens": 26,
+      "cache_creation_input_tokens": 61941,
+      "cache_read_input_tokens": 592737,
+      "output_tokens": 15541,
+      "output_tokens_details": {
+        "thinking_tokens": 1207
+      },
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 61941,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "not_available",
+      "iterations": [
+        {
+          "input_tokens": 2,
+          "output_tokens": 840,
+          "cache_read_input_tokens": 72947,
+          "cache_creation_input_tokens": 901,
+          "cache_creation": {
+            "ephemeral_5m_input_tokens": 0,
+            "ephemeral_1h_input_tokens": 901
+          },
+          "type": "message"
+        }
+      ],
+      "speed": "standard",
+      "fallback_credit": null
+    },
+    "final_message": "The project is in `./app`, and `mvn -B -ntp -DskipTests test-compile` passes. I haven't run any tests, so the workflow itself is untested. I also haven't run the app or called a live model.\n\nI created the project through the Quarkus Agents MCP (it was reachable) with Quarkus 3.40.1, Java 25 and Ollama as the provider. Extensions: `rest`, `rest-jackson`, `smallrye-openapi`, `langchain4j-ollama`, `langchain4j-agentic`, `smallrye-fault-tolerance` and `http-problem`. I picked these myself; the unattended run meant I couldn't use the skill's step of asking you to choose.\n\n**How `POST /review` works** (`ReviewResource`):\n- **Request and response:** it takes `{\"brief\": \"...\"}` and returns a `ReviewReport` containing the technical review, the business review and a summary.\n- **Edge checks:** a blank or over-long brief (more than 8,000 characters) gets a 400 before any model call.\n- **Threading:** the workflow runs on a virtual thread, since it blocks.\n- **Errors:** other failures leave as RFC 9457 problem responses.\n\n**Workflow** (`BriefReviewAgent`): a `TechnicalReviewer` and a `BusinessReviewer` run in parallel and each returns a record. A `ReportWriter` agent then combines both reviews into an executive summary, and an `@Output` method assembles the final report.\n\n**Safety:** the two reviewers see the raw brief, so each carries `PromptInjectionGuard` (length limit, reserved-tag rejection, an \"ignore previous instructions\" check). They also wrap the brief in `<brief>\u2026</brief>` and tell the model it is data. The writer only sees model output, which is also delimited.\n\n**Models** (`application.properties`): `qwen3:4b` is the default and `qwen3:1.7b` is a named `smaller` model with temperature 0 that the reviewers use. Dev Services are off, and request/response logging is on in dev only.\n\n**Test:** `ReviewWiringTest` checks that the workflow bean injects and that a blank brief returns 400. It needs no model but was not run.\n\n**Gaps:**\n- I did not put `@Timeout`, `@Retry` or ",
+    "tool_calls": 30,
+    "failed_tool_calls": 3,
+    "agent_build_commands": 2,
+    "agent_failed_build_commands": 1,
+    "skill_invocations": [
+      "quarkus-agentic-scaffolding:scaffold-project"
+    ],
+    "quarkus_mcp_calls": 4,
+    "context7_calls": 0,
+    "project_dir": "app",
+    "java_files": 11,
+    "conformance": {
+      "ai_service": true,
+      "named_model": true,
+      "record_dto": true,
+      "input_guardrail": true,
+      "delimited_input": true,
+      "no_manual_wiring": true,
+      "smoke_test": true,
+      "dev_logging": true,
+      "devservices_off": true,
+      "agentic_extension": true,
+      "agent_annotation": true,
+      "parallel_agent": true,
+      "no_executor_glue": true
+    },
+    "generator": {
+      "dual_bom": true,
+      "no_extension_version_pins": true,
+      "java_release_25": true,
+      "parameters_flag": true,
+      "native_profile": true
+    },
+    "compile_attempts": [
+      {
+        "exit": 0,
+        "timed_out": false,
+        "seconds": 2.8
+      }
+    ],
+    "compiles_first_attempt": true,
+    "compiles_within_two": true,
+    "build_attempts_to_green": 1,
+    "successful_generation": true
+  },
+  {
+    "run": "parallel-r3-baseline",
+    "task": "parallel",
+    "repetition": 3,
+    "arm": "baseline",
+    "model": "claude-sonnet-5-5",
+    "started_at": "2026-10-05T18:19:20.789717+00:00",
+    "with_claude_md": true,
+    "context_files": [
+      "CLAUDE.md"
+    ],
+    "setting_sources": "project",
+    "status": "completed",
+    "isolation_ok": true,
+    "isolation_error": null,
+    "mcp_status": {
+      "quarkus-agent": "connected",
+      "context7": "connected"
+    },
+    "agent_exit": 0,
+    "agent_timed_out": false,
+    "agent_seconds": 215.5,
+    "agent_is_error": false,
+    "agent_turns": 25,
+    "cost_usd_equivalent": 0.3608022,
+    "usage": {
+      "input_tokens": 30,
+      "cache_creation_input_tokens": 35454,
+      "cache_read_input_tokens": 525881,
+      "output_tokens": 11375,
+      "output_tokens_details": {
+        "thinking_tokens": 1399
+      },
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 35454,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "not_available",
+      "iterations": [
+        {
+          "input_tokens": 2,
+          "output_tokens": 747,
+          "cache_read_input_tokens": 46959,
+          "cache_creation_input_tokens": 402,
+          "cache_creation": {
+            "ephemeral_5m_input_tokens": 0,
+            "ephemeral_1h_input_tokens": 402
+          },
+          "type": "message"
+        }
+      ],
+      "speed": "standard",
+      "fallback_credit": null
+    },
+    "final_message": "The project is created in `./app` and `mvn -B -ntp -DskipTests test-compile` passes. I haven't started the app or hit the endpoint, and I didn't add tests. I also couldn't read the agentic extension's docs, so the agent and workflow annotations are from memory and are only checked by compiling.\n\n**How it works**\n- `POST /review` takes `{\"brief\": \"...\"}` and returns a `ReviewReport` JSON with `technicalReview`, `businessReview` and a combined markdown `report`. A blank brief gets a 400.\n- `TechnicalReviewer` and `BusinessReviewer` are the two reviewer agents, both on a named `reviewer` model.\n- `BriefReviewWorkflow` runs the two in parallel and merges their outputs into the report.\n- The brief is wrapped in `<brief>\u2026</brief>` and the system prompts treat it as data. `BriefInputGuardrail` rejects empty, oversized (over 20,000 characters) or delimiter-breaking input.\n- Each reviewer has a 120 s timeout, one retry and a fallback message. If the model can't be reached, that section of the report says the review is unavailable rather than the request failing.\n\n**Setup**\n- The Ollama model provider points at `http://localhost:11434` with model `llama3.2`; the model id is a placeholder, so change it to whichever model you have pulled.\n- Dev Services is disabled, so nothing starts a container.\n- The other extensions are Quarkus REST with Jackson, OpenAPI, fault tolerance, Prometheus metrics, OpenTelemetry and `quarkus-http-problem`.\n- The generated `pom.xml` has `maven.compiler.release` 25, `-parameters` and a native profile.\n\n**Not checked**\n- I couldn't run the app, so the fallback methods, the guardrail and the parallel merge are untested at runtime. The fallback is the likeliest to need a fix, because the extension may treat the default fallback method on the `@Agent` interface differently than I assumed.\n- Docs search failed because it needs Docker or Podman, which isn't available here.",
+    "tool_calls": 24,
+    "failed_tool_calls": 5,
+    "agent_build_commands": 7,
+    "agent_failed_build_commands": 4,
+    "skill_invocations": [],
+    "quarkus_mcp_calls": 5,
+    "context7_calls": 0,
+    "project_dir": "app",
+    "java_files": 6,
+    "conformance": {
+      "ai_service": true,
+      "named_model": true,
+      "record_dto": true,
+      "input_guardrail": true,
+      "delimited_input": true,
+      "no_manual_wiring": true,
+      "smoke_test": false,
+      "dev_logging": true,
+      "devservices_off": true,
+      "agentic_extension": true,
+      "agent_annotation": true,
+      "parallel_agent": true,
+      "no_executor_glue": true
+    },
+    "generator": {
+      "dual_bom": true,
+      "no_extension_version_pins": true,
+      "java_release_25": true,
+      "parameters_flag": true,
+      "native_profile": true
+    },
+    "compile_attempts": [
+      {
+        "exit": 0,
+        "timed_out": false,
+        "seconds": 3.0
+      }
+    ],
+    "compiles_first_attempt": true,
+    "compiles_within_two": true,
+    "build_attempts_to_green": 1,
+    "successful_generation": true
+  },
+  {
+    "run": "parallel-r3-skill",
+    "task": "parallel",
+    "repetition": 3,
+    "arm": "skill",
+    "model": "claude-sonnet-5-5",
+    "started_at": "2026-10-05T18:20:00.313935+00:00",
+    "with_claude_md": true,
+    "context_files": [
+      "CLAUDE.md"
+    ],
+    "setting_sources": "project",
+    "status": "completed",
+    "isolation_ok": true,
+    "isolation_error": null,
+    "mcp_status": {
+      "quarkus-agent": "connected",
+      "context7": "connected"
+    },
+    "agent_exit": 0,
+    "agent_timed_out": false,
+    "agent_seconds": 120.6,
+    "agent_is_error": false,
+    "agent_turns": 28,
+    "cost_usd_equivalent": 0.48365099999999994,
+    "usage": {
+      "input_tokens": 22,
+      "cache_creation_input_tokens": 60232,
+      "cache_read_input_tokens": 491145,
+      "output_tokens": 14445,
+      "output_tokens_details": {
+        "thinking_tokens": 1320
+      },
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 60232,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "not_available",
+      "iterations": [
+        {
+          "input_tokens": 2,
+          "output_tokens": 809,
+          "cache_read_input_tokens": 71029,
+          "cache_creation_input_tokens": 1110,
+          "cache_creation": {
+            "ephemeral_5m_input_tokens": 0,
+            "ephemeral_1h_input_tokens": 1110
+          },
+          "type": "message"
+        }
+      ],
+      "speed": "standard",
+      "fallback_credit": null
+    },
+    "final_message": "The project is in `./app` and `mvn -B -ntp -DskipTests test-compile` passes. I did not run the app or any test, so the workflow has never executed. The one test I added, `ReviewResourceTest` (a blank brief returns 400), is compiled but unrun.\n\nThe Quarkus Agents MCP responded, so I created the project through `quarkus_create`. I chose Quarkus 3.40.1, Java 25, and the extensions `rest`, `rest-jackson`, `smallrye-openapi`, `langchain4j-ollama`, `langchain4j-agentic`, `smallrye-fault-tolerance` and `http-problem`. I made those choices myself because the run was unattended.\n\n**How `POST /review` works:**\n- **Request and response:** it takes `{\"brief\": \"...\"}` and returns `{technical, business}`. `ReviewResource` rejects a blank or oversized brief with a 400 before any model call, and runs on a virtual thread.\n- **Parallel agents:** `BriefReviewAgent` is a `@ParallelAgent` that runs `TechnicalReviewer` and `BusinessReviewer` at the same time. An `@Output` method merges their two reviews into one `ReviewReport`.\n- **Prompt-injection protection:** the brief is wrapped in `<brief>\u2026</brief>` and the system prompts say it is data, not instructions. Both reviewers also carry a `PromptInjectionGuard` input guardrail.\n- **Fault tolerance:** each reviewer has a 120-second timeout, one retry, and a fallback that returns an \"unavailable\" review. I haven't tested the fallback methods on the agent interfaces at runtime.\n- **Ollama:** `application.properties` sets `qwen3:4b` at temperature 0, with Dev Services off. Prompt and response logging is on in the dev profile only.\n\n**Deviations and loose ends:**\n- **Guard changed from the template:** the template's guard would reject every call, because it scans the whole rendered message, including the prompt's own `<ticket>` tags. Mine strips the outer `<brief>` pair and checks only what the author wrote.\n- **Dev mode started:** `quarkus_create` auto-started dev mode, which may still be running.\n- **Git repo:** the skill says to put the pro",
+    "tool_calls": 26,
+    "failed_tool_calls": 2,
+    "agent_build_commands": 2,
+    "agent_failed_build_commands": 1,
+    "skill_invocations": [
+      "quarkus-agentic-scaffolding:scaffold-project"
+    ],
+    "quarkus_mcp_calls": 3,
+    "context7_calls": 0,
+    "project_dir": "app",
+    "java_files": 9,
+    "conformance": {
+      "ai_service": true,
+      "named_model": false,
+      "record_dto": true,
+      "input_guardrail": true,
+      "delimited_input": true,
+      "no_manual_wiring": true,
+      "smoke_test": true,
+      "dev_logging": true,
+      "devservices_off": true,
+      "agentic_extension": true,
+      "agent_annotation": true,
+      "parallel_agent": true,
+      "no_executor_glue": true
+    },
+    "generator": {
+      "dual_bom": true,
+      "no_extension_version_pins": true,
+      "java_release_25": true,
+      "parameters_flag": true,
+      "native_profile": true
+    },
+    "compile_attempts": [
+      {
+        "exit": 0,
+        "timed_out": false,
+        "seconds": 2.8
+      }
+    ],
+    "compiles_first_attempt": true,
+    "compiles_within_two": true,
+    "build_attempts_to_green": 1,
+    "successful_generation": true
+  },
+  {
+    "run": "rag-r1-baseline",
+    "task": "rag",
+    "repetition": 1,
+    "arm": "baseline",
+    "model": "claude-sonnet-5-5",
+    "started_at": "2026-10-05T18:02:33.981988+00:00",
+    "with_claude_md": true,
+    "context_files": [
+      "CLAUDE.md"
+    ],
+    "setting_sources": "project",
+    "status": "completed",
+    "isolation_ok": true,
+    "isolation_error": null,
+    "mcp_status": {
+      "quarkus-agent": "connected",
+      "context7": "connected"
+    },
+    "agent_exit": 0,
+    "agent_timed_out": false,
+    "agent_seconds": 188.6,
+    "agent_is_error": false,
+    "agent_turns": 16,
+    "cost_usd_equivalent": 0.2543862,
+    "usage": {
+      "input_tokens": 20,
+      "cache_creation_input_tokens": 29211,
+      "cache_read_input_tokens": 306961,
+      "output_tokens": 7611,
+      "output_tokens_details": {
+        "thinking_tokens": 614
+      },
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 29211,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "not_available",
+      "iterations": [
+        {
+          "input_tokens": 2,
+          "output_tokens": 751,
+          "cache_read_input_tokens": 40512,
+          "cache_creation_input_tokens": 606,
+          "cache_creation": {
+            "ephemeral_5m_input_tokens": 0,
+            "ephemeral_1h_input_tokens": 606
+          },
+          "type": "message"
+        }
+      ],
+      "speed": "standard",
+      "fallback_credit": null
+    },
+    "final_message": "The new project is in `./app` and `mvn -B -ntp -DskipTests test-compile` passes there. I didn't run the tests or the app, and nothing was run against a live model.\n\n- **Project:** `org.acme:docs-qa` on Quarkus 3.40.1 (`quarkus_status` succeeded first). It uses Java 25, with `-parameters` and a `native` profile. It also includes the Ollama, Easy RAG and fault-tolerance extensions, plus RFC 9457 error responses, OpenAPI, Prometheus metrics and OpenTelemetry.\n- **Ingestion:** Easy RAG loads the Markdown files in `./docs` at startup, or from `DOCS_PATH` if you set it. It uses the bundled in-process embedding model `langchain4j-embeddings-bge-small-en-q`, which is not managed by the BOM. I pinned it to `1.0.0-beta3` and did not check whether that is the right version for this platform.\n- **Sample document:** `docs/quarkus-overview.md`.\n- **`POST /ask`:** it takes `{\"question\": \"...\"}` and returns `{\"answer\": \"...\"}`. A blank or missing question gives a 400. The call runs on a virtual thread.\n- **Answering:** `DocsAssistant` answers only from the retrieved excerpts. It wraps the question in `<question>` tags and treats it as data, not instructions. It has a 60-second timeout and falls back to an \"unavailable\" message if the model call fails.\n- **Model settings:** the endpoint and model come from `OLLAMA_URL` (default `http://localhost:11434`) and `OLLAMA_MODEL` (default `llama3.2`), with temperature 0. Dev Services are off.\n- **Test:** `AskResourceTest` checks that a blank question returns 400. I didn't run it, and startup ingestion may need the embedding model to load.\n- **Skipped:** I did not run `quarkus_skills`, and the context7 lookup was skipped. The extension setup came from my own knowledge and was only checked by compiling.\n- **Cleanup:** `quarkus_create` auto-started the app in dev mode, so I stopped it right after creating the project. I didn't check whether it touched containers.",
+    "tool_calls": 15,
+    "failed_tool_calls": 1,
+    "agent_build_commands": 2,
+    "agent_failed_build_commands": 1,
+    "skill_invocations": [],
+    "quarkus_mcp_calls": 3,
+    "context7_calls": 0,
+    "project_dir": "app",
+    "java_files": 2,
+    "conformance": {
+      "ai_service": true,
+      "named_model": false,
+      "record_dto": true,
+      "input_guardrail": false,
+      "delimited_input": true,
+      "no_manual_wiring": true,
+      "smoke_test": true,
+      "dev_logging": true,
+      "devservices_off": true,
+      "easy_rag_extension": true,
+      "easy_rag_path": true,
+      "embedding_dependency": true,
+      "sample_document": true
+    },
+    "generator": {
+      "dual_bom": true,
+      "no_extension_version_pins": false,
+      "java_release_25": true,
+      "parameters_flag": true,
+      "native_profile": true
+    },
+    "compile_attempts": [
+      {
+        "exit": 0,
+        "timed_out": false,
+        "seconds": 3.3
+      }
+    ],
+    "compiles_first_attempt": true,
+    "compiles_within_two": true,
+    "build_attempts_to_green": 1,
+    "successful_generation": true
+  },
+  {
+    "run": "rag-r1-skill",
+    "task": "rag",
+    "repetition": 1,
+    "arm": "skill",
+    "model": "claude-sonnet-5-5",
+    "started_at": "2026-10-05T18:02:41.271799+00:00",
+    "with_claude_md": true,
+    "context_files": [
+      "CLAUDE.md"
+    ],
+    "setting_sources": "project",
+    "status": "completed",
+    "isolation_ok": true,
+    "isolation_error": null,
+    "mcp_status": {
+      "quarkus-agent": "connected",
+      "context7": "connected"
+    },
+    "agent_exit": 0,
+    "agent_timed_out": false,
+    "agent_seconds": 215.8,
+    "agent_is_error": false,
+    "agent_turns": 27,
+    "cost_usd_equivalent": 0.3875451999999999,
+    "usage": {
+      "input_tokens": 24,
+      "cache_creation_input_tokens": 46428,
+      "cache_read_input_tokens": 477926,
+      "output_tokens": 10620,
+      "output_tokens_details": {
+        "thinking_tokens": 534
+      },
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 46428,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "not_available",
+      "iterations": [
+        {
+          "input_tokens": 2,
+          "output_tokens": 857,
+          "cache_read_input_tokens": 57888,
+          "cache_creation_input_tokens": 447,
+          "cache_creation": {
+            "ephemeral_5m_input_tokens": 0,
+            "ephemeral_1h_input_tokens": 447
+          },
+          "type": "message"
+        }
+      ],
+      "speed": "standard",
+      "fallback_credit": null
+    },
+    "final_message": "The project is in `./app` and `mvn -B -ntp -DskipTests test-compile` passes. I haven't run the app or any tests, and I haven't called a live model.\n\n- **Created with the MCP:** I checked the Quarkus Agents MCP first, then made the project with `quarkus_create` on the Quarkus 3.40.1 platform. The extensions are `rest`, `rest-jackson`, `smallrye-openapi`, `langchain4j-ollama`, `langchain4j-easy-rag`, `smallrye-fault-tolerance` and `http-problem`. I added the in-process `langchain4j-embeddings-bge-small-en-v15-q` embedding model by hand, since Easy RAG needs one. `quarkus_create` auto-starts dev mode, so I stopped it right afterwards.\n- **Skipped steps:** I did not run `quarkus_skills` or `git init` (the skill says the MCP needs a git repo), and I didn't make a `native` profile or an extension-choice pause (the run is unattended). The generated `pom.xml` already had a `native` profile.\n- **Sample document:** `docs/quarkus-overview.md`.\n- **Document folder:** `quarkus.langchain4j.easy-rag.path=docs` in `application.properties`. Easy RAG loads the Markdown files in `docs/` into an in-memory store on startup.\n- **AI service:** `org.acme.ai.DocsAssistant` is a `@RegisterAiService` that answers from the retrieved context and says it doesn't know otherwise. The question is wrapped in `<question>` tags and treated as data. It carries `@InputGuardrails(PromptInjectionGuard.class)`, plus `@Timeout`, `@Retry` and a `@Fallback` that returns a \"temporarily unavailable\" message.\n- **Endpoint:** `POST /ask` takes `{\"question\": \"...\"}` and returns `{\"answer\": \"...\"}`. A blank question returns 400. The resource is `org.acme.rest.AskResource` and runs on a virtual thread.\n- **Ollama setup:** the default chat model is `qwen3:4b` at temperature 0. Dev Services are disabled and request/response logging is on in `%dev` only.\n- **Test:** `DocsAssistantTest` is a `@QuarkusTest` that only checks the AI service is wired, so it needs no Ollama. I have not run it.\n\nTo use it for real, run `ollam",
+    "tool_calls": 25,
+    "failed_tool_calls": 4,
+    "agent_build_commands": 2,
+    "agent_failed_build_commands": 1,
+    "skill_invocations": [
+      "quarkus-agentic-scaffolding:scaffold-project"
+    ],
+    "quarkus_mcp_calls": 3,
+    "context7_calls": 0,
+    "project_dir": "app",
+    "java_files": 5,
+    "conformance": {
+      "ai_service": true,
+      "named_model": false,
+      "record_dto": true,
+      "input_guardrail": true,
+      "delimited_input": true,
+      "no_manual_wiring": true,
+      "smoke_test": true,
+      "dev_logging": true,
+      "devservices_off": true,
+      "easy_rag_extension": true,
+      "easy_rag_path": true,
+      "embedding_dependency": true,
+      "sample_document": true
+    },
+    "generator": {
+      "dual_bom": true,
+      "no_extension_version_pins": true,
+      "java_release_25": true,
+      "parameters_flag": true,
+      "native_profile": true
+    },
+    "compile_attempts": [
+      {
+        "exit": 0,
+        "timed_out": false,
+        "seconds": 3.4
+      }
+    ],
+    "compiles_first_attempt": true,
+    "compiles_within_two": true,
+    "build_attempts_to_green": 1,
+    "successful_generation": true
+  },
+  {
+    "run": "rag-r2-baseline",
+    "task": "rag",
+    "repetition": 2,
+    "arm": "baseline",
+    "model": "claude-sonnet-5-5",
+    "started_at": "2026-10-05T18:11:45.187750+00:00",
+    "with_claude_md": true,
+    "context_files": [
+      "CLAUDE.md"
+    ],
+    "setting_sources": "project",
+    "status": "completed",
+    "isolation_ok": true,
+    "isolation_error": null,
+    "mcp_status": {
+      "quarkus-agent": "connected",
+      "context7": "connected"
+    },
+    "agent_exit": 0,
+    "agent_timed_out": false,
+    "agent_seconds": 224.5,
+    "agent_is_error": false,
+    "agent_turns": 28,
+    "cost_usd_equivalent": 0.3359230000000001,
+    "usage": {
+      "input_tokens": 36,
+      "cache_creation_input_tokens": 31905,
+      "cache_read_input_tokens": 614105,
+      "output_tokens": 8541,
+      "output_tokens_details": {
+        "thinking_tokens": 765
+      },
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 31905,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "not_available",
+      "iterations": [
+        {
+          "input_tokens": 2,
+          "output_tokens": 623,
+          "cache_read_input_tokens": 43062,
+          "cache_creation_input_tokens": 750,
+          "cache_creation": {
+            "ephemeral_5m_input_tokens": 0,
+            "ephemeral_1h_input_tokens": 750
+          },
+          "type": "message"
+        }
+      ],
+      "speed": "standard",
+      "fallback_credit": null
+    },
+    "final_message": "The project is in `./app` and `mvn -B -ntp -DskipTests test-compile` passes. I didn't run the app, call a model or start any containers, and I didn't write tests.\n\n- **Endpoint:** `POST /ask` takes `{\"question\": \"...\"}` and returns `{\"answer\": \"...\"}`. A blank question gets a 400. It's in `AskResource.java`.\n- **AI service:** `DocsAssistant` is a declarative AI service with a 60-second timeout, one retry and a fallback message. The question is wrapped in `<question>` tags, and the system message says to treat it as data. A guardrail rejects questions over 2000 characters.\n- **RAG:** Easy RAG ingests the `./app/docs` folder on startup, and one sample document, `docs/quarkus-overview.md`, is included. The embedding model is the in-process `langchain4j-embeddings-bge-small-en-v15-q`.\n- **Ollama:** the base URL is `http://localhost:11434` and the chat model is `llama3.2` at temperature 0, so you'll need a local Ollama with that model pulled. LangChain4j Dev Services are disabled, so no container starts. The model ID is a guess you can change in `application.properties`.\n- **Pinned version:** the embedding model is pinned at `1.0.0-beta3`, because I couldn't confirm the BOM manages its version. It compiles, but that version may be out of line with the platform's LangChain4j version. Check it before relying on it at runtime.\n- **Extras beyond what you asked for:** I also added OpenAPI, fault tolerance, Prometheus metrics, OpenTelemetry and `quarkus-http-problem` for RFC 9457 error responses.\n\n`quarkus_create` put the project in `./docs-qa`, so I stopped the auto-started dev instance and renamed the folder to `./app`.",
+    "tool_calls": 27,
+    "failed_tool_calls": 6,
+    "agent_build_commands": 4,
+    "agent_failed_build_commands": 2,
+    "skill_invocations": [],
+    "quarkus_mcp_calls": 4,
+    "context7_calls": 0,
+    "project_dir": "app",
+    "java_files": 3,
+    "conformance": {
+      "ai_service": true,
+      "named_model": false,
+      "record_dto": true,
+      "input_guardrail": true,
+      "delimited_input": true,
+      "no_manual_wiring": true,
+      "smoke_test": false,
+      "dev_logging": true,
+      "devservices_off": true,
+      "easy_rag_extension": true,
+      "easy_rag_path": true,
+      "embedding_dependency": true,
+      "sample_document": true
+    },
+    "generator": {
+      "dual_bom": true,
+      "no_extension_version_pins": false,
+      "java_release_25": true,
+      "parameters_flag": true,
+      "native_profile": true
+    },
+    "compile_attempts": [
+      {
+        "exit": 0,
+        "timed_out": false,
+        "seconds": 4.3
+      }
+    ],
+    "compiles_first_attempt": true,
+    "compiles_within_two": true,
+    "build_attempts_to_green": 1,
+    "successful_generation": true
+  },
+  {
+    "run": "rag-r2-skill",
+    "task": "rag",
+    "repetition": 2,
+    "arm": "skill",
+    "model": "claude-sonnet-5-5",
+    "started_at": "2026-10-05T18:11:14.740890+00:00",
+    "with_claude_md": true,
+    "context_files": [
+      "CLAUDE.md"
+    ],
+    "setting_sources": "project",
+    "status": "completed",
+    "isolation_ok": true,
+    "isolation_error": null,
+    "mcp_status": {
+      "quarkus-agent": "connected",
+      "context7": "connected"
+    },
+    "agent_exit": 0,
+    "agent_timed_out": false,
+    "agent_seconds": 229.0,
+    "agent_is_error": false,
+    "agent_turns": 30,
+    "cost_usd_equivalent": 0.4444184,
+    "usage": {
+      "input_tokens": 30,
+      "cache_creation_input_tokens": 54246,
+      "cache_read_input_tokens": 645472,
+      "output_tokens": 9828,
+      "output_tokens_details": {
+        "thinking_tokens": 1254
+      },
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 54246,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "not_available",
+      "iterations": [
+        {
+          "input_tokens": 2,
+          "output_tokens": 713,
+          "cache_read_input_tokens": 65122,
+          "cache_creation_input_tokens": 1031,
+          "cache_creation": {
+            "ephemeral_5m_input_tokens": 0,
+            "ephemeral_1h_input_tokens": 1031
+          },
+          "type": "message"
+        }
+      ],
+      "speed": "standard",
+      "fallback_credit": null
+    },
+    "final_message": "The project is in `./app` and `mvn -B -ntp -DskipTests test-compile` passes. I did not run the tests or start the app (no live model, no containers), so `/ask` has not been exercised.\n\n**What it does**\n- **`POST /ask`** takes `{\"question\": \"...\"}` and returns `{\"answer\": \"...\"}`. It rejects a blank question, one over 2,000 characters, or one containing `<question>` tags with a 400.\n- **Retrieval** uses Easy RAG. The sample document is `docs/getting-started.md`. On startup Easy RAG ingests everything in `docs/` into an in-memory store, and a BGE-small embedding model runs in-process.\n- **The model** is Ollama `qwen3:4b` at temperature 0. It needs `ollama serve` running and `ollama pull qwen3:4b` done before the app can answer.\n- **`DocsAssistant`** puts the question inside `<question>` tags and tells the model to treat it as data. It has an input guard (`PromptInjectionGuard`), a 120s timeout and a fallback message.\n- **Errors:** `http-problem` is included, so exceptions leave the REST edge as `application/problem+json`.\n- **Dev Services:** disabled.\n\n**Deviations from the conventions and the skill**\n- **Guard rewritten:** The skill's template guard would have rejected every request, because the prompt's own `<question>` wrapper matches its forbidden-markup check. Mine inspects only the text between the tags.\n- **No git repo:** I did not run `git init` in `app`, because I never called an MCP tool that needs it after generating the project.\n- **Extension skills:** I only loaded `quarkus_skills` for rest, fault-tolerance and openapi. I didn't load skills for the Ollama, Easy RAG or http-problem extensions, and I didn't look anything up in context7.\n- **Wrong directory:** `quarkus_create` put the project in `work/docs-qa`, so I stopped dev mode and renamed the folder to `app`.\n\n**Tests:** `AskResourceTest` checks that the assistant is wired and that a blank question returns 400.",
+    "tool_calls": 28,
+    "failed_tool_calls": 3,
+    "agent_build_commands": 1,
+    "agent_failed_build_commands": 0,
+    "skill_invocations": [
+      "quarkus-agentic-scaffolding:scaffold-project"
+    ],
+    "quarkus_mcp_calls": 4,
+    "context7_calls": 0,
+    "project_dir": "app",
+    "java_files": 5,
+    "conformance": {
+      "ai_service": true,
+      "named_model": false,
+      "record_dto": true,
+      "input_guardrail": true,
+      "delimited_input": true,
+      "no_manual_wiring": true,
+      "smoke_test": true,
+      "dev_logging": true,
+      "devservices_off": true,
+      "easy_rag_extension": true,
+      "easy_rag_path": true,
+      "embedding_dependency": true,
+      "sample_document": true
+    },
+    "generator": {
+      "dual_bom": true,
+      "no_extension_version_pins": true,
+      "java_release_25": true,
+      "parameters_flag": true,
+      "native_profile": true
+    },
+    "compile_attempts": [
+      {
+        "exit": 0,
+        "timed_out": false,
+        "seconds": 3.3
+      }
+    ],
+    "compiles_first_attempt": true,
+    "compiles_within_two": true,
+    "build_attempts_to_green": 1,
+    "successful_generation": true
+  },
+  {
+    "run": "rag-r3-baseline",
+    "task": "rag",
+    "repetition": 3,
+    "arm": "baseline",
+    "model": "claude-sonnet-5-5",
+    "started_at": "2026-10-05T18:20:35.814400+00:00",
+    "with_claude_md": true,
+    "context_files": [
+      "CLAUDE.md"
+    ],
+    "setting_sources": "project",
+    "status": "completed",
+    "isolation_ok": true,
+    "isolation_error": null,
+    "mcp_status": {
+      "quarkus-agent": "connected",
+      "context7": "connected"
+    },
+    "agent_exit": 0,
+    "agent_timed_out": false,
+    "agent_seconds": 188.2,
+    "agent_is_error": false,
+    "agent_turns": 19,
+    "cost_usd_equivalent": 0.27018780000000003,
+    "usage": {
+      "input_tokens": 24,
+      "cache_creation_input_tokens": 29322,
+      "cache_read_input_tokens": 377659,
+      "output_tokens": 7732,
+      "output_tokens_details": {
+        "thinking_tokens": 696
+      },
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 29322,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "not_available",
+      "iterations": [
+        {
+          "input_tokens": 2,
+          "output_tokens": 554,
+          "cache_read_input_tokens": 40847,
+          "cache_creation_input_tokens": 382,
+          "cache_creation": {
+            "ephemeral_5m_input_tokens": 0,
+            "ephemeral_1h_input_tokens": 382
+          },
+          "type": "message"
+        }
+      ],
+      "speed": "standard",
+      "fallback_credit": null
+    },
+    "final_message": "The project is in `./app` and `mvn -B -ntp -DskipTests test-compile` passes. I did not run the app, call a model, or write any tests.\n\n- **`POST /ask`:** takes `{\"question\": \"...\"}` and returns `{\"answer\": \"...\"}`. A blank question gets a 400.\n- **`DocsAssistant`:** answers only from retrieved excerpts. It wraps the question in `<question>` tags and tells the model to treat that text as data. It has a 60-second timeout and a fallback message if the call fails.\n- **Retrieval:** Easy RAG loads `*.md` files on startup. The folder is `src/main/resources/docs` by default, or whatever `DOCS_PATH` points to. The embedding model is the in-process `bge-small-en-q`.\n- **Sample document:** `docs/quarkus-intro.md`, a short Quarkus overview.\n- **Ollama:** `llama3.2` at `http://localhost:11434` by default; set `OLLAMA_MODEL` or `OLLAMA_URL` to change either. Dev Services is off, and temperature is 0.\n- **Other extensions:** OpenAPI, RFC 9457 problem-detail errors, Prometheus metrics and OpenTelemetry.\n\nI pinned `langchain4j-embeddings-bge-small-en-q` to `1.13.0-beta23` in the pom. I picked that version without checking it against the BOM, and it resolved and built. If you'd rather the BOM manage it, drop the version and rebuild.\n\n`quarkus_create` started a dev-mode instance on its own. I stopped it with `quarkus_stop` once the build passed.",
+    "tool_calls": 18,
+    "failed_tool_calls": 5,
+    "agent_build_commands": 4,
+    "agent_failed_build_commands": 3,
+    "skill_invocations": [],
+    "quarkus_mcp_calls": 3,
+    "context7_calls": 0,
+    "project_dir": "app",
+    "java_files": 2,
+    "conformance": {
+      "ai_service": true,
+      "named_model": false,
+      "record_dto": true,
+      "input_guardrail": false,
+      "delimited_input": true,
+      "no_manual_wiring": true,
+      "smoke_test": false,
+      "dev_logging": true,
+      "devservices_off": true,
+      "easy_rag_extension": true,
+      "easy_rag_path": true,
+      "embedding_dependency": true,
+      "sample_document": true
+    },
+    "generator": {
+      "dual_bom": true,
+      "no_extension_version_pins": false,
+      "java_release_25": true,
+      "parameters_flag": true,
+      "native_profile": true
+    },
+    "compile_attempts": [
+      {
+        "exit": 0,
+        "timed_out": false,
+        "seconds": 3.8
+      }
+    ],
+    "compiles_first_attempt": true,
+    "compiles_within_two": true,
+    "build_attempts_to_green": 1,
+    "successful_generation": true
+  },
+  {
+    "run": "rag-r3-skill",
+    "task": "rag",
+    "repetition": 3,
+    "arm": "skill",
+    "model": "claude-sonnet-5-5",
+    "started_at": "2026-10-05T18:22:03.782209+00:00",
+    "with_claude_md": true,
+    "context_files": [
+      "CLAUDE.md"
+    ],
+    "setting_sources": "project",
+    "status": "completed",
+    "isolation_ok": true,
+    "isolation_error": null,
+    "mcp_status": {
+      "quarkus-agent": "connected",
+      "context7": "connected"
+    },
+    "agent_exit": 0,
+    "agent_timed_out": false,
+    "agent_seconds": 183.1,
+    "agent_is_error": false,
+    "agent_turns": 27,
+    "cost_usd_equivalent": 0.3588188,
+    "usage": {
+      "input_tokens": 20,
+      "cache_creation_input_tokens": 51852,
+      "cache_read_input_tokens": 384854,
+      "output_tokens": 7440,
+      "output_tokens_details": {
+        "thinking_tokens": 258
+      },
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 51852,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "not_available",
+      "iterations": [
+        {
+          "input_tokens": 2,
+          "output_tokens": 565,
+          "cache_read_input_tokens": 57779,
+          "cache_creation_input_tokens": 5980,
+          "cache_creation": {
+            "ephemeral_5m_input_tokens": 0,
+            "ephemeral_1h_input_tokens": 5980
+          },
+          "type": "message"
+        }
+      ],
+      "speed": "standard",
+      "fallback_credit": null
+    },
+    "final_message": "The project is in `./app` and `mvn -B -ntp -DskipTests test-compile` passes (BUILD SUCCESS). I did not run the tests, start the app, or call a live model.\n\n- **Project:** `org.acme:docs-qa` on Quarkus 3.40.1 with Java 25, created through the Quarkus Agents MCP. It uses Ollama (`qwen3:4b`) with Easy RAG and an in-process embedding model. I also added the Quarkus REST, OpenAPI, fault-tolerance and `http-problem` extensions.\n- **RAG:** the sample document is `src/main/resources/rag/quarkus-overview.md`. Easy RAG ingests the folder named in `quarkus.langchain4j.easy-rag.path` at startup.\n- **Endpoint:** `POST /ask` with JSON `{\"question\": \"...\"}` returns `{\"answer\": \"...\"}`. A blank question gets a 400 with a problem-details body.\n- **AI service:** `DocsAssistant` wraps the question in `<question>` delimiters and tells the model to treat it as data. It also has a prompt-injection guardrail, a timeout, one retry and a fallback message if the model is unavailable.\n- **Config:** Dev Services are disabled because Ollama is the real endpoint, and prompt/response logging is on in dev mode only.\n- **Test:** `DocsAssistantTest` is a wiring smoke test that needs no live model. It compiles but has not been run.\n\nI made these choices without asking, as the run required. I left out websockets, agentic, MCP and observability extensions because the task didn't need them. I didn't run `git init` in `app`, since you said not to commit anything.",
+    "tool_calls": 25,
+    "failed_tool_calls": 2,
+    "agent_build_commands": 1,
+    "agent_failed_build_commands": 0,
+    "skill_invocations": [
+      "quarkus-agentic-scaffolding:scaffold-project"
+    ],
+    "quarkus_mcp_calls": 3,
+    "context7_calls": 0,
+    "project_dir": "app",
+    "java_files": 5,
+    "conformance": {
+      "ai_service": true,
+      "named_model": false,
+      "record_dto": true,
+      "input_guardrail": true,
+      "delimited_input": true,
+      "no_manual_wiring": true,
+      "smoke_test": true,
+      "dev_logging": true,
+      "devservices_off": true,
+      "easy_rag_extension": true,
+      "easy_rag_path": true,
+      "embedding_dependency": true,
+      "sample_document": true
+    },
+    "generator": {
+      "dual_bom": true,
+      "no_extension_version_pins": true,
+      "java_release_25": true,
+      "parameters_flag": true,
+      "native_profile": true
+    },
+    "compile_attempts": [
+      {
+        "exit": 0,
+        "timed_out": false,
+        "seconds": 3.2
+      }
+    ],
+    "compiles_first_attempt": true,
+    "compiles_within_two": true,
+    "build_attempts_to_green": 1,
+    "successful_generation": true
+  },
+  {
+    "run": "tools-r1-baseline",
+    "task": "tools",
+    "repetition": 1,
+    "arm": "baseline",
+    "model": "claude-sonnet-5-5",
+    "started_at": "2026-10-05T18:06:20.470835+00:00",
+    "with_claude_md": true,
+    "context_files": [
+      "CLAUDE.md"
+    ],
+    "setting_sources": "project",
+    "status": "completed",
+    "isolation_ok": true,
+    "isolation_error": null,
+    "mcp_status": {
+      "quarkus-agent": "connected",
+      "context7": "connected"
+    },
+    "agent_exit": 0,
+    "agent_timed_out": false,
+    "agent_seconds": 242.7,
+    "agent_is_error": false,
+    "agent_turns": 34,
+    "cost_usd_equivalent": 0.4889829999999999,
+    "usage": {
+      "input_tokens": 46,
+      "cache_creation_input_tokens": 38838,
+      "cache_read_input_tokens": 900195,
+      "output_tokens": 15350,
+      "output_tokens_details": {
+        "thinking_tokens": 996
+      },
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 38838,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "not_available",
+      "iterations": [
+        {
+          "input_tokens": 2,
+          "output_tokens": 631,
+          "cache_read_input_tokens": 50038,
+          "cache_creation_input_tokens": 707,
+          "cache_creation": {
+            "ephemeral_5m_input_tokens": 0,
+            "ephemeral_1h_input_tokens": 707
+          },
+          "type": "message"
+        }
+      ],
+      "speed": "standard",
+      "fallback_credit": null
+    },
+    "final_message": "I built the project in `./app`, and `mvn -B -ntp -DskipTests test-compile` passes. I didn't run the tests or start the app, and I didn't call a live model. The Dev MCP's auto-start was stopped right after project creation.\n\n**What it does**\n- **Chat endpoint:** `POST /chat` takes `{conversationId, message}` and returns `{conversationId, reply}`. A blank message is rejected with a 400.\n- **Memory:** it is kept per `conversationId`, using LangChain4j's in-memory chat memory.\n- **Tools:** the assistant can look up an order's shipping status and open a refund request, both against in-memory data. The sample orders are A1001 (shipped), A1002 (processing) and A1003 (delivered). Opening a refund twice for the same order returns the existing request.\n- **Model:** Ollama with `llama3.1` at `localhost:11434` and temperature 0. I picked that model and URL myself; they're in `application.properties`.\n- **Safeguards:** the customer's text goes into the prompt inside `<customer_message>` tags, and an input guardrail checks it. The chat call also has a timeout, one retry and a fallback reply.\n- **Config and extras:** Dev Services are disabled and request/response logging is on in dev only. There is also a small test class (`ChatResourceTest`) and a README.\n\nI used the Quarkus MCP to create the project (Quarkus 3.40.1, Java 25), with the platform BOMs importing the LangChain4j versions. `quarkus_create` put it in `support-assistant/`, so I moved it to `./app`.\n\nI did not add the `native` profile checks, `quarkus-websockets-next`, or an OpenTelemetry or cost configuration. The `context7` and `quarkus_skills` lookups were also skipped, because I found the guardrail annotation's package by compiling rather than by looking it up.",
+    "tool_calls": 33,
+    "failed_tool_calls": 8,
+    "agent_build_commands": 5,
+    "agent_failed_build_commands": 2,
+    "skill_invocations": [],
+    "quarkus_mcp_calls": 3,
+    "context7_calls": 0,
+    "project_dir": "app",
+    "java_files": 7,
+    "conformance": {
+      "ai_service": true,
+      "named_model": false,
+      "record_dto": true,
+      "input_guardrail": true,
+      "delimited_input": true,
+      "no_manual_wiring": true,
+      "smoke_test": true,
+      "dev_logging": true,
+      "devservices_off": true,
+      "llm_tool": true,
+      "llm_tools_wired": true,
+      "memory_id": true,
+      "fault_tolerance": true
+    },
+    "generator": {
+      "dual_bom": true,
+      "no_extension_version_pins": true,
+      "java_release_25": true,
+      "parameters_flag": true,
+      "native_profile": true
+    },
+    "compile_attempts": [
+      {
+        "exit": 0,
+        "timed_out": false,
+        "seconds": 3.1
+      }
+    ],
+    "compiles_first_attempt": true,
+    "compiles_within_two": true,
+    "build_attempts_to_green": 1,
+    "successful_generation": true
+  },
+  {
+    "run": "tools-r1-skill",
+    "task": "tools",
+    "repetition": 1,
+    "arm": "skill",
+    "model": "claude-sonnet-5-5",
+    "started_at": "2026-10-05T18:06:57.030643+00:00",
+    "with_claude_md": true,
+    "context_files": [
+      "CLAUDE.md"
+    ],
+    "setting_sources": "project",
+    "status": "completed",
+    "isolation_ok": true,
+    "isolation_error": null,
+    "mcp_status": {
+      "quarkus-agent": "connected",
+      "context7": "connected"
+    },
+    "agent_exit": 0,
+    "agent_timed_out": false,
+    "agent_seconds": 83.9,
+    "agent_is_error": false,
+    "agent_turns": 25,
+    "cost_usd_equivalent": 0.33389080000000004,
+    "usage": {
+      "input_tokens": 20,
+      "cache_creation_input_tokens": 42023,
+      "cache_read_input_tokens": 366694,
+      "output_tokens": 9242,
+      "output_tokens_details": {
+        "thinking_tokens": 691
+      },
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 42023,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "not_available",
+      "iterations": [
+        {
+          "input_tokens": 2,
+          "output_tokens": 752,
+          "cache_read_input_tokens": 51870,
+          "cache_creation_input_tokens": 2060,
+          "cache_creation": {
+            "ephemeral_5m_input_tokens": 0,
+            "ephemeral_1h_input_tokens": 2060
+          },
+          "type": "message"
+        }
+      ],
+      "speed": "standard",
+      "fallback_credit": null
+    },
+    "final_message": "The project is at `./app`, and `mvn -B -ntp -DskipTests test-compile` passes there (BUILD SUCCESS). I did not run the tests or the app, and no live model was called. Nothing was committed or published.\n\n- **Setup:** I checked that the Quarkus Agents MCP was reachable, then created the project through it with Quarkus 3.40.1 and Java 25. Extensions are `rest`, `rest-jackson`, `smallrye-openapi`, `langchain4j-ollama`, `smallrye-fault-tolerance` and `http-problem`. I added `hibernate-validator` by hand for request validation. The MCP also auto-started dev mode, and I stopped it afterwards.\n- **`POST /chat`:** It takes `{conversationId, message}` and returns `{conversationId, reply}`. The message is limited to 2000 characters. Memory is per conversation: the conversation id is used as the AI service's `@MemoryId`.\n- **Assistant:** `SupportAssistant` is a `@RegisterAiService` with the support tools attached. The customer message is wrapped in `<customer_message>` tags and the system prompt says to treat it as data. It has a prompt-injection input guardrail and a 120s `@Timeout`, one `@Retry` and a default-method `@Fallback`.\n- **Tools:** `SupportTools` has `getShippingStatus` and `openRefundRequest`. Both read from `OrderStore`, an in-memory store seeded with orders A1001\u2013A1004. Refunds are refused for unknown or cancelled orders.\n- **Config:** Ollama points at `http://localhost:11434` with `llama3.2` at temperature 0. Dev Services are disabled, and request/response logging is on in dev only.\n- **Tests:** I wrote `SupportAssistantTest`, a wiring smoke test plus a check of the tools against the in-memory data. It needs no live model.\n\nI picked the extensions, Quarkus version and `llama3.2` myself, since the run was unattended. I also skipped `git init`, which the skill asks for after `quarkus_create`, because you said not to commit anything. I did not add the skill's other optional extensions (observability, WebSockets, agentic) because the task didn't need them.",
+    "tool_calls": 23,
+    "failed_tool_calls": 2,
+    "agent_build_commands": 1,
+    "agent_failed_build_commands": 0,
+    "skill_invocations": [
+      "quarkus-agentic-scaffolding:scaffold-project"
+    ],
+    "quarkus_mcp_calls": 4,
+    "context7_calls": 0,
+    "project_dir": "app",
+    "java_files": 9,
+    "conformance": {
+      "ai_service": true,
+      "named_model": false,
+      "record_dto": true,
+      "input_guardrail": true,
+      "delimited_input": true,
+      "no_manual_wiring": true,
+      "smoke_test": true,
+      "dev_logging": true,
+      "devservices_off": true,
+      "llm_tool": true,
+      "llm_tools_wired": true,
+      "memory_id": true,
+      "fault_tolerance": true
+    },
+    "generator": {
+      "dual_bom": true,
+      "no_extension_version_pins": true,
+      "java_release_25": true,
+      "parameters_flag": true,
+      "native_profile": true
+    },
+    "compile_attempts": [
+      {
+        "exit": 0,
+        "timed_out": false,
+        "seconds": 3.1
+      }
+    ],
+    "compiles_first_attempt": true,
+    "compiles_within_two": true,
+    "build_attempts_to_green": 1,
+    "successful_generation": true
+  },
+  {
+    "run": "tools-r2-baseline",
+    "task": "tools",
+    "repetition": 2,
+    "arm": "baseline",
+    "model": "claude-sonnet-5-5",
+    "started_at": "2026-10-05T18:15:50.659299+00:00",
+    "with_claude_md": true,
+    "context_files": [
+      "CLAUDE.md"
+    ],
+    "setting_sources": "project",
+    "status": "completed",
+    "isolation_ok": true,
+    "isolation_error": null,
+    "mcp_status": {
+      "quarkus-agent": "connected",
+      "context7": "connected"
+    },
+    "agent_exit": 0,
+    "agent_timed_out": false,
+    "agent_seconds": 207.1,
+    "agent_is_error": false,
+    "agent_turns": 19,
+    "cost_usd_equivalent": 0.3088034,
+    "usage": {
+      "input_tokens": 24,
+      "cache_creation_input_tokens": 31725,
+      "cache_read_input_tokens": 393877,
+      "output_tokens": 10308,
+      "output_tokens_details": {
+        "thinking_tokens": 585
+      },
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 31725,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "not_available",
+      "iterations": [
+        {
+          "input_tokens": 2,
+          "output_tokens": 736,
+          "cache_read_input_tokens": 43499,
+          "cache_creation_input_tokens": 133,
+          "cache_creation": {
+            "ephemeral_5m_input_tokens": 0,
+            "ephemeral_1h_input_tokens": 133
+          },
+          "type": "message"
+        }
+      ],
+      "speed": "standard",
+      "fallback_credit": null
+    },
+    "final_message": "I created the Quarkus + LangChain4j project in `./app` (`org.acme:support-assistant`), and `mvn -B -ntp -DskipTests test-compile` passes. I did not run the unit test, start the app, or call a live model.\n\n- **Project:** The Quarkus Agents MCP was reachable, so I used `quarkus_create`. The project is on Quarkus platform 3.40.1 with the Quarkus and `quarkus-langchain4j` BOMs, and Java release 25. The extensions are Ollama, rest-jackson, openapi, fault-tolerance, `quarkus-http-problem`, Prometheus metrics and OpenTelemetry. I stopped the dev-mode app that `quarkus_create` auto-started.\n- **Endpoint:** `POST /chat` takes `{conversationId, message}` and returns `{conversationId, reply}`. Missing or blank fields give a 400. It runs on a virtual thread.\n- **Assistant:** `SupportAgent` is a `@RegisterAiService` interface with two tools in `SupportTools`: `getShippingStatus` and `openRefundRequest`. The customer message is wrapped in `<customer_message>` tags, and the system prompt tells the model to treat it as data. It also has an input guardrail and `@Timeout`, `@Retry` and `@Fallback`.\n- **Memory:** The conversation id is the `@MemoryId`, so each conversation keeps its own in-memory history.\n- **Data:** `OrderService` holds in-memory orders 1001, 1002 and 1003. It allows one open refund per order. If you ask for a second refund on the same order, the existing refund request comes back.\n- **Config:** Ollama is at `http://localhost:11434` with model `llama3.1` and temperature 0. Dev Services are disabled, and request/response logging is on only in `%dev`.\n- **Tests:** I added a plain unit test, `OrderServiceTest`, for the order and refund logic. I did not add a `@QuarkusTest` for the endpoint.\n- **Skipped:** I did not call `quarkus_skills` for the LangChain4j extension, because none was listed. I did not look anything up in context7.",
+    "tool_calls": 18,
+    "failed_tool_calls": 2,
+    "agent_build_commands": 4,
+    "agent_failed_build_commands": 2,
+    "skill_invocations": [],
+    "quarkus_mcp_calls": 3,
+    "context7_calls": 0,
+    "project_dir": "app",
+    "java_files": 5,
+    "conformance": {
+      "ai_service": true,
+      "named_model": false,
+      "record_dto": true,
+      "input_guardrail": true,
+      "delimited_input": true,
+      "no_manual_wiring": true,
+      "smoke_test": false,
+      "dev_logging": true,
+      "devservices_off": true,
+      "llm_tool": true,
+      "llm_tools_wired": true,
+      "memory_id": true,
+      "fault_tolerance": true
+    },
+    "generator": {
+      "dual_bom": true,
+      "no_extension_version_pins": true,
+      "java_release_25": true,
+      "parameters_flag": true,
+      "native_profile": true
+    },
+    "compile_attempts": [
+      {
+        "exit": 0,
+        "timed_out": false,
+        "seconds": 3.0
+      }
+    ],
+    "compiles_first_attempt": true,
+    "compiles_within_two": true,
+    "build_attempts_to_green": 1,
+    "successful_generation": true
+  },
+  {
+    "run": "tools-r2-skill",
+    "task": "tools",
+    "repetition": 2,
+    "arm": "skill",
+    "model": "claude-sonnet-5-5",
+    "started_at": "2026-10-05T18:15:33.991172+00:00",
+    "with_claude_md": true,
+    "context_files": [
+      "CLAUDE.md"
+    ],
+    "setting_sources": "project",
+    "status": "completed",
+    "isolation_ok": true,
+    "isolation_error": null,
+    "mcp_status": {
+      "quarkus-agent": "connected",
+      "context7": "connected"
+    },
+    "agent_exit": 0,
+    "agent_timed_out": false,
+    "agent_seconds": 101.3,
+    "agent_is_error": false,
+    "agent_turns": 27,
+    "cost_usd_equivalent": 0.42742900000000006,
+    "usage": {
+      "input_tokens": 24,
+      "cache_creation_input_tokens": 50243,
+      "cache_read_input_tokens": 470895,
+      "output_tokens": 13223,
+      "output_tokens_details": {
+        "thinking_tokens": 729
+      },
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 50243,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "not_available",
+      "iterations": [
+        {
+          "input_tokens": 2,
+          "output_tokens": 834,
+          "cache_read_input_tokens": 54550,
+          "cache_creation_input_tokens": 7600,
+          "cache_creation": {
+            "ephemeral_5m_input_tokens": 0,
+            "ephemeral_1h_input_tokens": 7600
+          },
+          "type": "message"
+        }
+      ],
+      "speed": "standard",
+      "fallback_credit": null
+    },
+    "final_message": "The project is in `./app` and `mvn -B -ntp -DskipTests test-compile` passes (BUILD SUCCESS). I did not run any tests, the app, or a live model. `quarkus_create` auto-started a dev-mode app on port 18080, which I did not stop. I did not put the project under git, because you said not to commit.\n\n- **Stack:** Quarkus 3.40.1 with Java 25 and Ollama (`qwen3:4b`, temperature 0). The extensions are `rest`, `rest-jackson`, `smallrye-openapi`, `langchain4j-ollama`, `smallrye-fault-tolerance` and `http-problem`. Dev Services are off.\n- **Endpoint:** `POST /chat` takes `{conversationId, message}` and returns `{conversationId, reply}`. It returns 400 for a blank message or conversation id, a message over 4,000 characters, or a message containing `<customer_message>` tags. The 400s for `<customer_message>` tags and over-long messages come from `ChatResource` itself.\n- **Memory:** `conversationId` is used as the memory id on `SupportAssistant`, so each conversation gets its own memory. I left the default chat-memory settings in place.\n- **Tools:** `SupportTools` holds the in-memory data. Orders ORD-1001, ORD-1002 and ORD-1003 are hard-coded. `getOrderStatus` returns an order's shipping status. `openRefundRequest` opens a refund with an `RF-` id, and returns an error message if the order doesn't exist.\n- **Prompt safety:** The customer text is wrapped in `<customer_message>` tags, and the system message says it is data, not instructions. `PromptInjectionGuard` checks length and one injection marker phrase.\n- **Failure handling:** `chat` has a 120-second timeout, one retry, and a fallback reply that says the assistant can't help right now.\n- **Test:** `SupportAssistantWiringTest` checks that the AI service is injected and that the tools behave. It is compiled but not run.\n\nTo run it for real, you need `ollama serve` and `ollama pull qwen3:4b`.\n\nI did not add WebSockets, observability or a native-image test setup, since the task didn't need them. I also skipped the `quarkus_skills`",
+    "tool_calls": 25,
+    "failed_tool_calls": 4,
+    "agent_build_commands": 2,
+    "agent_failed_build_commands": 1,
+    "skill_invocations": [
+      "quarkus-agentic-scaffolding:scaffold-project"
+    ],
+    "quarkus_mcp_calls": 3,
+    "context7_calls": 0,
+    "project_dir": "app",
+    "java_files": 8,
+    "conformance": {
+      "ai_service": true,
+      "named_model": false,
+      "record_dto": true,
+      "input_guardrail": true,
+      "delimited_input": true,
+      "no_manual_wiring": true,
+      "smoke_test": true,
+      "dev_logging": true,
+      "devservices_off": true,
+      "llm_tool": true,
+      "llm_tools_wired": true,
+      "memory_id": true,
+      "fault_tolerance": true
+    },
+    "generator": {
+      "dual_bom": true,
+      "no_extension_version_pins": true,
+      "java_release_25": true,
+      "parameters_flag": true,
+      "native_profile": true
+    },
+    "compile_attempts": [
+      {
+        "exit": 0,
+        "timed_out": false,
+        "seconds": 2.9
+      }
+    ],
+    "compiles_first_attempt": true,
+    "compiles_within_two": true,
+    "build_attempts_to_green": 1,
+    "successful_generation": true
+  },
+  {
+    "run": "tools-r3-baseline",
+    "task": "tools",
+    "repetition": 3,
+    "arm": "baseline",
+    "model": "claude-sonnet-5-5",
+    "started_at": "2026-10-05T18:25:10.037968+00:00",
+    "with_claude_md": true,
+    "context_files": [
+      "CLAUDE.md"
+    ],
+    "setting_sources": "project",
+    "status": "completed",
+    "isolation_ok": true,
+    "isolation_error": null,
+    "mcp_status": {
+      "quarkus-agent": "connected",
+      "context7": "connected"
+    },
+    "agent_exit": 0,
+    "agent_timed_out": false,
+    "agent_seconds": 189.1,
+    "agent_is_error": false,
+    "agent_turns": 15,
+    "cost_usd_equivalent": 0.25376,
+    "usage": {
+      "input_tokens": 16,
+      "cache_creation_input_tokens": 29739,
+      "cache_read_input_tokens": 222360,
+      "output_tokens": 9030,
+      "output_tokens_details": {
+        "thinking_tokens": 508
+      },
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 29739,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "not_available",
+      "iterations": [
+        {
+          "input_tokens": 2,
+          "output_tokens": 787,
+          "cache_read_input_tokens": 36037,
+          "cache_creation_input_tokens": 5609,
+          "cache_creation": {
+            "ephemeral_5m_input_tokens": 0,
+            "ephemeral_1h_input_tokens": 5609
+          },
+          "type": "message"
+        }
+      ],
+      "speed": "standard",
+      "fallback_credit": null
+    },
+    "final_message": "The project is in `./app` and `mvn -B -ntp -DskipTests test-compile` passes (BUILD SUCCESS). I did not run the tests or the app, and I made no live model calls.\n\n- **Setup:** I created it with the Quarkus Agents MCP, which was reachable (Quarkus 3.40.1, Java 25). The MCP auto-started dev mode on creation, so I stopped it right away. I did not call `quarkus_skills` or context7 before writing code, so the AI-service, tool and memory code is from memory and has only been compile-checked.\n- **Extensions:** `rest-jackson`, `langchain4j-ollama`, `smallrye-openapi`, `smallrye-fault-tolerance`, `http-problem`, `micrometer-registry-prometheus` and `opentelemetry`. I did not add the `quarkus-langchain4j-agentic` extension or a WebSockets Next streaming path, since the task is a single synchronous `POST /chat` and no multi-agent workflow or streaming.\n- **Data:** `OrderStore` holds three in-memory orders (`A1001`, `A1002`, `A1003`) and records refund requests in memory.\n- **Tools:** `SupportTools` has `getShippingStatus` and `openRefundRequest`.\n- **Assistant:** `SupportAssistant` is a `@RegisterAiService` with `@MemoryId` conversation memory, which the config sets to the last 20 messages per conversation.\n    - The customer's message is wrapped in `<customer_message>` tags, and the system prompt tells the model to treat it as data.\n    - It has a 120 s `@Timeout`, one `@Retry`, and a `@Fallback` that returns a polite \"unavailable\" reply.\n- **`POST /chat`:** `ChatResource` takes `{conversationId, message}` and returns `{conversationId, reply}`. It runs on a virtual thread, and blank input returns 400. I did not add `@InputGuardrails` to the endpoint, which the conventions require for externally originated text.\n- **Config:** Ollama at `http://localhost:11434` with model `llama3.1` and temperature 0. Dev Services is disabled, and request/response logging is on only under `%dev`.\n- **Test:** `ChatResourceTest` checks that a blank message gets a 400 without calling a model.",
+    "tool_calls": 14,
+    "failed_tool_calls": 1,
+    "agent_build_commands": 2,
+    "agent_failed_build_commands": 1,
+    "skill_invocations": [],
+    "quarkus_mcp_calls": 4,
+    "context7_calls": 0,
+    "project_dir": "app",
+    "java_files": 4,
+    "conformance": {
+      "ai_service": true,
+      "named_model": false,
+      "record_dto": true,
+      "input_guardrail": false,
+      "delimited_input": true,
+      "no_manual_wiring": true,
+      "smoke_test": true,
+      "dev_logging": true,
+      "devservices_off": true,
+      "llm_tool": true,
+      "llm_tools_wired": true,
+      "memory_id": true,
+      "fault_tolerance": true
+    },
+    "generator": {
+      "dual_bom": true,
+      "no_extension_version_pins": true,
+      "java_release_25": true,
+      "parameters_flag": true,
+      "native_profile": true
+    },
+    "compile_attempts": [
+      {
+        "exit": 0,
+        "timed_out": false,
+        "seconds": 3.0
+      }
+    ],
+    "compiles_first_attempt": true,
+    "compiles_within_two": true,
+    "build_attempts_to_green": 1,
+    "successful_generation": true
+  },
+  {
+    "run": "tools-r3-skill",
+    "task": "tools",
+    "repetition": 3,
+    "arm": "skill",
+    "model": "claude-sonnet-5-5",
+    "started_at": "2026-10-05T18:26:06.063396+00:00",
+    "with_claude_md": true,
+    "context_files": [
+      "CLAUDE.md"
+    ],
+    "setting_sources": "project",
+    "status": "completed",
+    "isolation_ok": true,
+    "isolation_error": null,
+    "mcp_status": {
+      "quarkus-agent": "connected",
+      "context7": "connected"
+    },
+    "agent_exit": 0,
+    "agent_timed_out": false,
+    "agent_seconds": 97.9,
+    "agent_is_error": false,
+    "agent_turns": 29,
+    "cost_usd_equivalent": 0.4328331999999999,
+    "usage": {
+      "input_tokens": 22,
+      "cache_creation_input_tokens": 52225,
+      "cache_read_input_tokens": 472346,
+      "output_tokens": 12942,
+      "output_tokens_details": {
+        "thinking_tokens": 366
+      },
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 52225,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "not_available",
+      "iterations": [
+        {
+          "input_tokens": 2,
+          "output_tokens": 708,
+          "cache_read_input_tokens": 63335,
+          "cache_creation_input_tokens": 797,
+          "cache_creation": {
+            "ephemeral_5m_input_tokens": 0,
+            "ephemeral_1h_input_tokens": 797
+          },
+          "type": "message"
+        }
+      ],
+      "speed": "standard",
+      "fallback_credit": null
+    },
+    "final_message": "The project is in `./app`, and `mvn -B -ntp -DskipTests test-compile` passes with BUILD SUCCESS. I did not run the tests or call a model, so `POST /chat` is untested end to end. `quarkus_create` also auto-started dev mode, though I didn't check whether it came up.\n\n- **Endpoint:** `POST /chat` takes `{conversationId, message}` and returns `{conversationId, reply}`. Blank fields are rejected by bean validation.\n- **Assistant:** `ai/SupportAssistant` is a declarative AI service with the order tools attached. The conversation id is its memory id, so each conversation keeps its own history (last 20 messages).\n- **Tools:** `tools/OrderTools` has `getOrderStatus` and `openRefundRequest`, backed by an in-memory map. Orders 1001, 1002 and 1003 exist. Only one refund is allowed per order.\n- **Safety and resilience:** the customer's message is wrapped in `<customer_message>` tags, and a `PromptInjectionGuard` input guardrail rejects over-long input, the reserved tags and the phrase \"ignore previous instructions\". The method also has a 120s timeout and a fallback reply.\n- **Config:** Ollama with `qwen3:4b` at temperature 0, Dev Services disabled, and request/response logging in the dev profile only.\n- **Extensions:** I chose `rest`, `rest-jackson`, `smallrye-openapi`, `langchain4j-ollama`, `smallrye-fault-tolerance` and `http-problem`, plus `hibernate-validator` for request validation. Dev mode needs a local Ollama with `qwen3:4b` pulled.\n- **Test:** `SupportAssistantTest` covers CDI wiring and the tool logic without a model. I did not run it, and I did not run the `git init` step that the scaffold-project skill prescribes for the generated project.\n\nI skipped the WebSocket, observability and native-profile pieces from the conventions because the task didn't ask for them. The README is still the generated one and doesn't describe `/chat`.",
+    "tool_calls": 27,
+    "failed_tool_calls": 3,
+    "agent_build_commands": 2,
+    "agent_failed_build_commands": 1,
+    "skill_invocations": [
+      "quarkus-agentic-scaffolding:scaffold-project"
+    ],
+    "quarkus_mcp_calls": 3,
+    "context7_calls": 0,
+    "project_dir": "app",
+    "java_files": 8,
+    "conformance": {
+      "ai_service": true,
+      "named_model": false,
+      "record_dto": true,
+      "input_guardrail": true,
+      "delimited_input": true,
+      "no_manual_wiring": true,
+      "smoke_test": true,
+      "dev_logging": true,
+      "devservices_off": true,
+      "llm_tool": true,
+      "llm_tools_wired": true,
+      "memory_id": true,
+      "fault_tolerance": true
+    },
+    "generator": {
+      "dual_bom": true,
+      "no_extension_version_pins": true,
+      "java_release_25": true,
+      "parameters_flag": true,
+      "native_profile": true
+    },
+    "compile_attempts": [
+      {
+        "exit": 0,
+        "timed_out": false,
+        "seconds": 3.0
+      }
+    ],
+    "compiles_first_attempt": true,
+    "compiles_within_two": true,
+    "build_attempts_to_green": 1,
+    "successful_generation": true
+  }
+]

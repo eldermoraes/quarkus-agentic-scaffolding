@@ -13,15 +13,20 @@ Both arms are identical except for one flag:
 | Starting point | empty directory outside the repository | same |
 | Model | `claude-sonnet-5-5` (Claude Code CLI, subscription login, no API key) | same |
 | MCP servers | Quarkus Agents MCP + context7, at the README pins (`--strict-mcp-config`) | same |
-| Settings, user skills, plugins, `CLAUDE.md` | none (`--setting-sources ''`) | same |
+| Settings, user skills, plugins, `CLAUDE.md` | none (`--setting-sources ''`); with `--with-claude-md`, the repository's `CLAUDE.md` in the run directory, loaded with `--setting-sources project` | same |
 | Permissions | `--permission-mode acceptEdits` + a fixed `--allowedTools` list | same |
 | Skill | — | `--plugin-dir` with a plugin containing only `scaffold-project` and its templates, copied from the committed revision |
+
+`--with-claude-md` (round 2) copies `CLAUDE.md` from the committed revision into every run
+directory, plus `AGENTS.md` when `CLAUDE.md` references it (it currently does not). Each run's
+record carries `with_claude_md`, `context_files` and `setting_sources`; `environment.json` carries
+the file hashes. Without the flag the runner behaves exactly as in round 1.
 
 The exact command for every run is printed by `--dry-run`. In short:
 
 ```sh
 claude -p "$PROMPT" --model claude-sonnet-5-5 --output-format stream-json --verbose \
-  --setting-sources '' --strict-mcp-config --mcp-config mcp.json \
+  --setting-sources '' --strict-mcp-config          # 'project' with --with-claude-md --mcp-config mcp.json \
   --permission-mode acceptEdits --allowedTools "$ALLOWED" \
   [--plugin-dir plugin]          # skill arm only
 ```
@@ -99,7 +104,8 @@ python3 evals/effectiveness/summarize.py /tmp/qas-eval \
 ```
 
 Options: `--tasks classifier,rag`, `--repetitions 1`, `--parallel 3`, `--timeout 900` (seconds per
-agent run), `--repair-timeout 600`. `ANTHROPIC_API_KEY` and other `*API_KEY*`/`*TOKEN*`/`*SECRET*`
+agent run), `--repair-timeout 600`, `--with-claude-md` (round 2; the runner also refuses an
+uncommitted `CLAUDE.md`). `ANTHROPIC_API_KEY` and other `*API_KEY*`/`*TOKEN*`/`*SECRET*`
 variables are stripped from every run. If the subscription reports a usage or rate limit, the
 runner stops scheduling, keeps the partial results, and exits with code 2.
 

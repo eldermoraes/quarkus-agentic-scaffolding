@@ -116,5 +116,16 @@ class EffectivenessScoringTests(unittest.TestCase):
         self.assertEqual(summary['overall']['skill']['n'], 1)
 
 
+    def test_claude_md_option_changes_only_setting_sources(self):
+        from types import SimpleNamespace
+        output = Path('/tmp/eval-out')
+        for flag, sources in ((False, ''), (True, 'project')):
+            args = SimpleNamespace(model='m', with_claude_md=flag)
+            for arm in run.ARMS:
+                command = run.claude_command(args, output, arm, 'p')
+                self.assertEqual(command[command.index('--setting-sources') + 1], sources)
+                self.assertEqual('--plugin-dir' in command, arm == 'skill')
+
+
 if __name__ == '__main__':
     unittest.main()

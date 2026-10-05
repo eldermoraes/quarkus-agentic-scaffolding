@@ -79,7 +79,9 @@ def markdown(summary, environment):
     lines = ['# Skill effectiveness eval: results', '',
              f"Date {environment.get('date')}, model `{environment.get('model')}`, {environment.get('claude_code')}, "
              f"source commit `{environment.get('source_commit', '')[:12]}`. "
-             f"{summary['valid']} valid of {summary['scheduled']} scheduled runs.", '',
+             f"{summary['valid']} valid of {summary['scheduled']} scheduled runs. "
+             f"Repository CLAUDE.md in both arms' run directory: "
+             f"{'yes (' + ', '.join(environment.get('context_files_sha256') or {}) + ')' if environment.get('with_claude_md') else 'no'}.", '',
              '| Task | Arm | n | Compiles (attempt 1) | Compiles (within 2) | Convention checks (agent-decided) | Generator checks | Mean turns | Mean failed build cmds | Mean minutes |',
              '| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |']
     def row(name, arm, c):
