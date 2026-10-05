@@ -1,6 +1,6 @@
 ---
 name: scaffold-project
-description: Scaffold Quarkus + LangChain4j projects end-to-end and add agentic components to existing ones — AI services, tools, agents and multi-agent workflows, RAG pipelines, MCP clients and servers (Model Context Protocol), guardrails, and embedding store setups. Use this whenever the user asks to create, scaffold, set up, bootstrap, initialize, start, generate, or kickstart a new Quarkus + LangChain4j project or module, OR to add an AI service, tool, agent, RAG component, MCP client or server integration, guardrail, or embedding store to an existing project in this stack. Also use for generating baseline pom.xml, application.properties, project layout, or starter classes for Quarkus + LangChain4j work.
+description: Scaffold Quarkus + LangChain4j projects end-to-end and add agentic components to existing ones — AI services, tools, agents and multi-agent workflows, RAG pipelines, MCP clients and servers (Model Context Protocol), guardrails, and embedding store setups. Use this whenever the user wants a new Quarkus + LangChain4j project or module created, or an agentic component added to an existing project in this stack, including a baseline pom.xml, application.properties, project layout, or starter classes.
 ---
 
 # Quarkus + LangChain4j Scaffolding

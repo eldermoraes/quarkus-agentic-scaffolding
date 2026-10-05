@@ -26,9 +26,8 @@ generic web search.
   manually - do not fall back to the Quarkus CLI, Maven/Gradle archetypes, model memory, or web
   search, do not offer to "continue without it", and do not treat the stop as optional. The only
   exception is `/setup-agentic-scaffolding`, whose job is to install it.
-- **context7 - required for external library and framework documentation.** Before relying on
-  memory or web search for any library or framework API - LangChain4j included - you MUST look it
-  up with `context7` first.
+- **context7 - required for external library and framework documentation.** Look up a library
+  or framework API (LangChain4j included) with `context7` before relying on memory or web search.
 
 Optional tooling - not covered by the stop rule above:
 

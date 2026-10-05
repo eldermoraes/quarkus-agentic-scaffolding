@@ -11,6 +11,11 @@ versioning.
   and the setup skill's conventions seeds: they are optional (used when the third-party plugin is
   installed, never a reason to stop), matching the README and the setup skill. The Quarkus Agents
   MCP and `context7` stay mandatory.
+- Prompt audit of 2026-10-05: state the `context7` lookup rule in plain wording (no all-caps
+  "MUST") in section 1 of `CLAUDE.md`, `AGENTS.md` and both conventions seeds; condense the
+  `scaffold-project` description's trigger synonyms into intent categories; drop the v0.18.0
+  changelog pointer and the "D2"/"D3" decision IDs from the setup skill, which a skills-CLI
+  install does not ship with.
 
 ### Fixed
 
