@@ -19,6 +19,14 @@ versioning.
   `evals/effectiveness/results/2026-10-05-round-2` and compared with round 1 in the README:
   with `CLAUDE.md` alone, agent-decided convention checks reach 89.2% (42.6% with neither); the
   skill on top reaches 93.3% (+4.1 pp). Every run compiled in both arms.
+- Skill-effectiveness eval, round 3: the same 30 runs with `CLAUDE.md` in both arms, on the
+  revision that trimmed `scaffold-project` and added the smoke-test and BOM-version conventions
+  (#88, #89), published in `evals/effectiveness/results/2026-10-05-round-3` and compared with
+  rounds 1 and 2 in the README. Both arms reach 98.5% agent-decided convention checks (baseline
+  89.2% and skill 93.3% in round 2): the conventions now carry the smoke test, named model,
+  virtual threads and no pins without the skill, and the trimmed skill keeps its 15/15 on
+  guardrails, smoke test and pins. The skill arm's round-2 lead in time and failing builds did not
+  hold (3.0 vs 3.5 minutes, 1.8 vs 1.6 failed build commands, 30.3 vs 23.9 turns).
 
 ### Changed
 

@@ -1,0 +1,503 @@
+{
+  "scheduled": 30,
+  "valid": 30,
+  "excluded": [],
+  "by_task": {
+    "classifier": {
+      "baseline": {
+        "n": 3,
+        "compile_first_attempt": 3,
+        "compile_within_two": 3,
+        "build_attempts": {
+          "1": 3,
+          "2": 0,
+          "not_green": 0
+        },
+        "conformance_pct": 100.0,
+        "generator_pct": 100.0,
+        "mean_agent_turns": 22.67,
+        "mean_failed_build_commands": 2.0,
+        "mean_agent_minutes": 3.36,
+        "timeouts": 0,
+        "skill_invoked": 0,
+        "mean_quarkus_mcp_calls": 3.33
+      },
+      "skill": {
+        "n": 3,
+        "compile_first_attempt": 3,
+        "compile_within_two": 3,
+        "build_attempts": {
+          "1": 3,
+          "2": 0,
+          "not_green": 0
+        },
+        "conformance_pct": 94.9,
+        "generator_pct": 100.0,
+        "mean_agent_turns": 26.67,
+        "mean_failed_build_commands": 2.0,
+        "mean_agent_minutes": 2.11,
+        "timeouts": 0,
+        "skill_invoked": 3,
+        "mean_quarkus_mcp_calls": 2.67
+      }
+    },
+    "mcp-server": {
+      "baseline": {
+        "n": 3,
+        "compile_first_attempt": 3,
+        "compile_within_two": 3,
+        "build_attempts": {
+          "1": 3,
+          "2": 0,
+          "not_green": 0
+        },
+        "conformance_pct": 100.0,
+        "generator_pct": 100.0,
+        "mean_agent_turns": 24.67,
+        "mean_failed_build_commands": 1.33,
+        "mean_agent_minutes": 3.52,
+        "timeouts": 0,
+        "skill_invoked": 0,
+        "mean_quarkus_mcp_calls": 3.67
+      },
+      "skill": {
+        "n": 3,
+        "compile_first_attempt": 3,
+        "compile_within_two": 3,
+        "build_attempts": {
+          "1": 3,
+          "2": 0,
+          "not_green": 0
+        },
+        "conformance_pct": 100.0,
+        "generator_pct": 100.0,
+        "mean_agent_turns": 38.0,
+        "mean_failed_build_commands": 2.33,
+        "mean_agent_minutes": 3.48,
+        "timeouts": 0,
+        "skill_invoked": 3,
+        "mean_quarkus_mcp_calls": 3.0
+      }
+    },
+    "parallel": {
+      "baseline": {
+        "n": 3,
+        "compile_first_attempt": 3,
+        "compile_within_two": 3,
+        "build_attempts": {
+          "1": 3,
+          "2": 0,
+          "not_green": 0
+        },
+        "conformance_pct": 97.4,
+        "generator_pct": 100.0,
+        "mean_agent_turns": 36.67,
+        "mean_failed_build_commands": 3.0,
+        "mean_agent_minutes": 4.27,
+        "timeouts": 0,
+        "skill_invoked": 0,
+        "mean_quarkus_mcp_calls": 5.0
+      },
+      "skill": {
+        "n": 3,
+        "compile_first_attempt": 3,
+        "compile_within_two": 3,
+        "build_attempts": {
+          "1": 3,
+          "2": 0,
+          "not_green": 0
+        },
+        "conformance_pct": 97.4,
+        "generator_pct": 100.0,
+        "mean_agent_turns": 30.67,
+        "mean_failed_build_commands": 1.33,
+        "mean_agent_minutes": 3.13,
+        "timeouts": 0,
+        "skill_invoked": 3,
+        "mean_quarkus_mcp_calls": 4.0
+      }
+    },
+    "rag": {
+      "baseline": {
+        "n": 3,
+        "compile_first_attempt": 3,
+        "compile_within_two": 3,
+        "build_attempts": {
+          "1": 3,
+          "2": 0,
+          "not_green": 0
+        },
+        "conformance_pct": 94.9,
+        "generator_pct": 100.0,
+        "mean_agent_turns": 18.67,
+        "mean_failed_build_commands": 0.67,
+        "mean_agent_minutes": 3.26,
+        "timeouts": 0,
+        "skill_invoked": 0,
+        "mean_quarkus_mcp_calls": 4.0
+      },
+      "skill": {
+        "n": 3,
+        "compile_first_attempt": 3,
+        "compile_within_two": 3,
+        "build_attempts": {
+          "1": 3,
+          "2": 0,
+          "not_green": 0
+        },
+        "conformance_pct": 100.0,
+        "generator_pct": 100.0,
+        "mean_agent_turns": 27.67,
+        "mean_failed_build_commands": 1.0,
+        "mean_agent_minutes": 3.27,
+        "timeouts": 0,
+        "skill_invoked": 3,
+        "mean_quarkus_mcp_calls": 3.33
+      }
+    },
+    "tools": {
+      "baseline": {
+        "n": 3,
+        "compile_first_attempt": 3,
+        "compile_within_two": 3,
+        "build_attempts": {
+          "1": 3,
+          "2": 0,
+          "not_green": 0
+        },
+        "conformance_pct": 100.0,
+        "generator_pct": 100.0,
+        "mean_agent_turns": 17.0,
+        "mean_failed_build_commands": 1.0,
+        "mean_agent_minutes": 3.3,
+        "timeouts": 0,
+        "skill_invoked": 0,
+        "mean_quarkus_mcp_calls": 3.0
+      },
+      "skill": {
+        "n": 3,
+        "compile_first_attempt": 3,
+        "compile_within_two": 3,
+        "build_attempts": {
+          "1": 3,
+          "2": 0,
+          "not_green": 0
+        },
+        "conformance_pct": 100.0,
+        "generator_pct": 100.0,
+        "mean_agent_turns": 28.67,
+        "mean_failed_build_commands": 2.33,
+        "mean_agent_minutes": 3.07,
+        "timeouts": 0,
+        "skill_invoked": 3,
+        "mean_quarkus_mcp_calls": 3.0
+      }
+    }
+  },
+  "overall": {
+    "baseline": {
+      "n": 15,
+      "compile_first_attempt": 15,
+      "compile_within_two": 15,
+      "build_attempts": {
+        "1": 15,
+        "2": 0,
+        "not_green": 0
+      },
+      "conformance_pct": 98.5,
+      "generator_pct": 100.0,
+      "mean_agent_turns": 23.93,
+      "mean_failed_build_commands": 1.6,
+      "mean_agent_minutes": 3.54,
+      "timeouts": 0,
+      "skill_invoked": 0,
+      "mean_quarkus_mcp_calls": 3.8
+    },
+    "skill": {
+      "n": 15,
+      "compile_first_attempt": 15,
+      "compile_within_two": 15,
+      "build_attempts": {
+        "1": 15,
+        "2": 0,
+        "not_green": 0
+      },
+      "conformance_pct": 98.5,
+      "generator_pct": 100.0,
+      "mean_agent_turns": 30.33,
+      "mean_failed_build_commands": 1.8,
+      "mean_agent_minutes": 3.01,
+      "timeouts": 0,
+      "skill_invoked": 15,
+      "mean_quarkus_mcp_calls": 3.2
+    }
+  },
+  "checks": {
+    "baseline": {
+      "agent_annotation": [
+        3,
+        3
+      ],
+      "agentic_extension": [
+        3,
+        3
+      ],
+      "ai_service": [
+        15,
+        15
+      ],
+      "delimited_input": [
+        15,
+        15
+      ],
+      "dev_logging": [
+        15,
+        15
+      ],
+      "devservices_off": [
+        15,
+        15
+      ],
+      "dual_bom": [
+        15,
+        15
+      ],
+      "easy_rag_extension": [
+        3,
+        3
+      ],
+      "easy_rag_path": [
+        3,
+        3
+      ],
+      "embedding_dependency": [
+        3,
+        3
+      ],
+      "enum_result": [
+        3,
+        3
+      ],
+      "fault_tolerance": [
+        6,
+        6
+      ],
+      "input_guardrail": [
+        13,
+        15
+      ],
+      "java_release_25": [
+        15,
+        15
+      ],
+      "llm_tool": [
+        3,
+        3
+      ],
+      "llm_tools_wired": [
+        6,
+        6
+      ],
+      "mcp_server_extension": [
+        3,
+        3
+      ],
+      "mcp_tool": [
+        3,
+        3
+      ],
+      "mcp_tool_arg": [
+        3,
+        3
+      ],
+      "memory_id": [
+        3,
+        3
+      ],
+      "named_model": [
+        15,
+        15
+      ],
+      "native_profile": [
+        15,
+        15
+      ],
+      "no_executor_glue": [
+        2,
+        3
+      ],
+      "no_extension_version_pins": [
+        15,
+        15
+      ],
+      "no_manual_wiring": [
+        15,
+        15
+      ],
+      "parallel_agent": [
+        3,
+        3
+      ],
+      "parameters_flag": [
+        15,
+        15
+      ],
+      "record_dto": [
+        15,
+        15
+      ],
+      "sample_document": [
+        3,
+        3
+      ],
+      "smoke_test": [
+        15,
+        15
+      ],
+      "virtual_threads": [
+        3,
+        3
+      ],
+      "zero_temperature": [
+        3,
+        3
+      ]
+    },
+    "skill": {
+      "agent_annotation": [
+        3,
+        3
+      ],
+      "agentic_extension": [
+        3,
+        3
+      ],
+      "ai_service": [
+        15,
+        15
+      ],
+      "delimited_input": [
+        15,
+        15
+      ],
+      "dev_logging": [
+        15,
+        15
+      ],
+      "devservices_off": [
+        15,
+        15
+      ],
+      "dual_bom": [
+        15,
+        15
+      ],
+      "easy_rag_extension": [
+        3,
+        3
+      ],
+      "easy_rag_path": [
+        3,
+        3
+      ],
+      "embedding_dependency": [
+        3,
+        3
+      ],
+      "enum_result": [
+        3,
+        3
+      ],
+      "fault_tolerance": [
+        4,
+        6
+      ],
+      "input_guardrail": [
+        15,
+        15
+      ],
+      "java_release_25": [
+        15,
+        15
+      ],
+      "llm_tool": [
+        3,
+        3
+      ],
+      "llm_tools_wired": [
+        6,
+        6
+      ],
+      "mcp_server_extension": [
+        3,
+        3
+      ],
+      "mcp_tool": [
+        3,
+        3
+      ],
+      "mcp_tool_arg": [
+        3,
+        3
+      ],
+      "memory_id": [
+        3,
+        3
+      ],
+      "named_model": [
+        15,
+        15
+      ],
+      "native_profile": [
+        15,
+        15
+      ],
+      "no_executor_glue": [
+        2,
+        3
+      ],
+      "no_extension_version_pins": [
+        15,
+        15
+      ],
+      "no_manual_wiring": [
+        15,
+        15
+      ],
+      "parallel_agent": [
+        3,
+        3
+      ],
+      "parameters_flag": [
+        15,
+        15
+      ],
+      "record_dto": [
+        15,
+        15
+      ],
+      "sample_document": [
+        3,
+        3
+      ],
+      "smoke_test": [
+        15,
+        15
+      ],
+      "virtual_threads": [
+        3,
+        3
+      ],
+      "zero_temperature": [
+        3,
+        3
+      ]
+    }
+  },
+  "delta": {
+    "compile_first_attempt_pp": 0.0,
+    "compile_within_two_pp": 0.0,
+    "conformance_pp": 0.0,
+    "generator_pp": 0.0
+  }
+}

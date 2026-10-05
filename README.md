@@ -582,9 +582,11 @@ instruction files once at startup.
 Does installing `scaffold-project` change what a coding agent builds? Measured on 2026-10-05 with
 `claude-sonnet-5-5` in Claude Code 2.1.289: five fixed tasks, each run three times **without** and
 three times **with** the skill, 30 headless runs, all scored mechanically. The number is published
-as measured; the [protocol](evals/effectiveness/README.md) was committed before collection. Two
+as measured; the [protocol](evals/effectiveness/README.md) was committed before collection. Three
 rounds were collected: round 1 with no `CLAUDE.md` in either arm, round 2 with this repository's
-`CLAUDE.md` in the working directory of both arms (see [Round 2](#round-2-claudemd-in-both-arms)).
+`CLAUDE.md` in the working directory of both arms (see [Round 2](#round-2-claudemd-in-both-arms)),
+and round 3 the same way after the skill was trimmed (see
+[Round 3](#round-3-trimmed-skill-and-two-new-conventions)).
 
 ### Round 1: no `CLAUDE.md`
 
@@ -655,14 +657,55 @@ reference `AGENTS.md`, so only `CLAUDE.md` was copied. A probe before collection
 Raw records, transcripts and generated sources are in
 [`evals/effectiveness/results/2026-10-05-round-2`](evals/effectiveness/results/2026-10-05-round-2/SUMMARY.md).
 
-**Limitations (both rounds).** n = 3 per cell, one model, one agent, five tasks, no significance
+### Round 3: trimmed skill and two new conventions
+
+Round 3 repeats round 2 (`--with-claude-md`, same tasks, model, MCP pins, permissions and scorer)
+on the revision of #89, which trimmed `scaffold-project` to what the conventions do not say (#88,
+option 1) and added two conventions: every project keeps a `@QuarkusTest` smoke test, and no
+dependency the platform BOMs manage carries a version. The revision also includes #87 (every
+`@RegisterAiService` names its model; synchronous REST and I/O `@Tool` methods carry
+`@RunOnVirtualThread`), merged after round 2, so the round 2 to round 3 change mixes both PRs.
+
+| Round / arm | Compiles (attempt 1) | Agent-decided convention checks | Generator checks | Mean failed build commands | Mean turns | Mean minutes | API-equivalent USD (15 runs) |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| 1, baseline (no `CLAUDE.md`) | 15/15 | 42.6% | 89.3% | 4.5 | 19.9 | 1.1 | 3.12 |
+| 1, skill (no `CLAUDE.md`) | 15/15 | 86.2% | 100% | 1.1 | 27.9 | 2.1 | 5.79 |
+| 2, baseline + `CLAUDE.md` | 15/15 | 89.2% | 96.0% | 1.7 | 22.9 | 3.5 | 5.03 |
+| 2, skill + `CLAUDE.md` | 15/15 | 93.3% | 100% | 0.8 | 27.3 | 2.1 | 6.37 |
+| 3, baseline + `CLAUDE.md` | 15/15 | **98.5%** | 100% | 1.6 | 23.9 | 3.5 | 5.36 |
+| 3, trimmed skill + `CLAUDE.md` | 15/15 | **98.5%** | 100% | 1.8 | 30.3 | 3.0 | 6.87 |
+
+- **The conventions now carry the margin the skill used to own.** Without the skill, agent-decided
+  checks rose from 89.2% to 98.5%: `@QuarkusTest` smoke test 9/15 to 15/15, named model 6/15 to
+  15/15, virtual threads 1/3 to 3/3, `@InputGuardrails` 11/15 to 13/15, and in the generator band
+  no version pins 12/15 to 15/15. The three remaining baseline misses are two RAG runs with no
+  input guardrail and one parallel run with executor glue.
+- **The trimmed skill kept its conformance and lost its lead.** The skill arm also reached 98.5%
+  (93.3% in round 2), with `@InputGuardrails`, the smoke test and no pins all at 15/15. With both
+  arms equal, the skill adds no measured conformance on top of `CLAUDE.md`; it still leads on
+  `@InputGuardrails` (15/15 vs 13/15) and trails on `@Timeout`/`@Fallback` (4/6 vs 6/6, both misses
+  in the classifier task, where the prompt does not ask for fault tolerance).
+- **Time and builds: the round-2 advantage did not hold.** The skill arm took 3.0 minutes per run
+  (2.1 in round 2) against 3.5 for the baseline, more turns (30.3 vs 23.9) and slightly more
+  failing build commands (1.8 vs 1.6; 0.8 in round 2), at about 1.28x the token cost. Whether the
+  trim, the conventions changes or run-to-run variance moved these numbers is not isolated; wall
+  time also depends on machine load, which was not controlled.
+- **Compilation: still no difference.** Every run compiled at the first independent attempt.
+
+The baseline queried context7 in round 3 (7 calls in total); the skill arm did not. Raw records,
+transcripts and generated sources are in
+[`evals/effectiveness/results/2026-10-05-round-3`](evals/effectiveness/results/2026-10-05-round-3/SUMMARY.md).
+The collection ran from the head of #89 (`30a80a0`), whose tree is identical to its squash merge
+on `main` (`36aa81f`).
+
+**Limitations (all rounds).** n = 3 per cell, one model, one agent, five tasks, no significance
 test. The checks are regex presence predicates derived from [`CLAUDE.md`](CLAUDE.md), not proof of
 semantic correctness, and both the skill and `CLAUDE.md` were written against the same conventions,
 so each is evaluated on the standard it teaches (the rubric is this project's own). Neither arm
-queried context7 in either round. A fixed prompt preamble removes the confirmation questions the
+queried context7 in rounds 1 and 2. A fixed prompt preamble removes the confirmation questions the
 skill asks in interactive use. Isolation from the globally installed skill came from
-`--setting-sources` (`''` in round 1, `project` in round 2) plus `--strict-mcp-config`, and was
-asserted per run (0 runs excluded in either round). The two rounds ran hours apart on the same
+`--setting-sources` (`''` in round 1, `project` in rounds 2 and 3) plus `--strict-mcp-config`, and
+was asserted per run (0 runs excluded in any round). The rounds ran hours apart on the same
 machine, not interleaved.
 
 Reproduce (Claude Code logged in, JDK 25, Maven, JBang, Node, Python 3):
@@ -671,7 +714,7 @@ Reproduce (Claude Code logged in, JDK 25, Maven, JBang, Node, Python 3):
 python3 evals/effectiveness/run.py --dry-run /tmp/qas-eval   # prints the exact command of every run
 python3 evals/effectiveness/run.py /tmp/qas-eval             # 30 runs, at most 3 in parallel
 python3 evals/effectiveness/summarize.py /tmp/qas-eval
-python3 evals/effectiveness/run.py --with-claude-md /tmp/qas-eval-2   # round 2: CLAUDE.md in both arms
+python3 evals/effectiveness/run.py --with-claude-md /tmp/qas-eval-2   # rounds 2 and 3: CLAUDE.md in both arms
 ```
 
 An earlier [12-run Codex pilot](evals/skill-pilot/results/2026-09-09/REPORT.md) was inconclusive

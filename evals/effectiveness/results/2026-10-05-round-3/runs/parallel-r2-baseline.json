@@ -1,0 +1,103 @@
+{
+  "run": "parallel-r2-baseline",
+  "task": "parallel",
+  "repetition": 2,
+  "arm": "baseline",
+  "model": "claude-sonnet-5-5",
+  "started_at": "2026-10-05T21:29:56.499171+00:00",
+  "with_claude_md": true,
+  "context_files": [
+    "CLAUDE.md"
+  ],
+  "setting_sources": "project",
+  "status": "completed",
+  "isolation_ok": true,
+  "isolation_error": null,
+  "mcp_status": {
+    "quarkus-agent": "connected",
+    "context7": "connected"
+  },
+  "agent_exit": 0,
+  "agent_timed_out": false,
+  "agent_seconds": 238.5,
+  "agent_is_error": false,
+  "agent_turns": 37,
+  "cost_usd_equivalent": 0.5058792000000001,
+  "usage": {
+    "input_tokens": 46,
+    "cache_creation_input_tokens": 45013,
+    "cache_read_input_tokens": 938426,
+    "output_tokens": 13805,
+    "output_tokens_details": {
+      "thinking_tokens": 1339
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 45013,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "not_available",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 644,
+        "cache_read_input_tokens": 56289,
+        "cache_creation_input_tokens": 631,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 631
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "final_message": "The project is in `./app` and `mvn -B -ntp -DskipTests test-compile` passes. I did not run the tests or start the app. I made no model calls and started no containers.\n\n`POST /review` takes `{\"brief\": \"...\"}`. It runs a technical reviewer and a business reviewer in parallel and returns `{\"technicalReview\": ..., \"businessReview\": ...}`. The combining step is plain code, not a third model call.\n\n- **Workflow:** the two reviewers are `TechnicalReviewer` and `BusinessReviewer`. Each uses its own named Ollama model (`llama3.2` for both for now). `BriefReviewWorkflow` runs them in parallel and `ReviewResource` exposes the endpoint.\n- **Safeguards:**\n  - The brief is wrapped in `<brief>` tags, and the system prompt says it is data to analyse, not instructions.\n  - An input guardrail rejects empty or over-long briefs.\n  - Each reviewer has a timeout, one retry and a fallback message.\n  - The endpoint runs on a virtual thread and rejects empty or over-long briefs with a 400 (RFC 9457 problem details via `quarkus-http-problem`).\n- **Config:** Dev Services are disabled and Ollama points at `http://localhost:11434`, set in `application.properties`.\n- **Test:** `WiringTest` is a `@QuarkusTest` that checks both reviewers are injected. I didn't run it.\n- **Moved the project:** `quarkus_create` put the project in `./brief-review`, so I renamed it to `./app`.\n- **Unverified API details:** the Quarkus docs search needs a container runtime, so I used context7 for the agentic API and guessed the `InputGuardrails` import. The compile accepts it. Whether the fallback methods and guardrails behave correctly on agent interfaces at runtime is untested, so that is the first thing to check once the tests run.",
+  "tool_calls": 36,
+  "failed_tool_calls": 5,
+  "agent_build_commands": 6,
+  "agent_failed_build_commands": 3,
+  "skill_invocations": [],
+  "quarkus_mcp_calls": 6,
+  "context7_calls": 3,
+  "project_dir": "app",
+  "java_files": 7,
+  "conformance": {
+    "ai_service": true,
+    "named_model": true,
+    "record_dto": true,
+    "input_guardrail": true,
+    "delimited_input": true,
+    "no_manual_wiring": true,
+    "smoke_test": true,
+    "dev_logging": true,
+    "devservices_off": true,
+    "agentic_extension": true,
+    "agent_annotation": true,
+    "parallel_agent": true,
+    "no_executor_glue": true
+  },
+  "generator": {
+    "dual_bom": true,
+    "no_extension_version_pins": true,
+    "java_release_25": true,
+    "parameters_flag": true,
+    "native_profile": true
+  },
+  "compile_attempts": [
+    {
+      "exit": 0,
+      "timed_out": false,
+      "seconds": 2.9
+    }
+  ],
+  "compiles_first_attempt": true,
+  "compiles_within_two": true,
+  "build_attempts_to_green": 1,
+  "successful_generation": true
+}
