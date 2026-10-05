@@ -26,7 +26,7 @@ import io.quarkiverse.langchain4j.RegisterAiService;
  * That is the whole setup. The AI service below needs no RAG-specific code — retrieved
  * context is injected into its prompt automatically.
  */
-@RegisterAiService
+@RegisterAiService(modelName = "main")
 public interface RagAssistant {
 
     @SystemMessage("""

@@ -13,10 +13,11 @@ import io.quarkiverse.langchain4j.RegisterAiService;
  * Quarkus wires the configured chat model (and, if present, a RetrievalAugmentor and
  * ChatMemoryProvider) automatically.
  *
- * To use a named model, annotate with @RegisterAiService(modelName = "smaller")
- * (see application.properties for the "smaller" model configuration).
+ * Every AI service names its model (CLAUDE.md §4): "main" backs the primary task, "smaller"
+ * backs cheap subtasks such as classification. Both are configured in application.properties.
+ * Expose the service from a REST resource that runs on a virtual thread (RestResource.java.template).
  */
-@RegisterAiService
+@RegisterAiService(modelName = "main")
 public interface ChatAssistant {
 
     @SystemMessage("""

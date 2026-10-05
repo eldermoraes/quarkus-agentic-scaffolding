@@ -132,7 +132,7 @@ import jakarta.enterprise.context.ApplicationScoped;
  * still an instruction the model must not follow.
  */
 @ApplicationScoped
-@RegisterAiService
+@RegisterAiService(modelName = "main")
 public interface Synthesizer {
 
     @SystemMessage("""

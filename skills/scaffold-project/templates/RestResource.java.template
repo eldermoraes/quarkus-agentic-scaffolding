@@ -1,0 +1,54 @@
+package org.acme.rest;
+
+import org.acme.ai.ChatAssistant;
+import io.smallrye.common.annotation.RunOnVirtualThread;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.BadRequestException;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.core.MediaType;
+
+/*
+ * REST edge for the ChatAssistant AI service (pairs with AiService.java.template).
+ *
+ * Threading (CLAUDE.md §2): this method returns a plain value, so Quarkus REST treats it as
+ * blocking and would run it on a pooled platform worker thread. An AI-service call blocks for
+ * the whole model round-trip (and every tool round-trip), so @RunOnVirtualThread moves it onto
+ * a fresh virtual thread instead. Keep the annotation on every synchronous endpoint that calls
+ * an AI service, a tool, or other blocking I/O; a method returning Uni/Multi stays reactive and
+ * must not block at all.
+ *
+ * Validation at the edge: blank or over-long input is rejected before any model call. Keep the
+ * limit in step with PromptInjectionGuard.MAX_INPUT_CHARS (Guardrails.java.template). Anything
+ * that escapes becomes an RFC 9457 problem response when quarkus-http-problem is present.
+ */
+@Path("/chat")
+public class ChatResource {
+
+    /** Request body: a record keeps the DTO immutable and the native-image surface small. */
+    public record ChatRequest(String problem) {}
+
+    /** Response body. */
+    public record ChatResponse(String answer) {}
+
+    private static final int MAX_PROBLEM_CHARS = 4_000;
+
+    @Inject
+    ChatAssistant assistant;
+
+    @POST
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @RunOnVirtualThread
+    public ChatResponse chat(ChatRequest request) {
+        if (request == null || request.problem() == null || request.problem().isBlank()) {
+            throw new BadRequestException("problem must not be empty");
+        }
+        if (request.problem().length() > MAX_PROBLEM_CHARS) {
+            throw new BadRequestException("problem exceeds " + MAX_PROBLEM_CHARS + " characters");
+        }
+        return new ChatResponse(assistant.answer(request.problem()));
+    }
+}
