@@ -129,8 +129,8 @@ Agents MCP refuses to operate on a project that is not under git control, so `qu
 and `quarkus_skills` fail until this is done.
 
 **Learn each extension's patterns before writing code.** Call `quarkus_skills` for every
-selected extension (comma-separated queries are supported) before scaffolding against it — this
-is mandatory, not optional — and use context7 for LangChain4j and other library API lookups.
+selected extension (comma-separated queries are supported) before scaffolding against it, and
+use context7 for LangChain4j and other library API lookups.
 
 **Add the non-extension dependencies.** Project generators add only Quarkus extensions, so add
 the `dev.langchain4j` dependencies from `templates/pom.xml.template` by hand: the embedding
