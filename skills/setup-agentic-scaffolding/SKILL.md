@@ -122,8 +122,7 @@ that the download happens at that moment, not at some later first use.
 
 **Register the exact pinned versions above, including `--java 21+`.** Renovate maintains both
 pins; keep upgrades reviewable. Phase A verifies the machine's JDK, but JBang selects its own:
-`21+` enforces the server's Java floor while allowing an installed newer JDK. The historical
-JDK failure and catalog-alias analysis are recorded in the repository's v0.18.0 changelog.
+`21+` enforces the server's Java floor while allowing an installed newer JDK.
 
 **Never handle a secret in plaintext.** Do not ask the user to paste an API key into the chat, do
 not embed a literal key in a command or a config file you write, and do not echo one back in
@@ -144,7 +143,7 @@ secrets by design (see the context7 note above), so "exact" is literal: what you
 | Cursor | Write `.cursor/mcp.json` with both servers (`mcpServers` map, same command/args) | Settings → MCP shows both; user **toggles them on** | GUI enable |
 | GitHub Copilot CLI | `copilot mcp add quarkus-agent -- jbang --java 21+ io.quarkus:quarkus-agent-mcp:1.2.7:runner` · `copilot mcp add context7 -- npx -y @upstash/context7-mcp@4.1.1` | `copilot mcp list` | **Yes** — live immediately |
 | opencode | Write `opencode.json` `mcp` key with both servers | `/mcp` in session | **Yes** — hot reload |
-| Bob (D3; read §5.1 first) | `bob mcp add -s global quarkus-agent jbang -- --java 21+ io.quarkus:quarkus-agent-mcp:1.2.7:runner` · `bob mcp add -s global context7 npx -- -y @upstash/context7-mcp@4.1.1` — the `--` is mandatory, and `-s global` is machine-wide: state that to the user and offer `-s workspace` to stack-mixers (both §5.1) | `bob mcp list` shows both, `stdio`, `global` (or `workspace`) | **Yes** — Bob restarts changed servers |
+| Bob (read §5.1 first) | `bob mcp add -s global quarkus-agent jbang -- --java 21+ io.quarkus:quarkus-agent-mcp:1.2.7:runner` · `bob mcp add -s global context7 npx -- -y @upstash/context7-mcp@4.1.1` — the `--` is mandatory, and `-s global` is machine-wide: state that to the user and offer `-s workspace` to stack-mixers (both §5.1) | `bob mcp list` shows both, `stdio`, `global` (or `workspace`) | **Yes** — Bob restarts changed servers |
 
 The `.cursor/mcp.json`, `opencode.json`, and `.bob/mcp.json` map has the same shape everywhere:
 
@@ -223,7 +222,7 @@ wrote `AGENTS.md` (Phase C) ends in a conversation that has not read it. Close w
 
 `superpowers` skills are used wherever applicable in this stack, but they are a **third-party
 plugin** — this skill **detects** them and **presents install commands for the user to run**; it
-**never auto-installs** them (decision D2).
+**never auto-installs** them.
 
 - **Detect:** check whether superpowers skills are already available to the running agent.
 - **If absent, present** the install path (the user runs it), e.g. for Claude Code:
