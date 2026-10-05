@@ -201,8 +201,9 @@ section earns its place:
 
 - **§1 Required tooling (mandatory).** Makes `context7` and the **Quarkus Agents MCP** required,
   not optional: every Quarkus task goes through the Quarkus Agents MCP and every library lookup
-  through `context7`, with `superpowers` skills used where applicable. If a required tool is
-  missing, work stops rather than falling back to stale model memory.
+  through `context7`. If a required tool is missing, work stops rather than falling back to stale
+  model memory. `superpowers` skills are listed there as optional: used when installed, never
+  blocking.
 - **§2 Java conventions.** Sets Java 25 as the *minimum*, makes **virtual threads** the default
   carrier for blocking work, prefers **Scoped Values** over `ThreadLocal`, gives a pragmatic
   stance on structured concurrency, and favors **records / sealed types / pattern matching**.

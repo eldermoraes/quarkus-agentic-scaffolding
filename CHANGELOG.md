@@ -5,6 +5,13 @@ versioning.
 
 ## Unreleased
 
+### Changed
+
+- Move `superpowers` skills out of the mandatory list in section 1 of `CLAUDE.md`, `AGENTS.md`
+  and the setup skill's conventions seeds: they are optional (used when the third-party plugin is
+  installed, never a reason to stop), matching the README and the setup skill. The Quarkus Agents
+  MCP and `context7` stay mandatory.
+
 ### Fixed
 
 - Make the weekly template validation resolve the latest **stable** Quarkus platform instead

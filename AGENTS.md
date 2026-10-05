@@ -29,8 +29,12 @@ generic web search.
 - **context7 - required for external library and framework documentation.** Before relying on
   memory or web search for any library or framework API - LangChain4j included - you MUST look it
   up with `context7` first.
-- **superpowers skills - use whenever applicable.** Invoke the relevant `superpowers` skill
-  capabilities for the task at hand.
+
+Optional tooling - not covered by the stop rule above:
+
+- **superpowers skills - optional.** When the third-party `superpowers` plugin is installed, use
+  its skill for a task it fits. The user installs it by choice, so its absence never blocks work
+  and is not a reason to stop.
 
 ---
 
