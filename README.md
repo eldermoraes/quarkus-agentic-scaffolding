@@ -208,7 +208,8 @@ section earns its place:
   carrier for blocking work, prefers **Scoped Values** over `ThreadLocal`, gives a pragmatic
   stance on structured concurrency, and favors **records / sealed types / pattern matching**.
   These are the modern-Java habits that make AI code simpler and more debuggable.
-- **§3 Quarkus conventions.** Platform BOMs over pinned versions, CDI-first wiring, Quarkus REST +
+- **§3 Quarkus conventions.** Platform BOMs over pinned versions (no `<version>` on anything the
+  BOMs manage, embedding models included), CDI-first wiring, Quarkus REST +
   OpenAPI, WebSockets Next for streaming, the `-parameters` flag, a dual JVM/native build,
   zero-code AI observability via Micrometer + OpenTelemetry, and turning off Dev Services when a
   real model endpoint is configured.
@@ -216,8 +217,8 @@ section earns its place:
   **agentic** composition for multi-agent workflows, typed structured output, named/right-sized
   models, a streaming pattern that keeps reactive types at the edge, declarative fault tolerance
   on AI-service methods, and **Easy RAG first**.
-- **§5 Testing.** A minimal intended baseline (`@QuarkusTest` + REST-assured + native ITs),
-  flagged as a target rather than an observed standard.
+- **§5 Testing.** Every project keeps a `@QuarkusTest` wiring smoke test that needs no live
+  model; beyond it, REST-assured, native ITs and evaluation-based quality tests.
 - **§6 Scope and overrides.** States that per-project deviations are allowed when documented
   inline — the conventions guide, they do not imprison.
 
@@ -239,7 +240,9 @@ scaffolding and setup in the skills, rules in `CLAUDE.md` or `AGENTS.md`.
   starter templates), **and** adding components to an existing project — an AI service, tool,
   agent/workflow, RAG pipeline, MCP client or server, or guardrail. Keeping creation and
   components together (owner decision) minimizes the number of skills you face; it stays
-  model-invoked so component requests auto-trigger.
+  model-invoked so component requests auto-trigger. It refuses to start in a project without the
+  managed conventions block and points you to `/setup-agentic-scaffolding`, since it relies on
+  the conventions instead of restating them.
 - **`audit-project`** (user-invoked) is read-only by default: it audits an existing project
   against §2–§5, the package layout, and the dependency/properties baseline, and reports
   prioritized findings with evidence and a suggested fix each — applying fixes only after you

@@ -142,7 +142,7 @@ emit the §5.0 finding only and mark the §5 check as subsumed by it — do not 
 
 | Check | Look for | Pass when |
 |---|---|---|
-| BOM imports, no pinned versions | `quarkus-bom` + `quarkus-langchain4j-bom` in `dependencyManagement` | both imported at one platform version; **no** `<version>` on extensions |
+| BOM imports, no pinned versions | `quarkus-bom` + `quarkus-langchain4j-bom` in `dependencyManagement` | both imported at one platform version; **no** `<version>` on any dependency they manage (extensions and `langchain4j-embeddings-*` included) |
 | `-parameters` retention | compiler config in `pom.xml` | `<parameters>true</parameters>` set |
 | Native profile present | `<profile>` in `pom.xml` | a `native` profile exists |
 | REST + OpenAPI surface | extensions | `quarkus-rest` + `quarkus-rest-jackson`; `quarkus-smallrye-openapi` present |
@@ -177,8 +177,9 @@ emit the §5.0 finding only and mark the §5 check as subsumed by it — do not 
   precondition (EOL Quarkus line, unsupported Java release, pre-BOM LangChain4j, missing
   conventions file).
 - **Medium** — drift that will bite later (missing native profile, no observability extensions,
-  Dev Services left on against a real endpoint, `ThreadLocal` for agent identity).
-- **Low** — polish (missing dev logging, DTOs that could be records, missing wiring smoke test).
+  Dev Services left on against a real endpoint, `ThreadLocal` for agent identity, missing wiring
+  smoke test).
+- **Low** — polish (missing dev logging, DTOs that could be records).
 
 Lead with the recommendation, then present **all findings in a single markdown table**, ordered
 by severity (high first). Each row carries concrete evidence (`file:line`), the convention the
