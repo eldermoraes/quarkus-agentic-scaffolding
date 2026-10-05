@@ -49,7 +49,12 @@ Optional tooling - not covered by the stop rule above:
 - **Default to Virtual Threads for I/O-bound and blocking concurrent work.** Platform threads
   are acceptable only when the runtime or a critical dependency forbids virtual threads (for
   example, a JDBC driver that pins the carrier). When a blocking AI or tool call must run inside
-  a reactive endpoint, run it on a virtual thread rather than on the event loop.
+  a reactive endpoint, run it on a virtual thread rather than on the event loop. Concretely:
+  every synchronous REST resource method that calls an AI service, a tool, or other blocking
+  I/O carries `@RunOnVirtualThread` (`io.smallrye.common.annotation`) - Quarkus REST
+  otherwise runs it on a pooled platform worker thread - and so does every `@Tool` method
+  that does I/O; code that fans out by hand uses `Thread.startVirtualThread(...)` or an
+  `Executors.newVirtualThreadPerTaskExecutor()`.
 - **Use Scoped Values in place of `ThreadLocal`** for request- or agent-scoped identity that
   must survive virtual-thread continuations, avoiding the leakage and inheritance pitfalls of
   `ThreadLocal`.
@@ -136,6 +141,9 @@ Optional tooling - not covered by the stop rule above:
 - **Name and right-size models.** Configure models by name (`@RegisterAiService(modelName = "...")`
   on services, `@ModelName("...")` on injected models) and use a small, fast, low-temperature model
   for cheap subtasks (classification, query rewriting) and a larger model for the primary task.
+  Every `@RegisterAiService` declares `modelName`, even when the project has a single model:
+  give each role its own named block (`quarkus.langchain4j.<provider>.<name>.chat-model.*`)
+  instead of leaning on the unnamed default, so re-sizing one service is a configuration change.
 - **Streaming pattern: reactive only at the edge.** Stream over `quarkus-websockets-next`
   (`@WebSocket`, `@OnTextMessage` returning a Mutiny `Multi`, `@OnError`). Keep the agent and
   engine logic free of reactive types: have the WebSocket delegate to an `@ApplicationScoped`

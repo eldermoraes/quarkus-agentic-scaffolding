@@ -8,17 +8,23 @@
 # qwen3 is what the official quarkus-langchain4j Ollama guide uses, and its
 # tool-calling is markedly better than llama3.2's — which is what the tool and
 # agent templates here exercise. Models with >= 3B parameters follow system
-# prompts more reliably, so qwen3:4b is the default and qwen3:1.7b backs the
-# "smaller" named model below.
+# prompts more reliably, so qwen3:4b backs the default and "main" models and
+# qwen3:1.7b backs the "smaller" named model below.
 # ============================================================================
 
 # --- Ollama endpoint (uncomment to override the default) ---
 # quarkus.langchain4j.ollama.base-url=http://localhost:11434
 
-# --- Default chat model ---
+# --- Default (unnamed) chat model: backs only code that names no model. ---
 quarkus.langchain4j.ollama.chat-model.model-id=qwen3:4b
 quarkus.langchain4j.ollama.chat-model.temperature=0.7
 quarkus.langchain4j.timeout=120s
+
+# --- Named "main" model: the primary task. Every @RegisterAiService declares a ---
+# modelName (CLAUDE.md section 4); the primary services use @RegisterAiService(modelName = "main").
+quarkus.langchain4j.ollama.main.chat-model.model-id=qwen3:4b
+quarkus.langchain4j.ollama.main.chat-model.temperature=0.7
+quarkus.langchain4j.ollama.main.timeout=120s
 
 # --- Named "smaller" model: cheap/fast subtasks (classification, query rewriting). ---
 # Select it with @RegisterAiService(modelName = "smaller") or @ModelName("smaller").
@@ -42,6 +48,7 @@ quarkus.langchain4j.devservices.enabled=false
 # tickets) to that provider; apply your organization's consent, redaction, and
 # data-retention rules first.
 #   quarkus.langchain4j.ollama.chat-model.model-id=deepseek-v4-pro:cloud
+#   quarkus.langchain4j.ollama.main.chat-model.model-id=deepseek-v4-pro:cloud
 #   quarkus.langchain4j.ollama.smaller.chat-model.model-id=gpt-oss:20b-cloud
 # ============================================================================
 

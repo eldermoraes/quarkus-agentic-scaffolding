@@ -4,6 +4,7 @@ import org.acme.tools.TicketTools;
 
 import io.quarkiverse.mcp.server.Tool;
 import io.quarkiverse.mcp.server.ToolArg;
+import io.smallrye.common.annotation.RunOnVirtualThread;
 import jakarta.inject.Inject;
 
 /*
@@ -30,6 +31,7 @@ public class TriageMcpServer {
     TicketTools tickets;
 
     @Tool(description = "Looks up a customer's support context: plan and open-ticket count")
+    @RunOnVirtualThread // blocking lookup: keep it off the event loop and off the worker pool (CLAUDE.md §2)
     public String customerContext(
             @ToolArg(description = "The customer id") String customerId) {
         TicketTools.CustomerContext ctx = tickets.lookupCustomer(customerId);

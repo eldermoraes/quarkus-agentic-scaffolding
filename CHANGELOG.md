@@ -22,6 +22,21 @@ versioning.
 
 ### Changed
 
+- Reinforce the two conventions the effectiveness eval found missed in both arms (#6). Round 2
+  (`CLAUDE.md` in both arms) passed `named_model` in 6/15 runs without the skill and 5/15 with it,
+  and `virtual_threads` in 1/3 and 0/3. The generated code showed why: single-model projects
+  configured only the unnamed default (`quarkus.langchain4j.ollama.chat-model.*`) and left
+  `@RegisterAiService` without `modelName`, reading "name and right-size models" as a rule for
+  multi-model projects; and the classifier's synchronous `POST /classify` resource ran on Quarkus
+  REST's platform worker pool, which satisfies "keep blocking calls off the event loop" but not
+  "default to virtual threads". Section 4 of `CLAUDE.md`, `AGENTS.md` and both conventions seeds now
+  says every `@RegisterAiService` declares `modelName`, even with a single model; section 2 says
+  every synchronous REST method that calls an AI service, a tool or other blocking I/O, and every
+  `@Tool` method doing I/O, carries `@RunOnVirtualThread`. The `scaffold-project` templates ship the
+  markers: a named `main` model in `application.properties.template`, `modelName = "main"` on the
+  AI service, MCP client, RAG assistant and synthesizer agent, `@RunOnVirtualThread` on the MCP
+  server tool, and a new `RestResource.java.template` (`rest/ChatResource`, `POST /chat` on a
+  virtual thread with edge validation). The scorer is unchanged.
 - Move `superpowers` skills out of the mandatory list in section 1 of `CLAUDE.md`, `AGENTS.md`
   and the setup skill's conventions seeds: they are optional (used when the third-party plugin is
   installed, never a reason to stop), matching the README and the setup skill. The Quarkus Agents

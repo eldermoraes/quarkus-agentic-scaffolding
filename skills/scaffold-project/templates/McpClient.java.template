@@ -24,7 +24,7 @@ import io.quarkiverse.langchain4j.mcp.runtime.McpToolBox;
  * Health: each configured client contributes a readiness check; set
  * quarkus.langchain4j.mcp.health.enabled=false if the remote server may be down at startup.
  */
-@RegisterAiService
+@RegisterAiService(modelName = "main")
 public interface TicketOpsAssistant {
 
     @SystemMessage("""

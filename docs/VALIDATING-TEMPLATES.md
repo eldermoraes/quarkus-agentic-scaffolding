@@ -34,6 +34,7 @@ before shipping a release, and whenever you touch a template.
 
 3. **Materialize the templates** into `src/main/java/org/acme/` and `src/main/resources/`:
    - copy `AiService.java.template` → `ai/ChatAssistant.java`
+   - copy `RestResource.java.template` → `rest/ChatResource.java`
    - copy `RagSetup.java.template` → `rag/RagAssistant.java`
    - copy `application.properties.template` → `resources/application.properties`
    - split `Agent.java.template` into its per-file sections (each block is headed by a
