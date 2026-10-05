@@ -28,7 +28,7 @@ This skill has two roles:
 
 - **Create a Quarkus + LangChain4j project end-to-end** — scaffold, bootstrap, initialize,
   generate, or kickstart a new project or module, from `quarkus_create` through a running,
-  test-green dev mode (§2–§3, §11–§13).
+  test-green dev mode (§2–§3, §11–§14).
 - **Add a component to an existing project** — a new AI service (§4), tools (§5), MCP client
   (§6) or server (§7), agent or multi-agent workflow (§8), RAG pipeline (§9), guardrails
   (§10), or embedding store. These requests auto-trigger the skill.
@@ -128,7 +128,7 @@ the `dev.langchain4j` dependencies from `templates/pom.xml.template` by hand, wi
 parser.
 
 Then lay out the sub-packages (§2), drop in the templates you need (§4–§10), write the
-`application.properties` baseline (§11), and verify (§12).
+`application.properties` baseline (§11), verify (§12), and check the markers (§14).
 
 ## 4. AI service scaffolding
 
@@ -240,3 +240,32 @@ test (live Ollama, `temperature=0`) and an **AI-quality evaluation** example (`S
 `@EvaluationTest` with semantic-similarity or AI-judge strategies), backed by
 `quarkus-langchain4j-testing-evaluation-junit5` — already listed, test-scoped, in
 `templates/pom.xml.template` (the platform BOM manages its version).
+
+## 14. Verify the convention markers before you finish
+
+The last step of every create or add-component run, after §12. Run each search below from the
+project root (the Grep tool or `grep`), fix every miss in the code, and run the list again until
+every check passes. Do not skip a check because the code "looks right". These are the presence
+checks of `/audit-project` that a scaffold can satisfy; a pass proves the marker is there, not
+that the code is correct.
+
+1. **Named model.** `grep -rl '@RegisterAiService' src/main/java` and
+   `grep -rL 'modelName' src/main/java`: no file is in both lists.
+2. **Virtual threads.** `grep -rl -e '@Path' -e 'dev.langchain4j.agent.tool.Tool' src/main/java`:
+   in every listed file, each synchronous REST method that calls an AI service, a tool or other
+   I/O, and each `@Tool` method doing I/O, carries `@RunOnVirtualThread`.
+3. **Input guardrails.** `grep -rn -B4 '@UserMessage' src/main/java`: every AI-service method
+   that receives text the application did not author carries `@InputGuardrails` (on the method
+   or its interface).
+4. **Delimited input.** Same output as check 3: that text sits inside explicit tags
+   (`<ticket>{ticket}</ticket>`) and the system message says the tagged span is data.
+5. **Smoke test.** `grep -rl '@QuarkusTest' src/test/java` lists at least one file (§13).
+6. **No BOM-managed versions.** `grep -n -A3 -e '<groupId>io.quarkus' -e '<groupId>io.quarkiverse' -e '<groupId>dev.langchain4j' pom.xml`:
+   no `<version>` in those `<dependency>` blocks outside `<dependencyManagement>`.
+7. **Dev logging.** `grep -n -e '^%dev.quarkus.langchain4j.log-requests=true' -e '^%dev.quarkus.langchain4j.log-responses=true' src/main/resources/application.properties`
+   prints both lines.
+8. **Dev Services off.** `grep -n 'devservices.enabled=false' src/main/resources/application.properties`
+   prints a line when a model endpoint is configured.
+
+After fixing, repeat the §12 verification so the build and the smoke test stay green, and end
+your answer with the eight checks marked pass, or fixed with what changed.

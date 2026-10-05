@@ -63,7 +63,7 @@ def load_tasks():
     return spec
 
 
-def schedule(spec, task_ids, repetitions):
+def schedule(spec, task_ids, repetitions, arms_filter=ARMS):
     """Deterministic order; the arm order alternates per repetition to spread drift evenly."""
     runs = []
     for repetition in range(1, repetitions + 1):
@@ -72,6 +72,8 @@ def schedule(spec, task_ids, repetitions):
                 continue
             arms = ARMS if repetition % 2 else tuple(reversed(ARMS))
             for arm in arms:
+                if arm not in arms_filter:
+                    continue
                 runs.append({'id': f"{task['id']}-r{repetition}-{arm}", 'task': task,
                              'repetition': repetition, 'arm': arm})
     return runs
@@ -326,10 +328,15 @@ def main():
     parser.add_argument('--with-claude-md', action='store_true',
                         help="copy the repository's CLAUDE.md (and AGENTS.md if it is referenced) into every "
                              'run directory, in both arms, and load it with --setting-sources project')
+    parser.add_argument('--arms', default=','.join(ARMS),
+                        help='comma-separated arms to run (default: baseline,skill)')
     parser.add_argument('--dry-run', action='store_true', help='print the plan and commands, run nothing')
     args = parser.parse_args()
     spec = load_tasks()
-    runs = schedule(spec, set(filter(None, args.tasks.split(','))), args.repetitions)
+    arms = tuple(a for a in args.arms.split(',') if a)
+    if not arms or set(arms) - set(ARMS):
+        parser.error(f'--arms must be a subset of {",".join(ARMS)}')
+    runs = schedule(spec, set(filter(None, args.tasks.split(','))), args.repetitions, arms)
     output = args.output.resolve()
     if args.dry_run:
         quarkus, context7 = mcp_pins()
@@ -359,7 +366,7 @@ def main():
         'maven': subprocess.check_output(['mvn', '-v'], text=True).splitlines()[0],
         'quarkus_agent_mcp': quarkus, 'context7_mcp': context7, 'timeout_seconds': args.timeout,
         'repair_timeout_seconds': args.repair_timeout, 'parallel': args.parallel,
-        'repetitions': args.repetitions, 'compile_command': COMPILE, 'allowed_tools': ALLOWED_TOOLS,
+        'repetitions': args.repetitions, 'arms': list(arms), 'compile_command': COMPILE, 'allowed_tools': ALLOWED_TOOLS,
         'tasks_sha256': hashlib.sha256((HERE / 'tasks.json').read_bytes()).hexdigest(),
         'baseline_env': dict(line.split('=', 1) for line in (REPO / 'ci/baseline.env').read_text().splitlines()
                              if line and not line.startswith('#')),
