@@ -1,0 +1,99 @@
+{
+  "run": "parallel-r3-baseline",
+  "task": "parallel",
+  "repetition": 3,
+  "arm": "baseline",
+  "model": "claude-sonnet-5-5",
+  "started_at": "2026-10-05T17:24:48.277900+00:00",
+  "status": "completed",
+  "isolation_ok": true,
+  "isolation_error": null,
+  "mcp_status": {
+    "quarkus-agent": "connected",
+    "context7": "connected"
+  },
+  "agent_exit": 0,
+  "agent_timed_out": false,
+  "agent_seconds": 63.9,
+  "agent_is_error": false,
+  "agent_turns": 20,
+  "cost_usd_equivalent": 0.18555580000000002,
+  "usage": {
+    "input_tokens": 20,
+    "cache_creation_input_tokens": 19373,
+    "cache_read_input_tokens": 208919,
+    "output_tokens": 6624,
+    "output_tokens_details": {
+      "thinking_tokens": 425
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 19373,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "not_available",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 526,
+        "cache_read_input_tokens": 24307,
+        "cache_creation_input_tokens": 6973,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 6973
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "final_message": "The project is in `./app` and `mvn -B -ntp -DskipTests test-compile` passes (BUILD SUCCESS). I didn't run the app or call a model, so `POST /review` is untested end to end. The only test is a small unit test of the report formatting, and I compiled it but didn't run it.\n\n- **Versions:** I couldn't query Maven Central (network calls needed approval), so I picked Quarkus 3.27.0 and quarkus-langchain4j 1.5.0 myself, and they resolved. I wrote the pom by hand instead of using the Quarkus create tool, since that tool auto-starts dev mode.\n- **Reviewers:** `TechnicalReviewer` covers feasibility, architecture, risks and effort. `BusinessReviewer` covers market fit, customers, value proposition, revenue and business risks. Both use Ollama.\n- **Parallel run:** `BriefReviewService` runs both reviewers at the same time on virtual threads. It then combines their output into one Markdown report.\n- **Endpoint:** `POST /review` takes the brief as the request body, as text or JSON. It returns `{technicalReview, businessReview, report}`, and a blank body gets a 400.\n- **Ollama config:** it's set in `application.properties` to `http://localhost:11434` with model `llama3.2`, so you'll need to pull that model or change the id.\n\nTo try it later, start Ollama, run `mvn quarkus:dev`, then `curl -X POST localhost:8080/review -H 'Content-Type: text/plain' -d '<brief>'`.",
+  "tool_calls": 19,
+  "failed_tool_calls": 7,
+  "agent_build_commands": 7,
+  "agent_failed_build_commands": 6,
+  "skill_invocations": [],
+  "quarkus_mcp_calls": 0,
+  "context7_calls": 0,
+  "project_dir": "app",
+  "java_files": 5,
+  "conformance": {
+    "ai_service": true,
+    "named_model": false,
+    "record_dto": true,
+    "input_guardrail": false,
+    "delimited_input": false,
+    "no_manual_wiring": true,
+    "smoke_test": false,
+    "dev_logging": false,
+    "devservices_off": false,
+    "agentic_extension": false,
+    "agent_annotation": false,
+    "parallel_agent": false,
+    "no_executor_glue": false
+  },
+  "generator": {
+    "dual_bom": true,
+    "no_extension_version_pins": true,
+    "java_release_25": false,
+    "parameters_flag": true,
+    "native_profile": false
+  },
+  "compile_attempts": [
+    {
+      "exit": 0,
+      "timed_out": false,
+      "seconds": 2.6
+    }
+  ],
+  "compiles_first_attempt": true,
+  "compiles_within_two": true,
+  "build_attempts_to_green": 1,
+  "successful_generation": true,
+  "rescored": true
+}

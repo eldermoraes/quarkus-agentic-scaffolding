@@ -573,12 +573,58 @@ instruction files once at startup.
         └── SKILL.md
 ```
 
-## Skill effectiveness pilot
+## Skill effectiveness eval
 
-The [12-run pilot](evals/skill-pilot/results/2026-09-09/REPORT.md) was inconclusive: neither arm
-produced Java because required documentation services were unavailable or quota-limited. This
-is not evidence of benefit or parity. The [protocol and runner](evals/skill-pilot/README.md) publish
-fixed tasks, mechanical scoring, and every observed result; a valid comparison remains pending.
+Does installing `scaffold-project` change what a coding agent builds? Measured on 2026-10-05 with
+`claude-sonnet-5-5` in Claude Code 2.1.289: five fixed tasks, each run three times **without** and
+three times **with** the skill, 30 headless runs, all scored mechanically. The number is published
+as measured; the [protocol](evals/effectiveness/README.md) was committed before collection.
+
+| Task | Arm | Compiles (attempt 1) | Agent-decided convention checks | Mean failed build commands |
+| --- | --- | --- | --- | --- |
+| Ticket classifier | baseline / skill | 3/3 / 3/3 | 43.6% / 76.9% | 2.3 / 1.0 |
+| Parallel reviewer agents | baseline / skill | 3/3 / 3/3 | 23.1% / 92.3% | 5.0 / 1.3 |
+| Easy RAG Q&A | baseline / skill | 3/3 / 3/3 | 46.2% / 92.3% | 5.7 / 0.7 |
+| Tools exposed over MCP | baseline / skill | 3/3 / 3/3 | 53.8% / 92.3% | 6.3 / 0.3 |
+| Tool-calling assistant | baseline / skill | 3/3 / 3/3 | 46.2% / 76.9% | 3.3 / 2.0 |
+| **All 30 runs** | baseline / skill | **15/15 / 15/15** | **42.6% / 86.2% (+43.6 pp)** | **4.5 / 1.1** |
+
+- **Compilation: no difference.** Every run in both arms passed `mvn -B -ntp -DskipTests
+  test-compile` at the first independent attempt, so the "build attempts to green (max 2)" metric
+  is 1 everywhere and the repair turn was never used. Sonnet already builds a compiling Quarkus +
+  LangChain4j project without help on these tasks.
+- **Conventions: the skill's effect is here.** 13 equal-weight checks per run that the agent
+  decides (declarative AI service, `@InputGuardrails`, delimited external text, `@QuarkusTest`,
+  `%dev` logging, Dev Services off, plus four task-specific checks such as `@ParallelAgent`
+  instead of a hand-rolled executor). Generator-supplied checks (BOMs, Java 25, `-parameters`,
+  native profile) are reported separately: 89.3% baseline, 100% skill.
+- **Cost of the skill:** more agent turns (27.9 vs 19.9) and wall time (2.1 vs 1.1 minutes per run),
+  and roughly 1.9x the token use (USD 5.79 vs 3.12 API-equivalent for 15 runs; the runs used a
+  subscription, not API billing). The agent itself ran fewer failing builds (1.1 vs 4.5 per run).
+
+**Limitations.** n = 3 per cell, one model, one agent, five tasks, no significance test. The checks
+are regex presence predicates derived from [`CLAUDE.md`](CLAUDE.md), not proof of semantic
+correctness, and the skill was written against the same conventions, so it is evaluated on the
+standard it teaches. Some conventions were missed by both arms (no run named a model, no
+classifier or tools run added `@Timeout`/`@Fallback`). Neither arm received `CLAUDE.md`, which a
+real install adds through `/setup-agentic-scaffolding`. Both arms had the Quarkus Agents MCP and
+context7, but the baseline used the Quarkus MCP in 2 of 15 runs and neither arm queried context7.
+A fixed prompt preamble removes the confirmation questions the skill asks in interactive use. Isolation from
+the globally installed skill came from `--setting-sources ''` and was asserted per run (0 runs
+excluded). One scorer fix was made after collection: the RAG sample-document check now resolves a
+`${ENV:default}` path, which changed one skill run from 12/13 to 13/13. Raw records, transcripts
+and generated sources are in [`evals/effectiveness/results/2026-10-05`](evals/effectiveness/results/2026-10-05/SUMMARY.md).
+
+Reproduce (Claude Code logged in, JDK 25, Maven, JBang, Node, Python 3):
+
+```sh
+python3 evals/effectiveness/run.py --dry-run /tmp/qas-eval   # prints the exact command of every run
+python3 evals/effectiveness/run.py /tmp/qas-eval             # 30 runs, at most 3 in parallel
+python3 evals/effectiveness/summarize.py /tmp/qas-eval
+```
+
+An earlier [12-run Codex pilot](evals/skill-pilot/results/2026-09-09/REPORT.md) was inconclusive
+because its documentation prerequisites failed; it is kept as published.
 
 The [Anthropic community submission kit](docs/ANTHROPIC-SUBMISSION.md) is prepared and validated;
 submission remains pending authentication. No community or official-directory listing is claimed.

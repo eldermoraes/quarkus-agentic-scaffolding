@@ -1,0 +1,99 @@
+{
+  "run": "parallel-r2-baseline",
+  "task": "parallel",
+  "repetition": 2,
+  "arm": "baseline",
+  "model": "claude-sonnet-5-5",
+  "started_at": "2026-10-05T17:20:04.365957+00:00",
+  "status": "completed",
+  "isolation_ok": true,
+  "isolation_error": null,
+  "mcp_status": {
+    "quarkus-agent": "connected",
+    "context7": "connected"
+  },
+  "agent_exit": 0,
+  "agent_timed_out": false,
+  "agent_seconds": 49.5,
+  "agent_is_error": false,
+  "agent_turns": 19,
+  "cost_usd_equivalent": 0.18844719999999998,
+  "usage": {
+    "input_tokens": 22,
+    "cache_creation_input_tokens": 18869,
+    "cache_read_input_tokens": 248236,
+    "output_tokens": 6328,
+    "output_tokens_details": {
+      "thinking_tokens": 362
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 18869,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "not_available",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 424,
+        "cache_read_input_tokens": 29930,
+        "cache_creation_input_tokens": 846,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 846
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "final_message": "The project is in `./app` and `mvn -B -ntp -DskipTests test-compile` passes. I didn't start the app or call a model, so `POST /review` hasn't been run, and I didn't write any tests.\n\n- **Stack:** Quarkus 3.40.1 with `quarkus-rest-jackson` and `quarkus-langchain4j-ollama`, on Java 25 (the generated default, and the JDK installed here is 25).\n- **Reviewers:** `TechnicalReviewer` and `BusinessReviewer` are two `@RegisterAiService` interfaces. Each has its own system prompt and a `review(brief)` method.\n- **Workflow:** `ReviewWorkflow` runs both reviewers at the same time on virtual threads and waits for both. It then combines the two reviews into one Markdown report.\n- **Endpoint:** `POST /review` takes `{\"brief\": \"...\"}` and returns `{technicalReview, businessReview, report}`. A blank or missing brief returns 400.\n- **Ollama config:** `application.properties` points at `http://localhost:11434` with model `llama3.2` and a 120s timeout. That model name was my default choice, so change it if you use a different one.\n\nThe code is in `app/src/main/java/org/acme/`.",
+  "tool_calls": 18,
+  "failed_tool_calls": 5,
+  "agent_build_commands": 6,
+  "agent_failed_build_commands": 4,
+  "skill_invocations": [],
+  "quarkus_mcp_calls": 0,
+  "context7_calls": 0,
+  "project_dir": "app",
+  "java_files": 6,
+  "conformance": {
+    "ai_service": true,
+    "named_model": false,
+    "record_dto": true,
+    "input_guardrail": false,
+    "delimited_input": false,
+    "no_manual_wiring": true,
+    "smoke_test": false,
+    "dev_logging": false,
+    "devservices_off": false,
+    "agentic_extension": false,
+    "agent_annotation": false,
+    "parallel_agent": false,
+    "no_executor_glue": false
+  },
+  "generator": {
+    "dual_bom": true,
+    "no_extension_version_pins": true,
+    "java_release_25": true,
+    "parameters_flag": true,
+    "native_profile": true
+  },
+  "compile_attempts": [
+    {
+      "exit": 0,
+      "timed_out": false,
+      "seconds": 3.4
+    }
+  ],
+  "compiles_first_attempt": true,
+  "compiles_within_two": true,
+  "build_attempts_to_green": 1,
+  "successful_generation": true,
+  "rescored": true
+}
