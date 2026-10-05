@@ -3,6 +3,19 @@
 All notable changes to this artifact are documented here. This project adheres to semantic
 versioning.
 
+## Unreleased
+
+### Fixed
+
+- Make the weekly template validation resolve the latest **stable** Quarkus platform instead
+  of Maven's `<latest>` hint, which on 2026-10-05 pointed at `4.0.0.Beta1` — a pre-release
+  whose platform has no `langchain4j-mcp` extension, so the scheduled run failed (#79).
+  `ci/build-from-templates.sh` now reads every `<version>`, drops Alpha/Beta/CR/RC/M/SNAPSHOT
+  qualifiers and keeps the highest `x.y.z`, logging which pre-release it skipped. Adds a
+  `--resolve-only` flag and `ci/test-platform-version-resolution.sh`, a fixture test (wired
+  into the quality workflow) covering a Beta at the top of the list, numeric ordering, every
+  qualifier and metadata with no stable version.
+
 ## v0.23.4 — 2026-09-14
 
 ### Dependencies

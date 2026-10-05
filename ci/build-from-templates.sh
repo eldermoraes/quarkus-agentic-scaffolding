@@ -7,8 +7,18 @@
 # (compile-only run needs no embedding model), and runs `mvn test-compile`.
 #
 # Usage: ci/build-from-templates.sh [PLATFORM_VERSION]
-#   No argument: resolves the latest io.quarkus.platform version from Maven Central.
+#        ci/build-from-templates.sh --resolve-only
+#   No argument: resolves the latest STABLE io.quarkus.platform version from Maven Central.
+#     Maven's <latest>/<release> hints are ignored on purpose: they point at pre-releases too
+#     (2026-10-05: 4.0.0.Beta1, whose platform has no langchain4j-mcp, failed the weekly run).
+#     Instead every <version> is read, pre-releases (Alpha/Beta/CR/RC/M/SNAPSHOT — anything not
+#     x.y.z) are dropped and the highest remaining version wins.
+#   --resolve-only: print the resolved stable version and exit, generating nothing (used by
+#     ci/test-platform-version-resolution.sh and handy for a quick manual check).
 # Env: WORKDIR (optional) — where the throwaway project is generated.
+#      PLATFORM_METADATA_URL (optional) — where maven-metadata.xml is fetched from; defaults to
+#        Maven Central. Any URL curl accepts works, file:// included (that is how the test
+#        feeds a fixture).
 # Requires: python3 (materializes the templates and injects the pom deps), Maven,
 #   a JDK 25+, and curl (only when PLATFORM_VERSION is resolved from Maven Central).
 #
@@ -27,10 +37,49 @@ REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 TEMPLATES="$REPO_ROOT/skills/scaffold-project/templates"
 EXTENSIONS="rest,rest-jackson,smallrye-openapi,websockets-next,langchain4j-ollama,langchain4j-agentic,langchain4j-easy-rag,langchain4j-mcp,mcp-server-http"
 
+PLATFORM_METADATA_URL="${PLATFORM_METADATA_URL:-https://repo1.maven.org/maven2/io/quarkus/platform/quarkus-bom/maven-metadata.xml}"
+
+# Sort version strings ascending. GNU sort has -V (the Ubuntu runner); macOS/BSD sort
+# does not, so fall back to a numeric sort on the three dot-separated fields (enough,
+# because only x.y.z strings ever reach this function).
+sort_versions() {
+  if sort -V </dev/null >/dev/null 2>&1; then
+    sort -V
+  else
+    sort -t. -k1,1n -k2,2n -k3,3n
+  fi
+}
+
+# Resolve the highest STABLE version listed in the quarkus-bom maven-metadata.xml.
+# Prints the version on stdout and a one-line explanation on stderr; exits 1 when the
+# metadata cannot be fetched or lists no stable version at all.
+resolve_latest_stable_platform() {
+  local metadata versions stable chosen hinted
+  metadata="$(curl -fsSL "$PLATFORM_METADATA_URL")" || {
+    echo "ERROR: could not fetch $PLATFORM_METADATA_URL" >&2; return 1; }
+  versions="$(printf '%s\n' "$metadata" | grep -o '<version>[^<]*</version>' | sed 's/<[^>]*>//g')"
+  # Stable = plain x.y.z. This drops Alpha, Beta, CR, RC, M and SNAPSHOT qualifiers in any
+  # letter case, since every one of them adds a suffix beyond the third numeric field.
+  stable="$(printf '%s\n' "$versions" | grep -E '^[0-9]+\.[0-9]+\.[0-9]+$' || true)"
+  chosen="$(printf '%s\n' "$stable" | sort_versions | tail -n 1)"
+  [[ -n "$chosen" ]] || { echo "ERROR: no stable (x.y.z) version in $PLATFORM_METADATA_URL" >&2; return 1; }
+  hinted="$(printf '%s\n' "$metadata" | sed -n 's:.*<latest>\(.*\)</latest>.*:\1:p' | head -n 1)"
+  if [[ -n "$hinted" && "$hinted" != "$chosen" ]]; then
+    echo "==> Resolved latest stable platform $chosen (metadata <latest> is $hinted; pre-release ignored)" >&2
+  else
+    echo "==> Resolved latest stable platform $chosen" >&2
+  fi
+  printf '%s\n' "$chosen"
+}
+
+if [[ "${1:-}" == "--resolve-only" ]]; then
+  resolve_latest_stable_platform
+  exit $?
+fi
+
 PLATFORM_VERSION="${1:-}"
 if [[ -z "$PLATFORM_VERSION" ]]; then
-  PLATFORM_VERSION="$(curl -fsSL https://repo1.maven.org/maven2/io/quarkus/platform/quarkus-bom/maven-metadata.xml \
-    | sed -n 's:.*<latest>\(.*\)</latest>.*:\1:p')"
+  PLATFORM_VERSION="$(resolve_latest_stable_platform)"
 fi
 [[ -n "$PLATFORM_VERSION" ]] || { echo "ERROR: could not resolve latest platform version" >&2; exit 1; }
 echo "==> Validating templates against Quarkus platform $PLATFORM_VERSION"

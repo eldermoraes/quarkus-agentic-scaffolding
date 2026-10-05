@@ -112,8 +112,9 @@ runs that script two ways:
 
 - on every **push and pull request**, against the versions pinned in `ci/baseline.env`, so builds
   stay reproducible, and
-- on a **weekly cron (Mondays, 05:00 UTC)**, against the **live latest** Quarkus platform, so a new
-  release that breaks the templates is caught even when nothing in the repo changed.
+- on a **weekly cron (Mondays, 05:00 UTC)**, against the **live latest stable** Quarkus platform
+  (the highest `x.y.z` in Maven Central's metadata; Alpha/Beta/CR pre-releases are skipped), so a
+  new release that breaks the templates is caught even when nothing in the repo changed.
 
 A failing scheduled run opens a tracking issue (labeled `build failed`), or comments on the
 existing one; close it manually once a later run is green.
