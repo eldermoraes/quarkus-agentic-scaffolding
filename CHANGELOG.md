@@ -16,6 +16,9 @@ versioning.
   `scaffold-project` description's trigger synonyms into intent categories; drop the v0.18.0
   changelog pointer and the "D2"/"D3" decision IDs from the setup skill, which a skills-CLI
   install does not ship with.
+- Prompt audit of 2026-10-05, remaining items: drop the "mandatory, not optional" reinforcement
+  from the `quarkus_skills` step of `scaffold-project`; the skill already states the order in two
+  other places.
 
 ### Fixed
 
