@@ -5,7 +5,11 @@ import json
 from pathlib import Path
 import re
 import shutil
+import sys
 import tarfile
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import score  # noqa: E402
 
 ARMS = ('baseline', 'skill')
 SKIP = {'target', '.git', 'node_modules', '.quarkus'}
@@ -16,9 +20,9 @@ def valid(record):
     return record.get('status') == 'completed' and record.get('isolation_ok')
 
 
-def mean(values):
+def mean(values, digits=2):
     values = [v for v in values if v is not None]
-    return round(sum(values) / len(values), 2) if values else None
+    return round(sum(values) / len(values), digits) if values else None
 
 
 def ratio(checks):
@@ -34,8 +38,8 @@ def cell(records):
         'build_attempts': {'1': sum(r['build_attempts_to_green'] == 1 for r in records),
                            '2': sum(r['build_attempts_to_green'] == 2 for r in records),
                            'not_green': sum(r['build_attempts_to_green'] is None for r in records)},
-        'conformance_pct': round(100 * mean([ratio(r['conformance']) for r in records]), 1) if n else None,
-        'generator_pct': round(100 * mean([ratio(r['generator']) for r in records]), 1) if n else None,
+        'conformance_pct': round(100 * mean([ratio(r['conformance']) for r in records], 6), 1) if n else None,
+        'generator_pct': round(100 * mean([ratio(r['generator']) for r in records], 6), 1) if n else None,
         'mean_agent_turns': mean([r.get('agent_turns') for r in records]),
         'mean_failed_build_commands': mean([r.get('agent_failed_build_commands') for r in records]),
         'mean_agent_minutes': mean([(r.get('agent_seconds') or 0) / 60 for r in records]),
@@ -122,12 +126,32 @@ def export(output, dest):
             archive.add(path, arcname=str(Path('runs') / rel))
 
 
+def rescore(output, records):
+    """Recompute the convention checks from the projects kept in a local collection directory."""
+    spec = json.loads((Path(__file__).resolve().parent / 'tasks.json').read_text())
+    tasks = {t['id']: t for t in spec['tasks']}
+    for record in records:
+        workdir = output / 'runs' / record['run'] / 'work'
+        if record.get('status') == 'harness_error' or not workdir.is_dir():
+            continue
+        project = score.find_project(workdir)
+        record['conformance'] = score.score(project, spec['common_checks'] + tasks[record['task']]['checks'])
+        record['generator'] = score.score(project, spec['generator_checks'])
+        record['rescored'] = True
+        (output / 'runs' / record['run'] / 'result.json').write_text(json.dumps(record, indent=2) + '\n')
+    (output / 'results.json').write_text(json.dumps(records, indent=2) + '\n')
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('output', type=Path, help='collection directory written by run.py')
     parser.add_argument('--export', type=Path, help='repository results directory to populate')
+    parser.add_argument('--rescore', action='store_true',
+                        help='recompute convention checks with the current score.py before summarizing')
     args = parser.parse_args()
     records = json.loads((args.output / 'results.json').read_text())
+    if args.rescore:
+        rescore(args.output, records)
     environment = json.loads((args.output / 'environment.json').read_text())
     summary = summarize(records)
     target = args.export or args.output

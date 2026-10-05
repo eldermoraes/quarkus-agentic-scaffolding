@@ -73,6 +73,7 @@ class Project:
         candidates = []
         if match:
             value = match.group(1).strip()
+            value = re.sub(r'^\$\{[\w.-]+:([^}]*)\}$', r'\1', value)  # ${ENV:default} -> default
             value = re.sub(r'^(?:classpath:|file:)', '', value)
             candidates = [self.root / value, self.root / 'src/main/resources' / value]
             directories = [c for c in candidates if c.is_dir()]

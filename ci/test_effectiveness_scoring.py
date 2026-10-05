@@ -71,6 +71,12 @@ class EffectivenessScoringTests(unittest.TestCase):
             self.assertEqual(result['sample_document'], False)
             (root / 'app/src/main/resources/rag/guide.md').write_text('# Guide\n')
             self.assertTrue(all(score.score(project, names).values()))
+            (root / 'app/docs').mkdir()
+            (root / 'app/docs/a.md').write_text('# A\n')
+            (root / 'app/src/main/resources/application.properties').write_text(
+                'quarkus.langchain4j.easy-rag.path=${DOCS_PATH:docs}\n')
+            (root / 'app/src/main/resources/rag/guide.md').unlink()
+            self.assertTrue(score.score(project, ['sample_document'])['sample_document'])
             pinned = POM.replace('langchain4j-easy-rag</artifactId>', 'langchain4j-easy-rag</artifactId><version>1.0</version>')
             (root / 'app/pom.xml').write_text(pinned)
             self.assertFalse(score.score(project, ['no_extension_version_pins'])['no_extension_version_pins'])
