@@ -5,6 +5,15 @@ versioning.
 
 ## Unreleased
 
+### Added
+
+- Skill-effectiveness eval (`evals/effectiveness/`, issue #6, EVOLUTION-PLAN item 13): five fixed
+  tasks x baseline/skill x three repetitions run headless with `claude -p` (Sonnet 5.5), scored
+  mechanically on compilation, convention checks derived from `CLAUDE.md`, and build attempts to
+  green. Results from 2026-10-05 are published in the README: every run compiled in both arms;
+  agent-decided convention checks went from 42.6% without the skill to 86.2% with it. Adds
+  `ci/test_effectiveness_scoring.py` for the scorer, the isolation assertion and the schedule.
+
 ### Changed
 
 - Move `superpowers` skills out of the mandatory list in section 1 of `CLAUDE.md`, `AGENTS.md`

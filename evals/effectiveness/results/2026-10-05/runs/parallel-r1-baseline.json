@@ -1,0 +1,99 @@
+{
+  "run": "parallel-r1-baseline",
+  "task": "parallel",
+  "repetition": 1,
+  "arm": "baseline",
+  "model": "claude-sonnet-5-5",
+  "started_at": "2026-10-05T17:13:19.727359+00:00",
+  "status": "completed",
+  "isolation_ok": true,
+  "isolation_error": null,
+  "mcp_status": {
+    "quarkus-agent": "connected",
+    "context7": "connected"
+  },
+  "agent_exit": 0,
+  "agent_timed_out": false,
+  "agent_seconds": 144.2,
+  "agent_is_error": false,
+  "agent_turns": 21,
+  "cost_usd_equivalent": 0.21445599999999998,
+  "usage": {
+    "input_tokens": 24,
+    "cache_creation_input_tokens": 21645,
+    "cache_read_input_tokens": 278190,
+    "output_tokens": 7219,
+    "output_tokens_details": {
+      "thinking_tokens": 549
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 21645,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "not_available",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 503,
+        "cache_read_input_tokens": 32697,
+        "cache_creation_input_tokens": 855,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 855
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "final_message": "The project is in `./app`, and `mvn -B -ntp -DskipTests test-compile` passes there. I didn't run the app or call a model, and I didn't write any tests.\n\n- **Setup:** Quarkus 3.40.1 with `quarkus-rest-jackson`, `quarkus-langchain4j-ollama` and `quarkus-hibernate-validator`. The coordinates are `org.acme:brief-review`, base package `org.acme`. The generator picked Java 25 as the compiler release, and it built here.\n- **Reviewers:** `TechnicalReviewer` and `BusinessReviewer` are two LangChain4j AI services. Each has its own system prompt and answers with Summary, Strengths, Risks and Recommendations.\n- **Workflow:** `ReviewWorkflow` runs both reviewers at the same time on virtual threads. It then merges the two reviews into one markdown report.\n- **Endpoint:** `POST /review` takes `{\"brief\": \"...\"}`. A blank brief is rejected by validation. The response has `brief`, `technicalReview`, `businessReview` and `report`.\n- **Ollama config:** `application.properties` points at `http://localhost:11434` with model `llama3.2`, temperature 0.2 and a 120s timeout. Those are my defaults, so change the model id if you want a different one.\n\nI generated the project with the Maven plugin rather than `quarkus_create`, because that tool auto-starts dev mode and I wanted to avoid starting anything.",
+  "tool_calls": 20,
+  "failed_tool_calls": 6,
+  "agent_build_commands": 7,
+  "agent_failed_build_commands": 5,
+  "skill_invocations": [],
+  "quarkus_mcp_calls": 0,
+  "context7_calls": 0,
+  "project_dir": "app",
+  "java_files": 6,
+  "conformance": {
+    "ai_service": true,
+    "named_model": false,
+    "record_dto": true,
+    "input_guardrail": false,
+    "delimited_input": false,
+    "no_manual_wiring": true,
+    "smoke_test": false,
+    "dev_logging": false,
+    "devservices_off": false,
+    "agentic_extension": false,
+    "agent_annotation": false,
+    "parallel_agent": false,
+    "no_executor_glue": false
+  },
+  "generator": {
+    "dual_bom": true,
+    "no_extension_version_pins": true,
+    "java_release_25": true,
+    "parameters_flag": true,
+    "native_profile": true
+  },
+  "compile_attempts": [
+    {
+      "exit": 0,
+      "timed_out": false,
+      "seconds": 2.7
+    }
+  ],
+  "compiles_first_attempt": true,
+  "compiles_within_two": true,
+  "build_attempts_to_green": 1,
+  "successful_generation": true,
+  "rescored": true
+}
