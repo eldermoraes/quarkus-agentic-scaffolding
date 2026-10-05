@@ -22,6 +22,24 @@ versioning.
 
 ### Changed
 
+- Trim `scaffold-project` to what the conventions file does not already say (#88, option 1). The
+  effectiveness eval (round 2) traced the skill's margin over `CLAUDE.md` to its templates, not to
+  its prose, so `SKILL.md` drops the MCP gate (now one line pointing at conventions section 1),
+  the tooling paragraph, the guardrail, delimiter, virtual-thread and BOM restatements in the
+  component sections, and the old section 14; it keeps the layout, project creation, component
+  know-how (MCP client keys, the two `@Tool` annotations, `/mcp`, `@Output`), the properties
+  baseline, verification, the test section and every template. New first step: if no managed
+  conventions block is found in a `CLAUDE.md` or `AGENTS.md` of the working directory or its
+  parents, the skill stops and points to `/setup-agentic-scaffolding`, so a skills-only install
+  does not run without the rules the skill no longer restates.
+- Two conventions the eval showed only the skill's templates enforced now live in `CLAUDE.md`,
+  `AGENTS.md` and both seeds. Section 3: no `<version>` on any dependency the platform BOMs
+  manage, including `langchain4j-embeddings-*` (the three round-2 RAG baselines pinned
+  `langchain4j-embeddings-bge-small-en-q:1.0.0-beta3`; `pom.xml.template` builds with the
+  BOM-managed artifact and no version in `ci/build-from-templates.sh`). Section 5: every project
+  keeps a `@QuarkusTest` smoke test, replacing "No test suite is mandated" (baseline runs with
+  `CLAUDE.md` had one in 9/15, skill runs in 15/15). `audit-project` follows: its BOM check covers
+  every managed dependency and a missing smoke test is now a medium finding.
 - Reinforce the two conventions the effectiveness eval found missed in both arms (#6). Round 2
   (`CLAUDE.md` in both arms) passed `named_model` in 6/15 runs without the skill and 5/15 with it,
   and `virtual_threads` in 1/3 and 0/3. The generated code showed why: single-model projects

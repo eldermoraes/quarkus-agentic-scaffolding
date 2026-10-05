@@ -75,9 +75,10 @@ Optional tooling — not covered by the stop rule above:
 
 ## 3. Quarkus conventions
 
-- **Import the platform BOMs; do not pin extension versions.** Import `quarkus-bom` and
+- **Import the platform BOMs; do not pin versions they manage.** Import `quarkus-bom` and
   `quarkus-langchain4j-bom` at the same platform version and let the BOMs manage every extension
-  and LangChain4j version.
+  and LangChain4j version. No dependency the BOMs manage carries a `<version>`, including the
+  non-extension `dev.langchain4j:langchain4j-embeddings-*` models and document parsers.
 - **CDI-first.** Use `quarkus-arc` and standard CDI (`@ApplicationScoped`, `@Inject`,
   `@Produces`) for wiring. Produce framework objects (retrieval augmentors, memory providers,
   embedding stores) from `@ApplicationScoped` producer beans.
@@ -190,9 +191,9 @@ Optional tooling — not covered by the stop rule above:
 
 ## 5. Testing
 
-No test suite is mandated, so treat this as the intended baseline rather than an observed standard.
-Apply it when adding tests:
-
+- **Every project keeps a `@QuarkusTest` smoke test.** At least one `@QuarkusTest` under
+  `src/test/java` injects an AI service and asserts it wired; it boots the application without
+  calling the model, so it needs no live inference.
 - Use `@QuarkusTest` (artifact `io.quarkus:quarkus-junit`) for integration-style tests and
   `io.rest-assured:rest-assured` to exercise HTTP endpoints.
 - Run native integration tests through `maven-failsafe-plugin` inside the `native` profile.
