@@ -1,0 +1,37 @@
+{
+  "preamble": "This is an unattended evaluation run; no human is available to answer questions. Do not ask for confirmation and do not stop to present options: make every decision yourself (extensions, versions, structure) and carry the work through to the end. Create a new Quarkus + LangChain4j Maven project with groupId org.acme, artifactId {artifact}, base package org.acme, in the subdirectory ./app of the current working directory. Use Ollama as the model provider. Do not call a live model, do not start containers, and do not commit, push, or publish anything outside this directory. File edits and build commands inside this directory are authorized. Some documentation tools may be unavailable here (there is no container runtime, and context7 has no API key and may be rate-limited); if a documentation lookup fails, continue with what you have. Acceptance check: `mvn -B -ntp -DskipTests test-compile` must pass inside ./app.",
+  "tasks": [
+    {
+      "id": "classifier",
+      "artifact": "ticket-classifier",
+      "prompt": "Build a service that classifies incoming customer support tickets into BILLING, TECHNICAL or OTHER using an LLM, and expose it as a REST endpoint POST /classify that receives the ticket text.",
+      "checks": ["enum_result", "zero_temperature", "virtual_threads", "fault_tolerance"]
+    },
+    {
+      "id": "parallel",
+      "artifact": "brief-review",
+      "prompt": "Build a multi-agent workflow that takes a product brief, has a technical reviewer agent and a business reviewer agent analyse it in parallel, and combines both reviews into a single report. Expose it as a REST endpoint POST /review.",
+      "checks": ["agentic_extension", "agent_annotation", "parallel_agent", "no_executor_glue"]
+    },
+    {
+      "id": "rag",
+      "artifact": "docs-qa",
+      "prompt": "Build a question-answering service over a local folder of Markdown documents (retrieval-augmented generation), include one sample document, and expose it as a REST endpoint POST /ask that receives a question.",
+      "checks": ["easy_rag_extension", "easy_rag_path", "embedding_dependency", "sample_document"]
+    },
+    {
+      "id": "mcp-server",
+      "artifact": "order-tools",
+      "prompt": "Build an application with order-lookup operations (get order status by id, list recent orders for a customer) backed by an in-memory map. Expose these operations as tools to remote MCP (Model Context Protocol) clients over HTTP, and also add a REST endpoint POST /assistant where an LLM assistant answers customer questions using the same operations as tools.",
+      "checks": ["mcp_server_extension", "mcp_tool", "mcp_tool_arg", "llm_tools_wired"]
+    },
+    {
+      "id": "tools",
+      "artifact": "support-assistant",
+      "prompt": "Build a customer support assistant that uses an LLM with tool calling: it can look up an order's shipping status and open a refund request (both backed by in-memory data). Expose it as a REST endpoint POST /chat that receives the customer's message and a conversation id, and keep per-conversation memory.",
+      "checks": ["llm_tool", "llm_tools_wired", "memory_id", "fault_tolerance"]
+    }
+  ],
+  "common_checks": ["ai_service", "named_model", "record_dto", "input_guardrail", "delimited_input", "no_manual_wiring", "smoke_test", "dev_logging", "devservices_off"],
+  "generator_checks": ["dual_bom", "no_extension_version_pins", "java_release_25", "parameters_flag", "native_profile"]
+}
