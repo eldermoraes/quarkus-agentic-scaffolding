@@ -1,0 +1,103 @@
+{
+  "run": "classifier-r1-baseline",
+  "task": "classifier",
+  "repetition": 1,
+  "arm": "baseline",
+  "model": "claude-sonnet-5-5",
+  "started_at": "2026-10-05T21:16:20.970421+00:00",
+  "with_claude_md": true,
+  "context_files": [
+    "CLAUDE.md"
+  ],
+  "setting_sources": "project",
+  "status": "completed",
+  "isolation_ok": true,
+  "isolation_error": null,
+  "mcp_status": {
+    "quarkus-agent": "connected",
+    "context7": "connected"
+  },
+  "agent_exit": 0,
+  "agent_timed_out": false,
+  "agent_seconds": 199.3,
+  "agent_is_error": false,
+  "agent_turns": 23,
+  "cost_usd_equivalent": 0.33041059999999994,
+  "usage": {
+    "input_tokens": 32,
+    "cache_creation_input_tokens": 31501,
+    "cache_read_input_tokens": 564613,
+    "output_tokens": 9142,
+    "output_tokens_details": {
+      "thinking_tokens": 876
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 31501,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "not_available",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 661,
+        "cache_read_input_tokens": 43146,
+        "cache_creation_input_tokens": 262,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 262
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "final_message": "The project is in `./app` and `mvn -B -ntp -DskipTests test-compile` passes. I did not run the tests or call a live model.\n\n`POST /classify` takes `{\"text\": \"...\"}` and returns `{\"category\": \"BILLING|TECHNICAL|OTHER\"}`.\n\n- **Model:** a `TicketClassifier` AI service on Ollama at `OLLAMA_URL`, default `http://localhost:11434`. It uses a named `classifier` model block (`llama3.2`, temperature 0), and Dev Services is disabled so no container starts.\n- **Prompt injection:** the ticket is wrapped in `<ticket>` delimiters and the system message says it is data, not instructions. A guardrail rejects empty text, text over 10,000 characters and forged delimiters.\n- **Resilience:** the AI call has a 60-second timeout and two retries, and falls back to `OTHER`. The endpoint runs on a virtual thread.\n- **Wiring test:** `TicketClassifierWiringTest` is a `@QuarkusTest` that checks the AI service is injected without calling the model.\n- **Extensions:** the project also has OpenAPI, RFC 9457 problem details, Prometheus and OpenTelemetry. It targets Java 25 on Quarkus 3.40.1 with a `native` profile.\n\nThe Quarkus MCP was reachable and I created the project through it. Its docs search needs a container runtime, so it failed here. I found the correct guardrail import (`dev.langchain4j.service.guardrail.InputGuardrails`) by compiling.\n\nI didn't use the `quarkus_skills` or context7 lookups, so the guardrail API usage and config keys come from memory plus the successful compile. The Ollama config keys, the guardrail's `singleText()` call and the fallback behaviour are not exercised by anything yet.\n\n`quarkus_create` also auto-started dev mode for the new project. I didn't check or stop it, so it may still be running.",
+  "tool_calls": 22,
+  "failed_tool_calls": 4,
+  "agent_build_commands": 4,
+  "agent_failed_build_commands": 2,
+  "skill_invocations": [],
+  "quarkus_mcp_calls": 3,
+  "context7_calls": 0,
+  "project_dir": "app",
+  "java_files": 6,
+  "conformance": {
+    "ai_service": true,
+    "named_model": true,
+    "record_dto": true,
+    "input_guardrail": true,
+    "delimited_input": true,
+    "no_manual_wiring": true,
+    "smoke_test": true,
+    "dev_logging": true,
+    "devservices_off": true,
+    "enum_result": true,
+    "zero_temperature": true,
+    "virtual_threads": true,
+    "fault_tolerance": true
+  },
+  "generator": {
+    "dual_bom": true,
+    "no_extension_version_pins": true,
+    "java_release_25": true,
+    "parameters_flag": true,
+    "native_profile": true
+  },
+  "compile_attempts": [
+    {
+      "exit": 0,
+      "timed_out": false,
+      "seconds": 3.3
+    }
+  ],
+  "compiles_first_attempt": true,
+  "compiles_within_two": true,
+  "build_attempts_to_green": 1,
+  "successful_generation": true
+}
