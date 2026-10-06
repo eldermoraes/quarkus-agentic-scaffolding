@@ -88,10 +88,11 @@ def markdown(summary, environment):
         return (f"| {name} | {arm} | {c['n']} | {c['compile_first_attempt']}/{c['n']} | {c['compile_within_two']}/{c['n']} | "
                 f"{c['conformance_pct']}% | {c['generator_pct']}% | {c['mean_agent_turns']} | "
                 f"{c['mean_failed_build_commands']} | {c['mean_agent_minutes']} |")
+    present = [arm for arm in ARMS if summary['overall'][arm]['n']]  # --arms may run one arm only
     for task, arms in summary['by_task'].items():
-        for arm in ARMS:
+        for arm in present:
             lines.append(row(task, arm, arms[arm]))
-    for arm in ARMS:
+    for arm in present:
         lines.append(row('**All tasks**', arm, summary['overall'][arm]))
     if 'delta' in summary:
         d = summary['delta']

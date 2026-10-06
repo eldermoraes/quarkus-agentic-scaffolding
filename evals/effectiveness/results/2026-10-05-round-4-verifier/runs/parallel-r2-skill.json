@@ -1,0 +1,105 @@
+{
+  "run": "parallel-r2-skill",
+  "task": "parallel",
+  "repetition": 2,
+  "arm": "skill",
+  "model": "claude-sonnet-5-5",
+  "started_at": "2026-10-05T21:56:25.016380+00:00",
+  "with_claude_md": true,
+  "context_files": [
+    "CLAUDE.md"
+  ],
+  "setting_sources": "project",
+  "status": "completed",
+  "isolation_ok": true,
+  "isolation_error": null,
+  "mcp_status": {
+    "quarkus-agent": "connected",
+    "context7": "connected"
+  },
+  "agent_exit": 0,
+  "agent_timed_out": false,
+  "agent_seconds": 287.8,
+  "agent_is_error": false,
+  "agent_turns": 32,
+  "cost_usd_equivalent": 0.6445442000000001,
+  "usage": {
+    "input_tokens": 28,
+    "cache_creation_input_tokens": 68748,
+    "cache_read_input_tokens": 656181,
+    "output_tokens": 23826,
+    "output_tokens_details": {
+      "thinking_tokens": 1110
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 68748,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "not_available",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 1049,
+        "cache_read_input_tokens": 79645,
+        "cache_creation_input_tokens": 1010,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 1010
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "final_message": "The project is in `./app`, and `mvn -B -ntp -DskipTests test-compile` passes. I did not run the tests or start the app, so the workflow is untested against a model.\n\nThe Quarkus Agents MCP was reachable (`quarkus_status` succeeded), so I generated the project with `quarkus_create`. It created `./brief-review`, so I stopped the dev-mode app it had auto-started and renamed the directory to `./app`.\n\n**How the workflow runs:**\n- **Parallel reviews:** `TechnicalReviewer` and `BusinessReviewer` run in parallel and each returns a structured `ReviewNotes` record. They use the `main` model and carry the input guardrail.\n- **Summary:** `ReportWriter` (the `smaller` model) writes an executive summary from the two reviews.\n- **Combined report:** `BriefReviewAgent` is the sequence that chains the parallel step and the summary. It assembles the single `ReviewReport` (technical, business, summary).\n- **Endpoint:** `POST /review` takes `{\"brief\": \"...\"}` and returns the report. It rejects blank or over-8,000-character briefs with a 400 and runs on a virtual thread.\n- **Prompt safety:** the brief is wrapped in `<brief>\u2026</brief>` tags and the prompts say it is data, not instructions. The reviewer agents carry a `PromptInjectionGuard` that checks length, stray `<brief>` tags and a known injection phrase.\n- **Wiring test:** `WiringTest` only checks that the AI services inject. It needs no live model.\n- **Config:** Ollama is configured with `qwen3:4b` and `qwen3:1.7b`, request/response logging is dev-only, and Dev Services are off.\n\n**Deviations from the conventions:**\n- I did not put `@Timeout`, `@Retry` or `@Fallback` on the agent methods. I wasn't sure fault tolerance applies to sub-agents built by the agentic extension, and I didn't want to guess. `quarkus-smallrye-fault-tolerance` and `http-problem` are on the classpath.\n- I did not run `git init`, because the task said not to commit anything. The skill says the MCP needs the project under git for later calls like `quarkus_start`.",
+  "tool_calls": 30,
+  "failed_tool_calls": 6,
+  "agent_build_commands": 3,
+  "agent_failed_build_commands": 2,
+  "skill_invocations": [
+    "quarkus-agentic-scaffolding:scaffold-project"
+  ],
+  "quarkus_mcp_calls": 4,
+  "context7_calls": 0,
+  "project_dir": "app",
+  "java_files": 10,
+  "conformance": {
+    "ai_service": true,
+    "named_model": true,
+    "record_dto": true,
+    "input_guardrail": true,
+    "delimited_input": true,
+    "no_manual_wiring": true,
+    "smoke_test": true,
+    "dev_logging": true,
+    "devservices_off": true,
+    "agentic_extension": true,
+    "agent_annotation": true,
+    "parallel_agent": true,
+    "no_executor_glue": true
+  },
+  "generator": {
+    "dual_bom": true,
+    "no_extension_version_pins": true,
+    "java_release_25": true,
+    "parameters_flag": true,
+    "native_profile": true
+  },
+  "compile_attempts": [
+    {
+      "exit": 0,
+      "timed_out": false,
+      "seconds": 3.4
+    }
+  ],
+  "compiles_first_attempt": true,
+  "compiles_within_two": true,
+  "build_attempts_to_green": 1,
+  "successful_generation": true
+}
