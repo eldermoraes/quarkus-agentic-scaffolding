@@ -221,6 +221,17 @@ versioning.
   differs for Bob is where the file lives (project and global) and how it is written (`bob mcp add`
   first, a hand-written entry only without the CLI), with the pointer to §5.1 kept. Text-only fix,
   checked against `references/bob-mcp.md`; not verified against a running Bob.
+- `audit-project` returned a clean report for projects that broke conventions it never checked
+  (#117): problem details at the REST edge, a named model per AI service, `temperature=0` for
+  deterministic tasks, Easy RAG first, native integration tests, CDI-first wiring and
+  deterministic model calls in tests. The catalog now checks each of them and places it in the
+  severity guide, adds the `scaffold-project` package layout as a LOW check (the README already
+  promised it), and maps every convention in §2–§5 to its checks in a coverage table, with two
+  conventions listed as deliberately not audited. The new `ci/check-audit-coverage.sh` (wired
+  into the quality workflow) fails when a convention has no audit decision; on the previous
+  catalog it reported all 31 conventions as undecided. The audit also stopped accepting
+  `GEMINI.md`, which setup never writes, so it looks for `CLAUDE.md` or `AGENTS.md` like the
+  other two skills, and the README describes what the audit really covers.
 
 ## v0.23.4 — 2026-09-14
 
