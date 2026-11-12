@@ -107,6 +107,15 @@ versioning.
   now typed as `CategoryReport` and `PriorityReport`. A project scaffolded from the earlier
   template needs the same change in `Synthesizer.java` to start: the two parameter types and
   their imports.
+- The Easy RAG baseline did not start with the Ollama provider (#108). The Ollama extension
+  ships an embedding model next to the in-process one, and with two providers Quarkus stops at
+  startup (`A EmbeddingModel bean was requested, but since there are multiple available
+  providers, the 'quarkus.langchain4j.embedding-model.provider' needs to be set`), while
+  `application.properties.template` said the in-process model was "detected automatically (no
+  config)". The RAG block now carries that key, selecting the in-process model, with Ollama
+  embeddings as the commented alternative; `RagSetup.java.template`, `scaffold-project` §9 and
+  §11 and `docs/VALIDATING-TEMPLATES.md` describe the same two-key setup. CI did not see it
+  because the validation build removes Easy RAG before compiling.
 
 ## v0.23.4 — 2026-09-14
 

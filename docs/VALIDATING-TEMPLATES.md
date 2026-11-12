@@ -51,7 +51,8 @@ before shipping a release, and whenever you touch a template.
 
 4. **Build/run via the MCP.** Start dev mode (`quarkus_start`) with a real Ollama endpoint reachable
    and an in-process embedding model on the classpath (`langchain4j-embeddings-bge-small-en-v15-q`)
-   plus `quarkus.langchain4j.easy-rag.path` set, so Easy RAG augmentation is satisfied. A clean
+   plus both keys of the RAG block set (`quarkus.langchain4j.easy-rag.path` and
+   `quarkus.langchain4j.embedding-model.provider`), so Easy RAG augmentation is satisfied. A clean
    start means augmentation **and** compilation succeeded.
 
 ## Static fallback (JDK 25, no Ollama)

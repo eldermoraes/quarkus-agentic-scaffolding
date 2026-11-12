@@ -15,8 +15,12 @@ import io.quarkiverse.langchain4j.RegisterAiService;
  * 1. Add the extension + an in-process embedding model (see pom.xml.template):
  *      io.quarkiverse.langchain4j:quarkus-langchain4j-easy-rag
  *      dev.langchain4j:langchain4j-embeddings-bge-small-en-v15-q
- * 2. Configure the documents folder (see application.properties.template):
+ * 2. Configure the documents folder and select the embedding provider (see
+ *    application.properties.template). The provider key is required with the Ollama
+ *    extension, which ships an embedding model of its own: with two providers on the
+ *    classpath and none selected, the application does not start.
  *      quarkus.langchain4j.easy-rag.path=src/main/resources/rag
+ *      quarkus.langchain4j.embedding-model.provider=dev.langchain4j.model.embedding.onnx.bgesmallenv15q.BgeSmallEnV15QuantizedEmbeddingModel
  * 3. Drop your documents into that folder — curated, first-party content you publish
  *    (product docs, runbooks, FAQs). They are ingested into an in-memory
  *    embedding store on startup, and the produced RetrievalAugmentor is applied to
