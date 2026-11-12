@@ -568,7 +568,9 @@ instruction files once at startup.
 │   └── uninstall-bob-skill.sh  # The mirror: remove them again (see Uninstall)
 ├── docs/
 │   ├── agents/
-│   │   └── issue-tracker.md      # Where issues live and how agent skills read and write them
+│   │   ├── issue-tracker.md      # Where issues live and how agent skills read and write them
+│   │   ├── triage-labels.md      # Triage roles mapped to this repo's labels
+│   │   └── domain.md             # Where domain language and decision records live
 │   ├── VALIDATING-TEMPLATES.md   # How to verify the templates still build and start
 │   ├── AGENTIC-COMPENSATION.md   # Decision record: why compensation is not a default convention
 │   ├── ANTHROPIC-SUBMISSION.md   # Community-marketplace submission kit

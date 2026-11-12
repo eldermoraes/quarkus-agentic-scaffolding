@@ -41,6 +41,14 @@ versioning.
   GitHub template of `setup-matt-pocock-skills` and records this repo's labels (from
   `gh label list`), the ticket layout with the spec as its first comment, private security
   advisories for security findings per `SECURITY.md`, and `Closes #<number>` in pull requests.
+- `docs/agents/triage-labels.md` and `docs/agents/domain.md`, following the
+  `setup-matt-pocock-skills` templates. The first maps every role of the `triage` skill (five
+  states, two categories) to a label that exists in the repo (checked with `gh label list`);
+  `docs/agents/issue-tracker.md` now lists the new `needs-triage`, `needs-info` and
+  `ready-for-human` labels. The second points at where this single-context repo keeps its domain
+  language and decisions (the conventions, `CONTRIBUTING.md`, `CHANGELOG.md`, `docs/`), since it
+  has no `CONTEXT.md` or `docs/adr/`. The skills' pointer block goes in `CONTRIBUTING.md` under
+  "Agent skills", not in `CLAUDE.md`, which must stay identical to `AGENTS.md` and the seeds.
 
 ### Changed
 
