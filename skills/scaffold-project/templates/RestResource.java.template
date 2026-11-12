@@ -15,7 +15,7 @@ import org.jboss.logging.Logger;
 /*
  * REST edge for the ChatAssistant AI service (pairs with AiService.java.template).
  *
- * Threading (CLAUDE.md §2): this method returns a plain value, so Quarkus REST treats it as
+ * Threading (project conventions section 2): this method returns a plain value, so Quarkus REST treats it as
  * blocking and would run it on a pooled platform worker thread. An AI-service call blocks for
  * the whole model round-trip (and every tool round-trip), so @RunOnVirtualThread moves it onto
  * a fresh virtual thread instead. Keep the annotation on every synchronous endpoint that calls

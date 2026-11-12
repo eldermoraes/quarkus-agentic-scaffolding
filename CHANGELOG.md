@@ -263,6 +263,13 @@ versioning.
   own, and the new `ci/test-install-bob-skill.sh` (wired into the quality workflow) fails if the
   copies differ. That test failed 14 assertions against the old installer and passes on macOS
   bash 3.2 with BSD tools and on Ubuntu 24.04.
+- Template comments pointed at `CLAUDE.md` sections in projects whose conventions file is
+  `AGENTS.md` (#121). The six templates that named `CLAUDE.md §N` (or `section N`) now say
+  "project conventions section N", which reads correctly against both files, and the new
+  `ci/check-template-agent-neutral.sh` fails when any file under
+  `skills/scaffold-project/templates/` names `CLAUDE.md` or `AGENTS.md`. The check failed on all
+  six lines before the rewording and passes after it; `ci/build-from-templates.sh` still compiles
+  the generated project.
 
 ## v0.23.4 — 2026-09-14
 

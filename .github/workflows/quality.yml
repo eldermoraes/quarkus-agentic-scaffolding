@@ -38,6 +38,12 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - run: ci/check-action-pinning.sh
 
+  template-agent-neutral:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - run: ci/check-template-agent-neutral.sh
+
   shellcheck:
     runs-on: ubuntu-latest
     steps:
