@@ -226,10 +226,12 @@ versioning.
   command back. `ci/test_mcp_opencode_form.py` shows that the command consistency check counts the
   opencode form and fails it without the Java pin, and that both Renovate managers match its pins.
 - The setup skill said both that Bob's MCP file has the shared `mcpServers` shape and, in the note
-  under the example, that "Bob is not in that list" (#116). §5 now states once that Cursor's and
-  Bob's files share the shape, as the workspace seed in the Bob reference does, and that what
-  differs for Bob is where the file lives (project and global) and how it is written (`bob mcp add`
-  first, a hand-written entry only without the CLI), with the pointer to §5.1 kept. Text-only fix,
+  under the example, that "Bob is not in that list" (#116). §5 now states once that Cursor's file
+  and Bob's project file (`<project>/.bob/mcp.json`) share the shape, as the workspace seed in the
+  Bob reference does, and that what differs for Bob is where its files live and how they are
+  written (`bob mcp add` first, a hand-written entry only without the CLI), with the pointer to
+  §5.1 kept. For Bob's global file the note claims no shape beyond the server entries the
+  reference's no-CLI fallback writes, and says to read the file and add to it. Text-only fix,
   checked against `references/bob-mcp.md`; not verified against a running Bob.
 - `audit-project` returned a clean report for projects that broke conventions it never checked
   (#117): problem details at the REST edge, a named model per AI service, `temperature=0` for
