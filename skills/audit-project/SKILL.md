@@ -169,6 +169,7 @@ emit the §5.0 finding only and mark the §5 check as subsumed by it — do not 
 | Entry methods guard externally originated text | `@RegisterAiService` methods interpolating free text the app did not author | the slot is wrapped in explicit delimiters with "data, not instructions" system-message language **and** the method or interface carries `@InputGuardrails` |
 | Reactive only at the edge | Mutiny usage | `Multi` / `Uni` only in `@WebSocket` edge beans; **none** inside engine/agent/tool logic |
 | Declarative fault tolerance | retry/timeout logic on AI methods | MicroProfile `@Timeout` / `@Retry` / `@Fallback` on `@RegisterAiService` methods, **not** hand-rolled try/retry loops |
+| Long system prompts as skills | `@SystemMessage` text (inline, or the file a `fromResource` names) on `@RegisterAiService` interfaces and methods | no service without `@Skills` carries a system message longer than 30 lines; a longer one is a candidate for a `SKILL.md`, reported as LOW at most (the extension is `status:preview`) |
 | Easy RAG first | a hand-built `RetrievalAugmentor` / `EmbeddingStore` producer | `quarkus-langchain4j-easy-rag` is used, or the project states the control Easy RAG does not provide |
 | Request/response logging (dev) | `application.properties` | dev-scoped logging: `%dev.quarkus.langchain4j.log-requests=true` + `%dev.quarkus.langchain4j.log-responses=true` (unscoped `true` in prod is itself a finding — it records user content) |
 
@@ -177,6 +178,7 @@ emit the §5.0 finding only and mark the §5 check as subsumed by it — do not 
 | Check | Look for | Pass when |
 |---|---|---|
 | Wiring smoke test | `src/test` | a `@QuarkusTest` that boots the container and asserts the AI service wires (no live model) |
+| Test tooling | integration-style tests in `src/test`, test dependencies in `pom.xml` | they are `@QuarkusTest` classes with `io.quarkus:quarkus-junit` as the test dependency, and tests that call HTTP endpoints do it with REST Assured (`io.rest-assured:rest-assured`) |
 | Native integration tests | `native` profile in `pom.xml` | the profile runs integration tests through `maven-failsafe-plugin` |
 | Deterministic model calls in tests | tests that call an AI service | the model is mocked, or the test configuration fixes `temperature=0` and the prompt |
 | Quality graded, not string-matched | evaluation tests | AI quality graded via `quarkus-langchain4j-testing-evaluation-junit5` (semantic-similarity / AI-judge), not brittle string asserts |
@@ -222,20 +224,19 @@ row here and no entry in the list below, so adding a convention means deciding h
 | §4 | Guardrails wrap AI services declaratively | Upstream guardrail imports |
 | §4 | Externally originated free text is data, never instructions | Entry methods guard externally originated text |
 | §4 | Fault tolerance is declarative on AI-service methods | Declarative fault tolerance |
+| §4 | Reusable instructions ship as skills, not as prompt strings | Long system prompts as skills |
 | §4 | RAG starts simple with Easy RAG | Easy RAG first; Retrieval scoped to RAG services |
 | §4 | Enable request/response logging in dev | Request/response logging (dev) |
 | §5 | Every project keeps a `@QuarkusTest` smoke test | Wiring smoke test |
+| §5 | Use `@QuarkusTest` | Test tooling |
 | §5 | Run native integration tests through `maven-failsafe-plugin` inside the `native` profile | Native integration tests |
 | §5 | Keep model interactions deterministic in tests | Deterministic model calls in tests |
 | §5 | Grade model *quality* with the evaluation framework | Quality graded, not string-matched |
 
 #### Deliberately not audited
 
-- §4 **Reusable instructions ship as skills, not as prompt strings** — whether prompt text is
-  reusable enough to move into a skill is a design judgment, not something the source shows, and
-  the extension is still `status:preview`.
-- §5 **Use `@QuarkusTest`** — it names the tools for the tests a project chooses to write; the
-  `@QuarkusTest` the conventions require is the Wiring smoke test check.
+None: every convention in §2–§5 has a row in the table above. A convention left out of the audit
+goes here as `- §N **Title** — reason`.
 
 ## 6. Report format
 
@@ -253,7 +254,9 @@ row here and no entry in the list below, so adding a convention means deciding h
   agent identity, missing wiring smoke test, tests that depend on live, non-deterministic model
   output).
 - **Low** — polish (missing dev logging, DTOs that could be records, a hand-built retrieval
-  pipeline where Easy RAG would do, types outside the `scaffold-project` package layout).
+  pipeline where Easy RAG would do, types outside the `scaffold-project` package layout, a system
+  message over 30 lines on a service without `@Skills`, integration tests that are not
+  `@QuarkusTest` on `quarkus-junit` or HTTP tests that do not use REST Assured).
 
 Lead with the recommendation, then present **all findings in a single markdown table**, ordered
 by severity (high first). Each row carries concrete evidence (`file:line`), the convention the

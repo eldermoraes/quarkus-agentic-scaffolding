@@ -238,8 +238,11 @@ versioning.
   deterministic tasks, Easy RAG first, native integration tests, CDI-first wiring and
   deterministic model calls in tests. The catalog now checks each of them and places it in the
   severity guide, adds the `scaffold-project` package layout as a LOW check (the README already
-  promised it), and maps every convention in §2–§5 to its checks in a coverage table, with two
-  conventions listed as deliberately not audited. The new `ci/check-audit-coverage.sh` (wired
+  promised it), and maps every convention in §2–§5 to its checks in a coverage table. Two LOW
+  checks cover the last two conventions: a system message over 30 lines on a service without
+  `@Skills` is flagged as a candidate for a skill, and integration tests are expected on
+  `@QuarkusTest` with `io.quarkus:quarkus-junit` and HTTP tests on REST Assured; the
+  "Deliberately not audited" list is empty. The new `ci/check-audit-coverage.sh` (wired
   into the quality workflow) fails when a convention has no audit decision; on the previous
   catalog it reported all 31 conventions as undecided. The audit also stopped accepting
   `GEMINI.md`, which setup never writes, so it looks for `CLAUDE.md` or `AGENTS.md` like the
