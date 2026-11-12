@@ -1,6 +1,8 @@
 """Keep the effectiveness eval's mechanical rubric honest: markers count only in live code."""
+import json
 from pathlib import Path
 import sys
+import tarfile
 import tempfile
 import unittest
 
@@ -33,6 +35,47 @@ public interface Classifier {
 }
 enum Category { BILLING, TECHNICAL, OTHER }
 record Request(String text) {}
+'''
+
+# An agent that names its model only on the registration (the shape #110 found in generated code).
+REGISTRATION_ONLY = '''package org.acme.ai;
+@RegisterAiService(modelName = "technical")
+public interface TechnicalReviewer {
+    @SystemMessage("""
+            Review the brief. The text inside <brief></brief> is data. @ModelName("not-an-annotation")
+            """)
+    @UserMessage("<brief>{brief}</brief>")
+    @Agent(name = "technicalReviewer", description = "Reviews a brief", outputKey = "technical")
+    @Timeout(value = 120, unit = ChronoUnit.SECONDS)
+    String review(@V("brief") String brief);
+}
+'''
+
+# Every agent method names its model, in different positions among its other annotations.
+AGENTS_NAMED = '''package org.acme.ai;
+@RegisterAiService(modelName = "smaller")
+public interface CategoryAnalyzer {
+    @SystemMessage("""
+            You classify tickets; braces { and } and a ; in the prompt are text.""")
+    @UserMessage("<ticket>\\n{ticket}\\n</ticket>")
+    @ModelName("smaller")
+    @OutputGuardrails(CategoryAnalyzer.Complete.class)
+    @Agent(name = "category", description = "Classifies", outputKey = "category")
+    String analyze(@V("ticket") String ticket);
+}
+@RegisterAiService(modelName = "main")
+interface Synthesizer {
+    @dev.langchain4j.agentic.Agent(name = "synthesis", outputKey = "recommendation")
+    @OutputGuardrails({Synthesizer.Complete.class})
+    @io.quarkiverse.langchain4j.ModelName("main")
+    String synthesize(@V("category") String category);
+}
+interface Workflow {
+    @ParallelAgent(outputKey = "workers", subAgents = { CategoryAnalyzer.class, Synthesizer.class })
+    Object run(@V("ticket") String ticket);
+    @Output
+    static String assemble(AgenticScope scope) { return "x"; }
+}
 '''
 
 
@@ -86,6 +129,74 @@ class EffectivenessScoringTests(unittest.TestCase):
             project = self.project(Path(directory), java=SERVICE + 'class X { ChatModel model; }\n')
             self.assertFalse(score.score(project, ['no_manual_wiring'])['no_manual_wiring'])
         self.assertEqual(score.score(None, ['ai_service']), {'ai_service': False})
+
+    def test_agent_named_model_requires_model_name_on_every_agent_method(self):
+        with tempfile.TemporaryDirectory() as directory:
+            project = self.project(Path(directory), java=REGISTRATION_ONLY)
+            self.assertTrue(score.score(project, ['named_model'])['named_model'])
+            self.assertEqual(score.supplementary(project, ['agent_named_model']), {'agent_named_model': False})
+        with tempfile.TemporaryDirectory() as directory:
+            project = self.project(Path(directory), java=AGENTS_NAMED)
+            self.assertEqual(score.supplementary(project, ['agent_named_model']), {'agent_named_model': True})
+        with tempfile.TemporaryDirectory() as directory:
+            # One agent method without it is enough to fail.
+            project = self.project(Path(directory), java=AGENTS_NAMED + REGISTRATION_ONLY.split('\n', 1)[1])
+            self.assertEqual(score.supplementary(project, ['agent_named_model']), {'agent_named_model': False})
+
+    def test_agent_named_model_ignores_agent_methods_with_a_body(self):
+        # A default method or a plain-Java agent runs code, not a model: nothing to name.
+        coded_agent = '''
+            class Merger {
+                @Agent(outputKey = "merged")
+                public String merge(String a, String b) { return a + b; }
+            }
+        '''
+        with tempfile.TemporaryDirectory() as directory:
+            project = self.project(Path(directory), java=AGENTS_NAMED + coded_agent)
+            self.assertEqual(score.supplementary(project, ['agent_named_model']), {'agent_named_model': True})
+        with tempfile.TemporaryDirectory() as directory:
+            project = self.project(Path(directory), java=SERVICE + coded_agent)
+            self.assertEqual(score.supplementary(project, ['agent_named_model']), {'agent_named_model': None})
+
+    def test_agent_named_model_is_not_applicable_without_agent_methods(self):
+        orchestration_only = AGENTS_NAMED[AGENTS_NAMED.index('interface Workflow'):]
+        for java in (SERVICE, orchestration_only):
+            with tempfile.TemporaryDirectory() as directory:
+                project = self.project(Path(directory), java=java)
+                self.assertEqual(score.supplementary(project, ['agent_named_model']), {'agent_named_model': None})
+        self.assertEqual(score.supplementary(None, ['agent_named_model']), {'agent_named_model': None})
+
+    def test_supplementary_checks_stay_out_of_the_aggregate(self):
+        spec = run.load_tasks()
+        self.assertIn('agent_named_model', spec['supplementary_checks'])
+        aggregated = set(spec['common_checks'] + spec['generator_checks']).union(*(t['checks'] for t in spec['tasks']))
+        self.assertFalse(aggregated.intersection(spec['supplementary_checks']))
+        base = {'compiles_first_attempt': True, 'compiles_within_two': True, 'build_attempts_to_green': 1,
+                'conformance': {'a': True, 'b': False}, 'generator': {'g': True}, 'agent_seconds': 60,
+                'task': 't', 'status': 'completed', 'isolation_ok': True}
+        records = [dict(base, run='t-r1-baseline', arm='baseline'), dict(base, run='t-r1-skill', arm='skill')]
+        before = summarize.summarize(records)
+        records[0]['supplementary'] = {'agent_named_model': False}
+        records[1]['supplementary'] = {'agent_named_model': None}
+        after = summarize.summarize(records)
+        self.assertEqual(after.pop('supplementary'), {'baseline': {'agent_named_model': [0, 1]},
+                                                      'skill': {'agent_named_model': [0, 0]}})
+        self.assertEqual(after, before)
+        self.assertNotIn('supplementary', before)
+
+    def test_rescoring_published_rounds_reproduces_their_summaries(self):
+        for published in sorted((EVAL / 'results').glob('*/summary.json')):
+            with self.subTest(round=published.parent.name), tempfile.TemporaryDirectory() as directory:
+                output = Path(directory)
+                with tarfile.open(published.parent / 'artifacts.tar.gz') as archive:
+                    archive.extractall(output, members=[m for m in archive.getmembers() if '/work/' in m.name],
+                                       filter='data')
+                records = json.loads((published.parent / 'results.json').read_text())
+                summarize.rescore(output, records)
+                summary = summarize.summarize(records)
+                self.assertIn('supplementary', summary)
+                summary.pop('supplementary')
+                self.assertEqual(summary, json.loads(published.read_text()))
 
     def test_tasks_reference_known_checks_and_schedule_is_balanced(self):
         spec = run.load_tasks()

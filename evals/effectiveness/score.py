@@ -150,11 +150,64 @@ CHECKS = {
 }
 
 
+def _declaration_annotations(java):
+    """Per declaration (type, method, field): the simple names of its annotations and the
+    character that ends its header (';' for a method without a body or a field, '{' for a type
+    or a method with a body).
+
+    String literals are emptied and parenthesized arguments collapsed first, so braces, semicolons
+    and '@' inside prompts, annotation arguments or parameter annotations do not split or add to a
+    declaration. What remains between two of ';', '{', '}' is one declaration's header."""
+    text = _JAVA_TOKENS.sub('""', java)
+    flat, depth = [], 0
+    for char in text:
+        if char == '(':
+            depth += 1
+            if depth == 1:
+                flat.append('(')
+        elif char == ')':
+            depth = max(depth - 1, 0)
+            if depth == 0:
+                flat.append(')')
+        elif depth == 0:
+            flat.append(char)
+    return [({name.rsplit('.', 1)[-1] for name in re.findall(r'@\s*([\w.]+)', header)}, end)
+            for header, end in re.findall(r'([^;{}]*)([;{}])', ''.join(flat))]
+
+
+def _agent_named_model(project):
+    """Every model-backed @Agent method carries @ModelName itself; None when there is none.
+
+    On quarkus-langchain4j 1.13.4 an @Agent method ignores @RegisterAiService(modelName = ...) and
+    only @ModelName on the method selects its model (#110). Only @Agent methods without a body
+    count: one with a body (a default method, a plain-Java agent) runs code, not a model.
+    Methods carrying only an orchestration annotation (@SequenceAgent, @ParallelAgent,
+    @SupervisorAgent, ...) are not @Agent methods and are outside this check."""
+    agents = [names for names, end in _declaration_annotations(project.java)
+              if 'Agent' in names and end == ';']
+    return all('ModelName' in names for names in agents) if agents else None
+
+
+# Supplementary checks: reported per run and per arm next to the bands, never counted in the
+# conformance or generator percentages, so adding one leaves every published number reproducible.
+# Each returns True, False, or None when it does not apply to the project.
+SUPPLEMENTARY = {
+    'agent_named_model': _agent_named_model,
+}
+
+
 def score(project_root, names):
     if project_root is None:
         return {name: False for name in names}
     project = Project(project_root)
     return {name: bool(CHECKS[name](project)) for name in names}
+
+
+def supplementary(project_root, names):
+    if project_root is None:
+        return {name: None for name in names}
+    project = Project(project_root)
+    return {name: SUPPLEMENTARY[name](project) for name in names}
 
 
 def java_file_count(project_root):

@@ -65,6 +65,15 @@ def summarize(records):
                                           if k in r['conformance'] or k in r['generator']),
                                       sum(1 for r in rows if k in r['conformance'] or k in r['generator'])]
                                   for k in names}
+    # Supplementary checks: [passed, applicable] per arm, outside every percentage. Absent from
+    # records scored before they existed, so summaries of those rounds keep their exact shape.
+    if any('supplementary' in r for r in used):
+        summary['supplementary'] = {}
+        for arm in ARMS:
+            rows = [r.get('supplementary') or {} for r in used if r['arm'] == arm]
+            names = sorted({k for row in rows for k in row})
+            summary['supplementary'][arm] = {k: [sum(row.get(k) is True for row in rows),
+                                                 sum(row.get(k) is not None for row in rows)] for k in names}
     b, s = summary['overall']['baseline'], summary['overall']['skill']
     if b['n'] and s['n']:
         summary['delta'] = {
@@ -104,6 +113,15 @@ def markdown(summary, environment):
         b = summary['checks'].get('baseline', {}).get(name, [0, 0])
         s = summary['checks'].get('skill', {}).get(name, [0, 0])
         lines.append(f'| `{name}` | {b[0]}/{b[1]} | {s[0]}/{s[1]} |')
+    if 'supplementary' in summary:
+        lines += ['', '## Supplementary checks', '',
+                  'Not counted in any percentage above. Passed / runs the check applies to.', '',
+                  '| Check | Baseline | Skill |', '| --- | --- | --- |']
+        extra = summary['supplementary']
+        for name in sorted(set(extra.get('baseline', {})) | set(extra.get('skill', {}))):
+            b = extra.get('baseline', {}).get(name, [0, 0])
+            s = extra.get('skill', {}).get(name, [0, 0])
+            lines.append(f'| `{name}` | {b[0]}/{b[1]} | {s[0]}/{s[1]} |')
     skill = summary['overall']['skill']
     lines += ['', f"The skill arm invoked `scaffold-project` in {skill['skill_invoked']}/{skill['n']} runs.",
               f"Excluded runs: {len(summary['excluded'])}" + (': ' + ', '.join(f"{e['run']} ({e['status']})" for e in summary['excluded']) if summary['excluded'] else '.')]
@@ -139,6 +157,7 @@ def rescore(output, records):
         project = score.find_project(workdir)
         record['conformance'] = score.score(project, spec['common_checks'] + tasks[record['task']]['checks'])
         record['generator'] = score.score(project, spec['generator_checks'])
+        record['supplementary'] = score.supplementary(project, spec.get('supplementary_checks', []))
         record['rescored'] = True
         (output / 'runs' / record['run'] / 'result.json').write_text(json.dumps(record, indent=2) + '\n')
     (output / 'results.json').write_text(json.dumps(records, indent=2) + '\n')

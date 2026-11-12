@@ -60,6 +60,9 @@ def load_tasks():
         for name in spec['common_checks'] + task['checks'] + spec['generator_checks']:
             if name not in score.CHECKS:
                 raise SystemExit(f'unknown check {name} in task {task["id"]}')
+    for name in spec.get('supplementary_checks', []):
+        if name not in score.SUPPLEMENTARY:
+            raise SystemExit(f'unknown supplementary check {name}')
     return spec
 
 
@@ -237,6 +240,7 @@ def run_one(args, spec, output, run, port, stop):
         'java_files': score.java_file_count(project),
         'conformance': score.score(project, names),
         'generator': score.score(project, spec['generator_checks']),
+        'supplementary': score.supplementary(project, spec.get('supplementary_checks', [])),
     })
     # Metric 3: independent build attempts until green, at most 2. Attempt 1 compiles what the
     # agent left; on failure the same session is resumed once with the compiler output, then
