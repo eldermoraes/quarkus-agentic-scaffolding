@@ -3,6 +3,22 @@
 All notable changes to this artifact are documented here. This project adheres to semantic
 versioning.
 
+## Unreleased
+
+### Fixed
+
+- The Agent template's `CompleteAnswerGuard` now extends
+  `dev.langchain4j.guardrails.JsonExtractorOutputGuardrail` from `langchain4j-guardrails`, added
+  to `pom.xml.template` with no version, instead of the `langchain4j-core` class that is
+  deprecated for removal and gone from LangChain4j 1.20 (#149). The new class still has an
+  `(ObjectMapper, Class)` constructor at the platform's 1.19.3-beta29 but no longer has one at
+  1.23.0-beta33 (read with `javap`), so the guard calls `super(type)` and the three records it
+  parses carry `@JsonIgnoreProperties(ignoreUnknown = true)` to keep accepting extra fields. A
+  new boot test answers all three agents with an extra field and expects no second request: it
+  failed when `Recommendation` lacked the annotation. With it, the boot test passes 21 of 21 on
+  platform 3.40.1.2 with no removal warning, and 21 of 21 with `quarkus-langchain4j-bom` 1.15.1
+  (LangChain4j 1.23.0), where the old guard did not compile.
+
 ## v0.24.0 — 2026-11-12
 
 ### Added

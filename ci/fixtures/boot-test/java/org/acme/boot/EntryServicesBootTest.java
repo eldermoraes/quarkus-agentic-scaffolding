@@ -171,6 +171,29 @@ class EntryServicesBootTest {
     }
 
     @Test
+    void answerWithAnExtraFieldIsAccepted() {
+        // The analyzers run in parallel, so the order of the first two requests is not fixed:
+        // one answer, queued three times, is complete for each agent's record (CategoryReport,
+        // PriorityReport, Recommendation) and carries fields that record does not declare,
+        // "confidence" among them for all three.
+        String answer = "{\"category\":\"billing\",\"level\":\"high\",\"reason\":\"Charged twice.\","
+                + "\"recommendation\":\"Refund the duplicate charge.\",\"confidence\":0.9}";
+        FakeOllama.answerNextWith(answer, answer, answer);
+
+        List<ProgressUpdate> updates = triage("I was charged twice for order 1234.");
+
+        assertEquals("DONE", updates.getLast().state(), () -> "updates: " + updates);
+        // Three agents and no second request: an extra field is not a reason to ask again.
+        assertEquals(3, FakeOllama.requests().size(), () -> "requests: " + FakeOllama.requests());
+        // Each agent's result came from the queued answer, not from a default one.
+        TriageReport report = updates.getLast().result();
+        assertComplete(report);
+        assertEquals("billing", report.category().category(), () -> "report: " + report);
+        assertEquals("high", report.priority().level(), () -> "report: " + report);
+        assertEquals("Refund the duplicate charge.", report.recommendation(), () -> "report: " + report);
+    }
+
+    @Test
     void agentSchemasMarkEveryFieldRequired() {
         triage("I was charged twice for order 1234.");
 

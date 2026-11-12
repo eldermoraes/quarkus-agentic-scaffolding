@@ -38,9 +38,16 @@
   test-scoped eval artifact is a quarkiverse module the generator likewise omits. Neither
   quarkus_create nor code.quarkus.io will add any of them, and their versions are managed by
   quarkus-langchain4j-bom, so they take NO <version>. Add each only when its feature is used
-  (RAG embedding model, PDF parsing, AI-quality evals).
+  (output guardrails, RAG embedding model, PDF parsing, AI-quality evals).
 -->
 <dependencies>
+
+    <!-- agents: CompleteAnswerGuard extends dev.langchain4j.guardrails.JsonExtractorOutputGuardrail
+         (the copy in langchain4j-core is deprecated for removal and gone from LangChain4j 1.20) -->
+    <dependency>
+        <groupId>dev.langchain4j</groupId>
+        <artifactId>langchain4j-guardrails</artifactId>
+    </dependency>
 
     <!-- RAG: in-process embedding model required by Easy RAG -->
     <dependency>
