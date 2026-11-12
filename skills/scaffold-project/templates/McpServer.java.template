@@ -31,7 +31,8 @@ public class TriageMcpServer {
     TicketTools tickets;
 
     @Tool(description = "Looks up a customer's support context: plan and open-ticket count")
-    @RunOnVirtualThread // blocking lookup: keep it off the event loop and off the worker pool (project conventions section 2)
+    @RunOnVirtualThread // blocking lookup: keep it off the event loop and off the worker pool
+                        // (project conventions section 2)
     public String customerContext(
             @ToolArg(description = "The customer id") String customerId) {
         TicketTools.CustomerContext ctx = tickets.lookupCustomer(customerId);

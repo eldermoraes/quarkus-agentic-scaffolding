@@ -47,8 +47,8 @@ public class ChatAssistantTest {
 
     // --- Model-dependent test (requires a running Ollama; not run in CI) ---------------------
     // Uncomment to exercise real inference. Keep prompts fixed and configure the model with
-    // temperature=0 for deterministic assertions (project conventions section 5). Assert a stable property of the
-    // reply rather than exact wording — model output is fuzzy.
+    // temperature=0 for deterministic assertions (project conventions section 5). Assert a
+    // stable property of the reply rather than exact wording — model output is fuzzy.
     //
     //   @Test
     //   void answersARealQuestion() {

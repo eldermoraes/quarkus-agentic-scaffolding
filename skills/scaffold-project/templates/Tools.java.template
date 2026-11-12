@@ -14,7 +14,8 @@ import jakarta.enterprise.context.ApplicationScoped;
  *
  * Blocking: tools run blocking by default. Annotate a method to change that —
  *   @Blocking (caller thread), @NonBlocking (event loop; for Uni/CompletionStage returns), or
- *   @RunOnVirtualThread for blocking I/O (DB/REST) so it stays off the event loop (project conventions section 2).
+ *   @RunOnVirtualThread for blocking I/O (DB/REST) so it stays off the event loop
+ *   (project conventions section 2).
  *
  * Tool-level guardrails: validate a tool's arguments/results with @ToolInputGuardrails /
  *   @ToolOutputGuardrails — see Guardrails.java.template for the guardrail beans they reference.
