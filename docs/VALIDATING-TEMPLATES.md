@@ -171,17 +171,25 @@ Two mechanisms run these drift checks for you. Both are **backstops** — the Qu
 and the MCP procedure above stays the source of truth.
 
 **Boot test in CI.** `.github/workflows/validate-templates.yml` runs the **scripted boot test**
-above (`ci/build-from-templates.sh`, without `--compile-only`) two ways:
+above (`ci/build-from-templates.sh`, without `--compile-only`) on three occasions:
 
-- on every **push and pull request**, against the versions pinned in `ci/baseline.env`, so builds
-  stay reproducible, and
+- on every **pull request**, whatever files it changes, and on every **push to `main`** that
+  touches `skills/`, `ci/`, `.github/actions/` or the workflow itself, against the versions pinned
+  in `ci/baseline.env`, so builds stay reproducible. The job is named `boot`, and that name is the
+  status check to require on `main`; pull requests carry no paths filter because a required check
+  that never starts blocks the pull request;
+- on **manual runs** (`workflow_dispatch`), against the live latest platform as below;
 - on a **weekly cron (Mondays, 05:00 UTC)**, against the **live latest stable** Quarkus platform
   (the highest purely numeric version in Maven Central's metadata, platform respins such as
   `3.40.1.1` included; Alpha/Beta/CR pre-releases are skipped), so a
   new release that breaks the templates is caught even when nothing in the repo changed.
 
 A failing scheduled run opens a tracking issue (labeled `build failed`), or comments on the
-existing one; the next green scheduled run closes it automatically.
+existing one; the next green scheduled run closes it automatically. The `boot` job, which builds
+and runs the generated project with Maven, holds a token that can only read the repository
+(`contents: read`, and its checkout does not keep the token in the git config); a separate
+`boot-report` job, which runs only on scheduled runs, holds `issues: write` to open or close the
+issue. Pull requests, pushes, manual runs and cancelled runs never touch the issue.
 
 **Release watching (Renovate).** `renovate.json` watches the entries in `ci/baseline.env` and
 opens a PR for each new release (`dependencyDashboardApproval` is `false`); the repo's

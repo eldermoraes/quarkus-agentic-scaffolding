@@ -85,6 +85,14 @@ versioning.
   40-character SHA (it failed on every reference before the change), and `validate-templates`
   now declares permissions per job: the link check holds `contents: read` only, and a separate
   `links-report` job opens or closes the scheduled-run tracking issue with `issues: write`.
+- `validate-templates`: the `boot` job, which builds and runs the generated project with Maven,
+  now holds `contents: read` only and checks out with `persist-credentials: false` (an input of
+  `actions/checkout` at the pinned SHA, read from its `action.yml`); a new `boot-report` job,
+  scheduled runs only, opens or closes the "Template build failed on scheduled run" issue with
+  `issues: write`, mirroring `links-report` (#120). Pull requests lose the `paths` filter, so
+  `boot` runs on every pull request and can be a required status check on `main` without
+  blocking pull requests that touch none of the filtered paths; pushes to `main` keep the filter.
+  `actionlint` and `ci/check-action-pinning.sh` pass; the workflow itself was not run.
 
 ### Fixed
 
