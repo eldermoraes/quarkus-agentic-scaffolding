@@ -13,8 +13,9 @@ import io.quarkiverse.langchain4j.RegisterAiService;
  * Quarkus wires the configured chat model (and, if present, a RetrievalAugmentor and
  * ChatMemoryProvider) automatically; this service opts out of the RetrievalAugmentor below.
  *
- * Every AI service names its model (project conventions section 4): "main" backs the primary task, "smaller"
- * backs cheap subtasks such as classification. Both are configured in application.properties.
+ * Every AI service names its model (project conventions section 4): "main" backs the primary
+ * task, "smaller" backs cheap subtasks such as classification. Both are configured in
+ * application.properties.
  * Expose the service from a REST resource that runs on a virtual thread (RestResource.java.template).
  */
 @RegisterAiService(modelName = "main",
@@ -102,8 +103,9 @@ public interface ChatAssistant {
     //
     //   import io.quarkiverse.langchain4j.skills.Skills;
     //
-    //   @RegisterAiService(modelName = "main")
-    //   @Skills                       // every discovered skill
+    //   @RegisterAiService(modelName = "main",
+    //           retrievalAugmentor = RegisterAiService.NoRetrievalAugmentorSupplier.class)
+    //   @Skills                      // every discovered skill
     //   public interface ChatAssistant { ... }
     //
     // Narrow it to named skills, on the interface or on a single method:

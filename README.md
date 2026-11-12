@@ -253,8 +253,8 @@ scaffolding and setup in the skills, rules in `CLAUDE.md` or `AGENTS.md`.
   managed conventions block and points you to `/setup-agentic-scaffolding`, since it relies on
   the conventions instead of restating them.
 - **`audit-project`** (user-invoked) is read-only by default: it audits an existing project
-  against every convention in §2–§5 except the few its catalog names as deliberately not audited
-  (`ci/check-audit-coverage.sh` keeps the two in step), plus `scaffold-project`'s package layout
+  against every convention in §2–§5 (`ci/check-audit-coverage.sh` fails when a convention has no
+  audit decision in its catalog), plus `scaffold-project`'s package layout
   as a low-severity check, and reports prioritized findings with evidence and a suggested fix each — applying fixes only after you
   confirm, by handing off to `scaffold-project`'s component sections. Platform upgrades (an EOL
   Quarkus line, an unsupported Java release, pre-BOM LangChain4j) have no such handoff: they stay

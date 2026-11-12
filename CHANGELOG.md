@@ -226,18 +226,23 @@ versioning.
   command back. `ci/test_mcp_opencode_form.py` shows that the command consistency check counts the
   opencode form and fails it without the Java pin, and that both Renovate managers match its pins.
 - The setup skill said both that Bob's MCP file has the shared `mcpServers` shape and, in the note
-  under the example, that "Bob is not in that list" (#116). §5 now states once that Cursor's and
-  Bob's files share the shape, as the workspace seed in the Bob reference does, and that what
-  differs for Bob is where the file lives (project and global) and how it is written (`bob mcp add`
-  first, a hand-written entry only without the CLI), with the pointer to §5.1 kept. Text-only fix,
+  under the example, that "Bob is not in that list" (#116). §5 now states once that Cursor's file
+  and Bob's project file (`<project>/.bob/mcp.json`) share the shape, as the workspace seed in the
+  Bob reference does, and that what differs for Bob is where its files live and how they are
+  written (`bob mcp add` first, a hand-written entry only without the CLI), with the pointer to
+  §5.1 kept. For Bob's global file the note claims no shape beyond the server entries the
+  reference's no-CLI fallback writes, and says to read the file and add to it. Text-only fix,
   checked against `references/bob-mcp.md`; not verified against a running Bob.
 - `audit-project` returned a clean report for projects that broke conventions it never checked
   (#117): problem details at the REST edge, a named model per AI service, `temperature=0` for
   deterministic tasks, Easy RAG first, native integration tests, CDI-first wiring and
   deterministic model calls in tests. The catalog now checks each of them and places it in the
   severity guide, adds the `scaffold-project` package layout as a LOW check (the README already
-  promised it), and maps every convention in §2–§5 to its checks in a coverage table, with two
-  conventions listed as deliberately not audited. The new `ci/check-audit-coverage.sh` (wired
+  promised it), and maps every convention in §2–§5 to its checks in a coverage table. Two LOW
+  checks cover the last two conventions: a system message over 30 lines on a service without
+  `@Skills` is flagged as a candidate for a skill, and integration tests are expected on
+  `@QuarkusTest` with `io.quarkus:quarkus-junit` and HTTP tests on REST Assured; the
+  "Deliberately not audited" list is empty. The new `ci/check-audit-coverage.sh` (wired
   into the quality workflow) fails when a convention has no audit decision; on the previous
   catalog it reported all 31 conventions as undecided. The audit also stopped accepting
   `GEMINI.md`, which setup never writes, so it looks for `CLAUDE.md` or `AGENTS.md` like the

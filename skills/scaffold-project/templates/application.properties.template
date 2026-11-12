@@ -21,7 +21,8 @@ quarkus.langchain4j.ollama.chat-model.temperature=0.7
 quarkus.langchain4j.timeout=120s
 
 # --- Named "main" model: the primary task. Every @RegisterAiService declares a ---
-# modelName (project conventions section 4); the primary services use @RegisterAiService(modelName = "main").
+# modelName (project conventions section 4); the primary services use
+# @RegisterAiService(modelName = "main").
 quarkus.langchain4j.ollama.main.chat-model.model-id=qwen3:4b
 quarkus.langchain4j.ollama.main.chat-model.temperature=0.7
 quarkus.langchain4j.ollama.main.timeout=120s
