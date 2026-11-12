@@ -15,7 +15,9 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import org.acme.ai.TicketOpsAssistant;
 import org.acme.dto.ProgressUpdate;
 import org.acme.rag.RagAssistant;
@@ -33,6 +35,11 @@ import org.junit.jupiter.api.Test;
 class EntryServicesBootTest {
 
     private static final Duration TRIAGE_TIMEOUT = Duration.ofSeconds(30);
+
+    /** The response-schema properties of each agent's record (CategoryReport, PriorityReport, TriageReport). */
+    private static final Set<String> CATEGORY_AGENT = Set.of("category", "reason");
+    private static final Set<String> PRIORITY_AGENT = Set.of("level", "reason");
+    private static final Set<String> SYNTHESIZER = Set.of("category", "priority", "recommendation");
 
     @TestHTTPResource("/chat")
     URI chatEndpoint;
@@ -85,6 +92,16 @@ class EntryServicesBootTest {
         assertEquals("DONE", last.state(), () -> "updates: " + updates);
         assertTrue(FakeOllama.requests().stream()
                 .anyMatch(request -> lastUserTurn(request).contains("I was charged twice for order 1234.")));
+    }
+
+    @Test
+    void eachAgentCallsTheModelItNames() {
+        triage("I was charged twice for order 1234.");
+
+        // The analyzers name the small, zero-temperature model; the Synthesizer the primary one.
+        assertAgentModel(CATEGORY_AGENT, FakeOllama.SMALLER_MODEL, 0.0);
+        assertAgentModel(PRIORITY_AGENT, FakeOllama.SMALLER_MODEL, 0.0);
+        assertAgentModel(SYNTHESIZER, FakeOllama.MAIN_MODEL, 0.7);
     }
 
     @Test
@@ -147,6 +164,30 @@ class EntryServicesBootTest {
         List<JsonNode> requests = FakeOllama.requests();
         assertEquals(1, requests.size(), () -> "requests: " + requests);
         assertTrue(lastUserTurn(requests.getFirst()).contains(callerText), () -> "request: " + requests.getFirst());
+    }
+
+    private static void assertAgentModel(Set<String> agent, String model, double temperature) {
+        JsonNode request = requestOf(agent);
+        assertEquals(model, request.path("model").asText(), () -> "request: " + request);
+        assertEquals(temperature, request.path("options").path("temperature").asDouble(-1), () -> "request: " + request);
+    }
+
+    /**
+     * The single recorded request made by one agent. Each agent returns its own record, so the
+     * JSON schema the request carries (its property names) identifies the agent.
+     */
+    private static JsonNode requestOf(Set<String> agent) {
+        List<JsonNode> matching = FakeOllama.requests().stream()
+                .filter(request -> schemaProperties(request).equals(agent))
+                .toList();
+        assertEquals(1, matching.size(), () -> "requests: " + FakeOllama.requests());
+        return matching.getFirst();
+    }
+
+    private static Set<String> schemaProperties(JsonNode request) {
+        Set<String> names = new HashSet<>();
+        request.path("format").path("properties").fieldNames().forEachRemaining(names::add);
+        return names;
     }
 
     private static void assertNoModelCall() {

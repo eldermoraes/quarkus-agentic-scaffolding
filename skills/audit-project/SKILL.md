@@ -157,6 +157,7 @@ emit the §5.0 finding only and mark the §5 check as subsumed by it — do not 
 | Declarative AI services | AI-service classes | `@RegisterAiService` interfaces, **not** manual `ChatModel` wiring |
 | Tools as CDI beans | tool dispatch | `@Tool` methods on `@ApplicationScoped` beans, **not** hand-rolled JSON function dispatch |
 | Declarative agentic composition | multi-agent orchestration | `@Agent` + `@SequenceAgent` / `@ParallelAgent` / `@SupervisorAgent` / `@Output`, **no** hand-rolled executor glue |
+| Agents name their model | `@Agent` methods on `@RegisterAiService` interfaces | each `@Agent` method carries `@ModelName("…")` (`io.quarkiverse.langchain4j`); a `modelName` on the registration alone does not reach agent calls, which then go to the default model |
 | Upstream guardrail imports | guardrail beans | imports from `dev.langchain4j.guardrail` (the retired Quarkus-specific guardrail API is gone) |
 | Entry methods guard externally originated text | `@RegisterAiService` methods interpolating free text the app did not author | the slot is wrapped in explicit delimiters with "data, not instructions" system-message language **and** the method or interface carries `@InputGuardrails` |
 | Reactive only at the edge | Mutiny usage | `Multi` / `Uni` only in `@WebSocket` edge beans; **none** inside engine/agent/tool logic |

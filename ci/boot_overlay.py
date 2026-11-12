@@ -11,7 +11,10 @@ Turns the materialized project into one that `mvn test` can start without a live
   3. copies the sample documents into the folder the uncommented easy-rag.path names;
   4. adds a %test override pointing the "ops" MCP client at the application's own MCP server
      on the Quarkus test port, so the client has a server to connect to;
-  5. copies the CI test fixtures (fake Ollama + entry-service boot test) into src/test/java.
+  5. adds %test model ids that tell the default, "main" and "smaller" models apart (the
+     template gives the default and "main" models the same id; a model id is fixed at build
+     time, so the fake's test resource cannot override it);
+  6. copies the CI test fixtures (fake Ollama + entry-service boot test) into src/test/java.
 
 A key it must uncomment and cannot find fails the run and names the key: a template change
 must not silently switch off part of the boot test.
@@ -32,6 +35,12 @@ KEYS_TO_ENABLE = (
     "quarkus.langchain4j.mcp.ops.transport-type",
     "quarkus.langchain4j.mcp.ops.url",
     "quarkus.mcp.server.http.root-path",
+)
+# Distinct model ids per configured model; FakeOllama.java names the same values.
+TEST_MODEL_IDS = (
+    ("quarkus.langchain4j.ollama.chat-model.model-id", "fake-default"),
+    ("quarkus.langchain4j.ollama.main.chat-model.model-id", "fake-main"),
+    ("quarkus.langchain4j.ollama.smaller.chat-model.model-id", "fake-smaller"),
 )
 EASY_RAG_ARTIFACT = "quarkus-langchain4j-easy-rag"
 TEST_PORT = "${quarkus.http.test-port:8081}"
@@ -83,7 +92,9 @@ def main(argv):
     text = text.rstrip("\n") + (
         "\n\n# --- Added by ci/boot_overlay.py (CI boot test only) ---\n"
         "# The MCP client talks to this application's own MCP server on the test port.\n"
-        f"%test.quarkus.langchain4j.mcp.ops.url=http://localhost:{TEST_PORT}{mcp_root}\n")
+        f"%test.quarkus.langchain4j.mcp.ops.url=http://localhost:{TEST_PORT}{mcp_root}\n"
+        "# Distinct model ids, so a recorded request shows which configured model it reached.\n"
+        + "".join(f"%test.{key}={value}\n" for key, value in TEST_MODEL_IDS))
     props_path.write_text(text)
     for key in KEYS_TO_ENABLE:
         print(f"enabled {key}={values[key]}")
