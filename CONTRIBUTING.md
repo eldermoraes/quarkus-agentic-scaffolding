@@ -21,9 +21,13 @@ not from generic boilerplate. Contributions are expected to keep that bar.
   and `skills/`; do not put duplicate skill content here.
 - **`scripts/install-bob-skill.sh`** — installs the skill into a project's (or global) `.bob/skills/`
   for Bob (whose marketplace is IBM-internal and distributes modes and MCP servers, not skills).
+  Ownership-checked like the uninstaller: it refreshes only directories whose `SKILL.md` declares
+  our name. Behavior-tested by `ci/test-install-bob-skill.sh`.
 - **`scripts/uninstall-bob-skill.sh`** — the mirror of the installer: removes the three skills
   from a project's (or global) `.bob/skills/`, ownership-checked and safe to re-run. Behavior-tested
-  by `ci/test-uninstall-bob-skill.sh`.
+  by `ci/test-uninstall-bob-skill.sh`. Both scripts carry the same `declared_skill_name` function
+  between `BEGIN`/`END ownership rule` markers, so each still runs on its own;
+  `ci/test-install-bob-skill.sh` fails when the two copies differ.
 
 Keep the split clean: the skill says *how to lay things out*; `CLAUDE.md` and `AGENTS.md` say
 *what the code must do*. Do not restate conventions inside the skill — cross-reference the

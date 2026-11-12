@@ -169,6 +169,15 @@ skills into `.bob/skills/` for you:
 # ./scripts/install-bob-skill.sh --global          # into ~/.bob/skills/
 ```
 
+Re-running it refreshes the three skills, including removing supporting files a newer release
+dropped. It applies the same ownership check as the uninstaller below: an existing
+`.bob/skills/audit-project` (or either of the other two names) is replaced only when its
+`SKILL.md` front matter declares that name. A directory that declares a different name, declares
+none, or has no `SKILL.md` — or is a symlink — is left untouched with a warning; the other skills
+are still installed and the script exits non-zero. Rename or move your directory aside, then
+re-run. A skill of your own that *also* declares `name: audit-project` cannot be told apart from
+ours and **will** be overwritten.
+
 Bob asks for approval before activating a skill — once per conversation, not once ever; the setting
 is a single global toggle rather than a per-skill grant. Two things to know while you are here: a
 skill's `description` front-matter field is load-bearing (Bob ignores a skill without one), and
