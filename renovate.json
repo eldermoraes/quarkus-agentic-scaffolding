@@ -3,6 +3,17 @@
   "extends": ["config:recommended"],
   "dependencyDashboard": true,
   "dependencyDashboardApproval": false,
+  "ignorePaths": [
+    "**/node_modules/**",
+    "**/bower_components/**",
+    "**/vendor/**",
+    "**/examples/**",
+    "**/__tests__/**",
+    "**/test/**",
+    "**/tests/**",
+    "**/__fixtures__/**",
+    "evals/**"
+  ],
   "customManagers": [
     {
       "customType": "regex",

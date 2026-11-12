@@ -232,6 +232,15 @@ versioning.
   catalog it reported all 31 conventions as undecided. The audit also stopped accepting
   `GEMINI.md`, which setup never writes, so it looks for `CLAUDE.md` or `AGENTS.md` like the
   other two skills, and the README describes what the audit really covers.
+- Renovate had rewritten the frozen skill-pilot starter (#118): six update commits moved
+  `evals/skill-pilot/starter/pom.xml` from the recorded Quarkus 3.39.2, Surefire 3.5.6 and
+  compiler plugin 3.15.0 to 3.40.1.1, 3.6.1 and 3.16.0, so a reproduction no longer used the
+  starter the 2026-09-09 collection ran on. The file is restored from the pilot's source commit
+  `2237dd1` (its SHA-256 again matches the `pom_sha256` in the pilot's `audit.json`), and
+  `renovate.json` ignores `evals/**`. Because a repository `ignorePaths` replaces the preset's list
+  rather than extending it, the `config:recommended` defaults are restated. A local
+  `renovate --platform=local --dry-run=extract` (44.198.0) finds the same package files as before
+  except the starter POM, so `ci/baseline.env` and the MCP pins stay tracked.
 
 ## v0.23.4 — 2026-09-14
 

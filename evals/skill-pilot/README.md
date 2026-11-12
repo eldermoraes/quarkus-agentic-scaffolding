@@ -49,6 +49,14 @@ not “turns/errors until green”: that metric is unavailable here. Two repetit
 only a descriptive pilot, without significance claims or generalization to other models or tasks.
 Publish the observed result even if the difference is zero or negative.
 
+## Frozen inputs
+
+Checked-in inputs and results under `evals/` are a record of what a run used and produced, so
+they are frozen. `renovate.json` lists `evals/**` in `ignorePaths`, which keeps dependency
+updates away from the starter POM and any build file a future eval adds; the starter stays at the
+versions the 2026-09-09 collection ran on (Quarkus 3.39.2, Surefire 3.5.6). Change a frozen input
+only together with a new collection that records it.
+
 ## Reproduce
 
 Use the pinned source revision listed with the results, Python 3, Codex CLI supporting
