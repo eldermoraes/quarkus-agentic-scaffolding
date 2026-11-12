@@ -1,0 +1,48 @@
+/*
+ * Native integration test: `mvn verify -Dnative` builds the native executable, starts it and runs
+ * this test against it (the failsafe plugin of the generated `native` profile runs every *IT
+ * test; the JVM `mvn test` run skips them). `mvn verify -DskipITs=false` runs it against the JVM
+ * jar instead.
+ *
+ * What it verifies: the executable starts (Quarkus, the AI-service proxies and the agent
+ * workflow wiring initialize without a missing-reflection or missing-resource failure at boot),
+ * and serves the OpenAPI document, which lists the chat endpoint, so the REST layer was
+ * registered in the image. The OpenAPI endpoint calls no model, so the test needs no running
+ * Ollama and no inference.
+ *
+ * What it does NOT verify: a model call. A native image fails on a missing reflection
+ * registration only when the code path runs, so the first triage, the first WebSocket message
+ * and the first retrieval are where a gap shows. Exercise those against a stand-in for the model
+ * (point the models' base-url at it) before you rely on the native executable.
+ *
+ * The started application is the packaged artifact in the prod profile: an injected bean is not
+ * available here, only its HTTP surface. Keep this file's public type name ending in IT.
+ */
+package org.acme;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import io.quarkus.test.common.http.TestHTTPResource;
+import io.quarkus.test.junit.QuarkusIntegrationTest;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import org.junit.jupiter.api.Test;
+
+@QuarkusIntegrationTest
+public class ApplicationIT {
+
+    @TestHTTPResource("/q/openapi")
+    URI openApi;
+
+    @Test
+    void startsAndServesItsApiDocument() throws Exception {
+        HttpResponse<String> response = HttpClient.newHttpClient().send(
+                HttpRequest.newBuilder(openApi).GET().build(), HttpResponse.BodyHandlers.ofString());
+
+        assertEquals(200, response.statusCode(), response::body);
+        assertTrue(response.body().contains("/chat"), response::body);
+    }
+}

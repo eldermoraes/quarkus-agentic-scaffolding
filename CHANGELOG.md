@@ -45,6 +45,23 @@ versioning.
   port), fails with a message when another process holds the port, bounds each poll to 5 s, and
   stops the process and removes its directory on every exit; an interrupted run (SIGINT,
   SIGTERM) and a dummy server on the port were each checked.
+- The generated project runs as a native executable (#152). The Agent template registers
+  `TicketInput` and the five agent and workflow interfaces with `@RegisterForReflection`, each
+  with its reason; a new `ApplicationIT.java.template` gives the `native` profile a
+  `@QuarkusIntegrationTest` that needs no model; conventions §3 asks for the registrations, with
+  an audit check; `docs/VALIDATING-TEMPLATES.md` describes the manual native check, and
+  `ci/build-from-templates.sh` puts `*IT` templates in `src/test/java`. Evidence (GraalVM 25.0.2,
+  macOS arm64, platform 3.40.1.2, Easy RAG left out): five native builds, each without some of
+  the registrations, failed. One without `TicketInput` and `TriageAgent` showed two failures,
+  told apart by two probes: the WebSocket failed on "Cannot construct instance of
+  `org.acme.dto.TicketInput`", a direct triage call on "No agent method found in class:
+  org.acme.workflow.TriageAgent". One without `WorkersParallel` failed on "No agent method found
+  in class" naming it; one without the three AI services on the same error naming
+  `CategoryAnalyzer`, the first one looked up; one without `PriorityAnalyzer` and one without
+  `Synthesizer` each on that error naming it. With all six, `mvn verify -Dnative` ran
+  `ApplicationIT` green and a triage over `/ws/triage` against a stand-in model reported `DONE`.
+  The scheduled Linux native CI job the spec asks for is left out, because no Linux native
+  build could be run before merging; a follow-up issue tracks it.
 
 ## v0.24.0 — 2026-11-12
 

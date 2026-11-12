@@ -116,6 +116,11 @@ Optional tooling — not covered by the stop rule above:
   GraalVM native binary alongside the JVM build, and gate native integration tests in that
   profile. Native builds compile against the GraalVM JDK 25 line until JDK 29 (September 2027) —
   see §2 — so a project with a native profile does not raise the language level above 25.
+  Register for reflection (`@RegisterForReflection`) the types a framework reaches only by
+  reflection, such as the message records a WebSockets Next endpoint decodes and the
+  LangChain4j agent and workflow interfaces: without it the native executable starts, then fails
+  on the first request that uses them. A native run showed this for interfaces carrying `@Agent`,
+  `@ParallelAgent` and `@SequenceAgent`; expect the same for the other agentic annotations.
 - **Disable Dev Services when an external model endpoint is configured.** When the project points
   at a real Ollama endpoint (local or cloud), disable LangChain4j Dev Services
   (`quarkus.langchain4j.devservices.enabled=false`) so a container is not started implicitly.
