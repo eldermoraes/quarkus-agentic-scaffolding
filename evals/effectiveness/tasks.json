@@ -33,5 +33,6 @@
     }
   ],
   "common_checks": ["ai_service", "named_model", "record_dto", "input_guardrail", "delimited_input", "no_manual_wiring", "smoke_test", "dev_logging", "devservices_off"],
-  "generator_checks": ["dual_bom", "no_extension_version_pins", "java_release_25", "parameters_flag", "native_profile"]
+  "generator_checks": ["dual_bom", "no_extension_version_pins", "java_release_25", "parameters_flag", "native_profile"],
+  "supplementary_checks": ["agent_named_model"]
 }

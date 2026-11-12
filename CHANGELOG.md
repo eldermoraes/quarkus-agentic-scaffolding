@@ -27,6 +27,15 @@ versioning.
   virtual threads and no pins without the skill, and the trimmed skill keeps its 15/15 on
   guardrails, smoke test and pins. The skill arm's round-2 lead in time and failing builds did not
   hold (3.0 vs 3.5 minutes, 1.8 vs 1.6 failed build commands, 30.3 vs 23.9 turns).
+- Skill-effectiveness eval: supplementary check `agent_named_model` (#139). It applies only to
+  projects with `@Agent` methods and passes when every one carries `@ModelName`, the only thing
+  that selects an agent's model on quarkus-langchain4j 1.13.4 (#110); `named_model` keeps its
+  meaning. Supplementary checks are recorded per run and summarized per arm outside the
+  agent-decided and generator percentages, so published numbers do not move: re-scoring the
+  stored artifacts of all three 2026-10-05 rounds reproduces their `summary.json` exactly, and
+  `ci/test_effectiveness_scoring.py` now asserts that. On those rounds' `parallel` runs the new
+  check passes 0/3 in each arm that wrote agents, where `named_model` passed 5 of those 6 runs in
+  round 2 and 6/6 in round 3.
 
 ### Changed
 

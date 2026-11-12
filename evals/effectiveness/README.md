@@ -82,6 +82,14 @@ All scoring is mechanical ([`score.py`](score.py)); no human or LLM judgment.
    - **Generator** (context only): dual BOM import, no version pins on Quarkus/LangChain4j
      dependencies, `maven.compiler.release` ≥ 25, `-parameters`, `native` profile. A project
      generator supplies most of these, so they are kept out of the delta.
+   - **Supplementary** (reported separately, in no percentage): checks added after rounds were
+     published, listed under `supplementary_checks` in `tasks.json`. Each run records
+     pass, fail, or not applicable, and the summary gives passed / applicable runs per arm.
+     `agent_named_model` applies only to a project with `@Agent` methods and passes when every
+     one of them carries `@ModelName(...)` among its own annotations, which is what selects an
+     agent's model (#110). An `@Agent` method with a body runs code, not a model, and is not
+     counted; neither are methods carrying only an orchestration annotation (`@SequenceAgent`,
+     `@ParallelAgent`, `@SupervisorAgent`), which this check does not cover.
 3. **Build attempts to green, at most 2.** `claude -p` exposes no reliable per-turn "error until
    green" signal, so the metric is: attempt 1 is the independent compile above; if it fails, the
    same session is resumed once (`--resume`) with the last 60 lines of compiler output and a
@@ -94,7 +102,14 @@ configured only in properties); the predicates are the same for both arms. The r
 happens: `named_model` passes on `modelName` in the `@RegisterAiService` registration, which does
 not select the model for an `@Agent` method (#110), so on the agent tasks it shows that the marker
 is present, not which model the agent calls. The predicate is left as it is so the published
-rounds stay comparable.
+rounds stay comparable; the supplementary `agent_named_model` check (#139) reports which model
+the agents call instead. The published rounds were not scored with it, and their files are
+unchanged. Re-scoring them with `summarize.py --rescore` (on a copy: it rewrites the result files
+of the directory it is given) reproduces every published number and
+only adds the supplementary table: no `parallel` run in rounds 1 to 3 put `@ModelName` on its
+agent methods (0/3 in each arm where agents exist; the round-1 baseline had none).
+`ci/test_effectiveness_scoring.py` re-scores the stored artifacts of every published round and
+checks that the summary matches.
 
 ## Reproduce
 
