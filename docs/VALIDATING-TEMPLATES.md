@@ -52,7 +52,8 @@ starts and answers requests**. Run it before shipping a release, and whenever yo
 
 4. **Build/run via the MCP.** Start dev mode (`quarkus_start`) with a real Ollama endpoint reachable
    and an in-process embedding model on the classpath (`langchain4j-embeddings-bge-small-en-v15-q`)
-   plus all three keys of the RAG block set (`quarkus.langchain4j.easy-rag.path`,
+   plus all four keys of the RAG block set (`quarkus.langchain4j.easy-rag.path-type=classpath`,
+   `quarkus.langchain4j.easy-rag.path=rag` with a document in `src/main/resources/rag`,
    `quarkus.langchain4j.embedding-model.provider` and
    `%test.quarkus.langchain4j.easy-rag.ingestion-strategy=off`), so Easy RAG augmentation is
    satisfied. A clean start means augmentation **and** compilation succeeded.
@@ -84,7 +85,8 @@ It needs Maven, python3 and a JDK 25. What it does:
 2. Injects the non-extension dependencies from `pom.xml.template`. Easy RAG and the in-process
    embedding model stay in.
 3. Applies the boot overlay (`ci/boot_overlay.py`): uncomments the template's RAG keys
-   (`easy-rag.path`, `embedding-model.provider`, and the test-profile `ingestion-strategy`, which
+   (`easy-rag.path-type`, `easy-rag.path`, `embedding-model.provider`, and the test-profile
+   `ingestion-strategy`, which
    it then sets back to `on`: the template skips ingestion in tests so continuous testing works,
    while this test runs in its own JVM and asserts on retrieved passages), the `ops` MCP client
    keys and the MCP server `root-path`, points the `ops` client at the application's own MCP
@@ -95,6 +97,19 @@ It needs Maven, python3 and a JDK 25. What it does:
    must uncomment and cannot find stops the run with the key's name, so a template change cannot
    silently switch off part of the test.
 4. Runs `mvn -B -ntp test`.
+5. Packages the project (`mvn package -DskipTests`) and starts
+   `java -jar target/quarkus-app/quarkus-run.jar` from an empty temporary directory, as a
+   container image does, on `QUARKUS_HTTP_PORT` (default 8080). It passes once the started
+   process is alive, its own log says it listens on that port, the port answers (each poll
+   times out after 5 s) and the log shows Easy RAG's `Ingested N files` with N > 0. A port
+   another process already holds fails the step with a message saying so, since an answer from
+   that process would prove nothing. The process is stopped (SIGTERM, then SIGKILL after 10 s)
+   and its directory removed on every exit, an interrupted run included. A documents path
+   resolved against the working directory fails here (#151). No model is called at startup,
+   and the MCP client does not connect at startup (the packaged application started with its
+   URL pointing at a closed port), so the URL needs no override. Measured on 2026-11-12 (platform 3.40.1.2): the step adds about
+   8 seconds on a quiet machine (whole script 27 s against 19 s without it), and up to 55
+   under heavy load (package 26–39 s, start 9–16 s).
 
 The fixtures live in `ci/fixtures/boot-test/`. They are **CI fixtures, not shipped templates**:
 the `scaffold-project` skill never copies them into a user's project.
@@ -126,7 +141,8 @@ The generated pom carries no REST Assured (`-DnoCode` adds no test dependencies 
 
 **What a green run proves.** Against the platform it ran on: every template compiles; Quarkus
 augmentation and startup succeed with Easy RAG ingesting a document through the in-process
-embedding model, the MCP server and the MCP client connected to it; the `ChatAssistantTest` wiring
+embedding model, the MCP server and the MCP client connected to it; the packaged application
+starts from another working directory and ingests its documents; the `ChatAssistantTest` wiring
 smoke test passes; each entry service passes ordinary input to the model and rejects reserved
 delimiter markup before any model call; each triage agent reaches the model it names;
 retrieved content reaches the RAG assistant only; an incomplete structured answer is asked

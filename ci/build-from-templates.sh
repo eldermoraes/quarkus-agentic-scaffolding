@@ -6,8 +6,9 @@
 # non-extension deps from pom.xml.template, applies the boot overlay (ci/boot_overlay.py: keeps
 # Easy RAG, enables the RAG and MCP keys, adds a documents folder and the CI test fixtures from
 # ci/fixtures/boot-test/), and runs `mvn test`: Quarkus starts, the wiring smoke test runs, and
-# EntryServicesBootTest drives every entry service against a fake Ollama. No live model, no
-# container.
+# EntryServicesBootTest drives every entry service against a fake Ollama. It then packages the
+# project and starts the packaged application from another working directory, expecting it to
+# come up with its RAG documents ingested (#151). No live model, no container.
 #
 # Usage: ci/build-from-templates.sh [--compile-only] [PLATFORM_VERSION]
 #        ci/build-from-templates.sh --resolve-only
@@ -25,8 +26,11 @@
 #      PLATFORM_METADATA_URL (optional) — where maven-metadata.xml is fetched from; defaults to
 #        Maven Central. Any URL curl accepts works, file:// included (that is how the test
 #        feeds a fixture).
+#      QUARKUS_HTTP_PORT (optional, default 8080) — the port the packaged application listens
+#        on during the start-from-another-directory check.
 # Requires: python3 (materializes the templates, injects the pom deps, applies the overlay), Maven,
-#   a JDK 25+, and curl (only when PLATFORM_VERSION is resolved from Maven Central).
+#   a JDK 25+, and curl (polls the packaged application; also resolves PLATFORM_VERSION from
+#   Maven Central when none is given).
 #
 # Template conventions this script relies on (keep new templates compliant):
 #   - *.java.template containing '/* ===== File: <rel/path>.java ===== */' markers is split
@@ -182,6 +186,84 @@ PY
 
 python3 "$REPO_ROOT/ci/boot_overlay.py" . "$BOOT_FIXTURES"
 
+# Packages the project and starts `java -jar target/quarkus-app/quarkus-run.jar` from an empty
+# directory, as a container image does, so a path resolved against the working directory fails
+# here (#151). Passes once the started process is alive, its own log says it listens on the
+# port, the port answers, and Easy RAG has logged "Ingested N files" with N > 0. No model is
+# called at startup, and the MCP client does not connect at startup (the application starts
+# with its URL pointing at a closed port), so the URL needs no override. A port another
+# process already holds fails the step: an answer from that process would prove nothing.
+PACKAGED_PID=""
+PACKAGED_DIR=""
+
+# Stops the started application (SIGTERM, then SIGKILL after 10 s) and removes its directory.
+# Runs on every exit path once the process is started, interrupts included.
+stop_packaged() {
+  if [[ -n "$PACKAGED_PID" ]]; then
+    kill "$PACKAGED_PID" 2>/dev/null || true
+    for _ in $(seq 1 20); do
+      kill -0 "$PACKAGED_PID" 2>/dev/null || break
+      sleep 0.5
+    done
+    kill -9 "$PACKAGED_PID" 2>/dev/null || true
+    wait "$PACKAGED_PID" 2>/dev/null || true
+    PACKAGED_PID=""
+  fi
+  if [[ -n "$PACKAGED_DIR" ]]; then
+    rm -rf "$PACKAGED_DIR"
+    PACKAGED_DIR=""
+  fi
+}
+
+# True when something already accepts connections on the port (IPv4 or IPv6 loopback).
+port_in_use() {
+  (exec 3<>"/dev/tcp/127.0.0.1/$1") 2>/dev/null || (exec 3<>"/dev/tcp/::1/$1") 2>/dev/null
+}
+
+start_packaged_elsewhere() {
+  local port="${QUARKUS_HTTP_PORT:-8080}" jar log ready=false
+  mvn -B -ntp -q -DskipTests package
+  if port_in_use "$port"; then
+    echo "ERROR: port $port is already in use by another process, so the packaged application" \
+      "cannot be checked on it; free it or set QUARKUS_HTTP_PORT to a free port" >&2
+    return 1
+  fi
+  jar="$PWD/target/quarkus-app/quarkus-run.jar"
+  PACKAGED_DIR="$(mktemp -d)"
+  log="$PACKAGED_DIR/run.log"
+  trap stop_packaged EXIT
+  trap 'stop_packaged; exit 130' INT
+  trap 'stop_packaged; exit 143' TERM
+  (cd "$PACKAGED_DIR" && exec java -Dquarkus.http.port="$port" -jar "$jar" >"$log" 2>&1) &
+  PACKAGED_PID=$!
+  for _ in $(seq 1 120); do
+    kill -0 "$PACKAGED_PID" 2>/dev/null || break
+    # Quarkus logs "Listening on: http://0.0.0.0:<port>" once its HTTP server is bound.
+    if grep -qE "Listening on: https?://[^ ]*:$port([^0-9]|\$)" "$log" &&
+      curl -fs -m 5 -o /dev/null "http://127.0.0.1:$port/q/openapi"; then
+      kill -0 "$PACKAGED_PID" 2>/dev/null && ready=true
+      break
+    fi
+    sleep 0.5
+  done
+  if [[ "$ready" == true ]] && grep -qE 'Ingested [1-9][0-9]* files' "$log"; then
+    echo "==> OK: packaged application started from another working directory and ingested its documents:"
+    grep -E 'Ingested [0-9]+ files' "$log"
+    stop_packaged
+  else
+    cat "$log"
+    if grep -qE 'already bound|Address already in use' "$log"; then
+      echo "ERROR: port $port is already in use by another process (log above); free it or set" \
+        "QUARKUS_HTTP_PORT to a free port" >&2
+    else
+      echo "ERROR: the packaged application did not start from another working directory with" \
+        "its documents ingested (log above)" >&2
+    fi
+    stop_packaged
+    return 1
+  fi
+}
+
 if [[ "$COMPILE_ONLY" == true ]]; then
   mvn -B -ntp -DskipTests test-compile
   echo "==> OK: templates compile against platform $PLATFORM_VERSION (compile only; Quarkus not started)"
@@ -190,4 +272,5 @@ else
   # startup cause in the CI log.
   mvn -B -ntp -DtrimStackTrace=false test
   echo "==> OK: project generated from the templates starts and serves its entry services on platform $PLATFORM_VERSION"
+  start_packaged_elsewhere
 fi

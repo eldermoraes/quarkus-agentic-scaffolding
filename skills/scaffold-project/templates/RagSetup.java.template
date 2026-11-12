@@ -19,16 +19,28 @@ import io.quarkiverse.langchain4j.RegisterAiService;
  *    application.properties.template). The provider key is required with the Ollama
  *    extension, which ships an embedding model of its own: with two providers on the
  *    classpath and none selected, the application does not start.
- *      quarkus.langchain4j.easy-rag.path=src/main/resources/rag
+ *      quarkus.langchain4j.easy-rag.path-type=classpath
+ *      quarkus.langchain4j.easy-rag.path=rag
  *      quarkus.langchain4j.embedding-model.provider=dev.langchain4j.model.embedding.onnx.bgesmallenv15q.BgeSmallEnV15QuantizedEmbeddingModel
- *    Uncomment the block's third line too: it turns ingestion off in the test profile, so
+ *    Uncomment the block's last line too: it turns ingestion off in the test profile, so
  *    tests run inside the dev-mode JVM do not load the embedding model's native library twice.
  *      %test.quarkus.langchain4j.easy-rag.ingestion-strategy=off
- * 3. Drop your documents into that folder — curated, first-party content you publish
- *    (product docs, runbooks, FAQs). They are ingested into an in-memory
+ * 3. Drop your documents into src/main/resources/rag — curated, first-party content you
+ *    publish (product docs, runbooks, FAQs). They are ingested into an in-memory
  *    embedding store on startup, and the produced RetrievalAugmentor is applied to
  *    AI services automatically. Retrieved passages are context data for the model,
  *    not instructions.
+ *
+ * Where the documents are read at runtime: the path is a classpath path, so the build packs
+ * the documents into the application and it finds them wherever it starts (java -jar from
+ * any directory, a container image). A filesystem path such as src/main/resources/rag is
+ * resolved against the working directory and exists only in the source tree.
+ * - Documents outside the application: override at runtime with an absolute folder, e.g.
+ *   QUARKUS_LANGCHAIN4J_EASY_RAG_PATH_TYPE=filesystem QUARKUS_LANGCHAIN4J_EASY_RAG_PATH=/srv/rag
+ *   (in a container, mount the folder there).
+ * - Dev mode: documents are ingested at each restart (a Java change, or `s` in the console),
+ *   not when a document changes. It reads the copy under target/classes/rag, so a document
+ *   deleted from src/main/resources/rag is still ingested until a clean build (mvn clean).
  *
  * That is the whole setup. The AI service below needs no RAG-specific code — retrieved
  * context is injected into its prompt automatically.

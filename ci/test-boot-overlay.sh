@@ -7,7 +7,8 @@
 #   2. it points the "ops" MCP client at the app's own MCP server on the test port, gives the
 #      default, "main" and "smaller" models distinct %test model ids, and turns the template's
 #      test-profile Easy RAG ingestion (off, #113) back on for the boot test;
-#   3. it adds the RAG documents under the configured easy-rag.path and the Java fixtures
+#   3. it adds the RAG documents under the configured easy-rag.path (on the classpath, i.e.
+#      under src/main/resources, when easy-rag.path-type is classpath) and the Java fixtures
 #      under src/test/java;
 #   4. a key it must enable that the template no longer has fails the run, naming the key;
 #   5. a pom without Easy RAG fails the run;
@@ -47,7 +48,9 @@ else
   fail "overlay failed on the shipped template: $(cat "$TMP/out")"
 fi
 PROPS="$P/src/main/resources/application.properties"
-has_line "$PROPS" 'quarkus.langchain4j.easy-rag.path=src/main/resources/rag' "easy-rag.path enabled"
+has_line "$PROPS" 'quarkus.langchain4j.easy-rag.path=rag' "easy-rag.path enabled"
+# Classpath-relative, so the packaged application finds its documents wherever it starts (#151).
+has_line "$PROPS" 'quarkus.langchain4j.easy-rag.path-type=classpath' "easy-rag.path-type classpath enabled"
 has_line "$PROPS" 'quarkus.langchain4j.embedding-model.provider=dev.langchain4j.model.embedding.onnx.bgesmallenv15q.BgeSmallEnV15QuantizedEmbeddingModel' \
   "in-process embedding provider enabled"
 has_line "$PROPS" '# quarkus.langchain4j.embedding-model.provider=ollama' "Ollama embedding alternative stays commented"
