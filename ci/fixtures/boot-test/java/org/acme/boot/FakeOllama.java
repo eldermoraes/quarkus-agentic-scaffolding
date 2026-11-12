@@ -17,9 +17,9 @@ import java.util.concurrent.Executors;
 
 /**
  * CI fixture, not a shipped template: a stand-in for the Ollama HTTP API. Every chat model the
- * application configures (default, "main", "smaller") is pointed at it, so the boot test needs
- * no live model, and it records each chat request so tests can assert what the application
- * actually sent: which model, how many turns, which text.
+ * application configures (default, "main", "smaller") is pointed at it, under a distinct model
+ * id each, so the boot test needs no live model, and it records each chat request so tests can
+ * assert what the application actually sent: which model, how many turns, which text.
  *
  * Answers: plain text for a plain request; for a request that carries a JSON schema (a
  * record-returning service) a JSON object with every schema property filled in. A test can
@@ -31,6 +31,15 @@ import java.util.concurrent.Executors;
  * Copied into the generated project's src/test/java by ci/boot_overlay.py.
  */
 public class FakeOllama implements QuarkusTestResourceLifecycleManager {
+
+    /**
+     * Model ids of the default, "main" and "smaller" models in the boot test. The template gives
+     * the default and "main" models the same id, so ci/boot_overlay.py sets these distinct ones
+     * as %test properties (a model id is fixed at build time, so this resource cannot set it).
+     */
+    public static final String DEFAULT_MODEL = "fake-default";
+    public static final String MAIN_MODEL = "fake-main";
+    public static final String SMALLER_MODEL = "fake-smaller";
 
     private static final ObjectMapper JSON = new ObjectMapper();
     private static final List<JsonNode> REQUESTS = new CopyOnWriteArrayList<>();

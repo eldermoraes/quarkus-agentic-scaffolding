@@ -145,6 +145,8 @@ Optional tooling - not covered by the stop rule above:
   Every `@RegisterAiService` declares `modelName`, even when the project has a single model:
   give each role its own named block (`quarkus.langchain4j.<provider>.<name>.chat-model.*`)
   instead of leaning on the unnamed default, so re-sizing one service is a configuration change.
+  An `@Agent` method names its model with `@ModelName("...")` on the agent method itself: the
+  agentic extension ignores the registration's `modelName` for agent calls.
 - **Streaming pattern: reactive only at the edge.** Stream over `quarkus-websockets-next`
   (`@WebSocket`, `@OnTextMessage` returning a Mutiny `Multi`, `@OnError`). Keep the agent and
   engine logic free of reactive types: have the WebSocket delegate to an `@ApplicationScoped`

@@ -90,7 +90,11 @@ All scoring is mechanical ([`score.py`](score.py)); no human or LLM judgment.
 
 A check passing means the convention's marker is present, not that the code is semantically
 right. Several checks can be satisfied in ways the regex misses (for example, a named model
-configured only in properties); the predicates are the same for both arms.
+configured only in properties); the predicates are the same for both arms. The reverse also
+happens: `named_model` passes on `modelName` in the `@RegisterAiService` registration, which does
+not select the model for an `@Agent` method (#110), so on the agent tasks it shows that the marker
+is present, not which model the agent calls. The predicate is left as it is so the published
+rounds stay comparable.
 
 ## Reproduce
 

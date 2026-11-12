@@ -143,6 +143,18 @@ versioning.
   it fails at augmentation, and with the #109 guard reverted 5 of the 9 boot tests fail. The
   `validate-templates` job is renamed `boot` and gets a 30-minute timeout;
   `docs/VALIDATING-TEMPLATES.md` says what a green run proves.
+- Agents called the default model instead of the one they declare (#110). The agentic extension
+  ignores `@RegisterAiService(modelName = ...)` for `@Agent` methods, so with distinct default,
+  `main` and `smaller` models both analyzers in `Agent.java.template` reached the default model
+  at temperature 0.7. Each agent method now carries `@ModelName` (the quarkus-langchain4j agentic
+  guide's way to name an agent's model); section 4 of `CLAUDE.md`, `AGENTS.md` and both seeds
+  says an agent names its model on the agent method, and `audit-project` checks it. The boot
+  overlay gives the three models distinct `%test` model ids (a model id is fixed at build time)
+  and `EntryServicesBootTest` asserts the model and temperature of each agent's request: on
+  platform 3.40.1.2 it fails without the annotation (`fake-default` instead of `fake-smaller`)
+  and the 11 tests pass with it. The effectiveness eval's `named_model` predicate still passes
+  on the registration attribute alone; its README now says so, and the scorer is unchanged to
+  keep the published rounds comparable.
 
 ## v0.23.4 — 2026-09-14
 

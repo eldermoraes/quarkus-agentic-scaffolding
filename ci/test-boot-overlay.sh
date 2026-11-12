@@ -4,7 +4,8 @@
 # overlay runs on a minimal project holding the real application.properties.template.
 #   1. on the shipped template it enables the RAG, MCP-client and MCP-server keys, each at its
 #      first (primary) occurrence, leaving the commented alternatives alone;
-#   2. it points the "ops" MCP client at the app's own MCP server on the test port;
+#   2. it points the "ops" MCP client at the app's own MCP server on the test port and gives
+#      the default, "main" and "smaller" models distinct %test model ids;
 #   3. it adds the RAG documents under the configured easy-rag.path and the Java fixtures
 #      under src/test/java;
 #   4. a key it must enable that the template no longer has fails the run, naming the key;
@@ -56,6 +57,9 @@ has_line "$PROPS" 'quarkus.mcp.server.http.root-path=/mcp' "MCP server root-path
 # shellcheck disable=SC2016
 has_line "$PROPS" '%test.quarkus.langchain4j.mcp.ops.url=http://localhost:${quarkus.http.test-port:8081}/mcp' \
   "MCP client points at the app's own server on the test port"
+has_line "$PROPS" '%test.quarkus.langchain4j.ollama.chat-model.model-id=fake-default' "default model gets its own test id"
+has_line "$PROPS" '%test.quarkus.langchain4j.ollama.main.chat-model.model-id=fake-main' "main model gets its own test id"
+has_line "$PROPS" '%test.quarkus.langchain4j.ollama.smaller.chat-model.model-id=fake-smaller' "smaller model gets its own test id"
 active="$(grep -cE '^quarkus\.langchain4j\.embedding-model\.provider=' "$PROPS" || true)"
 if [[ "$active" == 1 ]]; then
   pass "exactly one embedding provider active"
