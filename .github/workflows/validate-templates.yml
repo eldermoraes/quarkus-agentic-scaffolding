@@ -9,21 +9,26 @@ on:
     - cron: '0 5 * * 1'   # weekly, Monday 05:00 UTC: validate against LIVE latest platform
   workflow_dispatch:
 
+# Each job declares what it needs. `issues: write` goes only to the jobs that open or close a
+# tracking issue through the local issue-by-title action; the third-party link checker runs
+# without it.
 permissions:
   contents: read
-  issues: write
 
 jobs:
   boot:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
     # Generating the project, resolving dependencies on a cold cache and starting Quarkus for
     # the tests fit well inside this; a hung boot or test fails the job instead of idling.
     timeout-minutes: 30
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Load baseline versions
         run: grep -v '^#' ci/baseline.env >> "$GITHUB_ENV"
-      - uses: actions/setup-java@v6
+      - uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6.1.0
         with:
           distribution: temurin
           java-version: ${{ env.JAVA_VERSION }}
@@ -59,10 +64,12 @@ jobs:
   links:
     if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Check markdown links
-        uses: lycheeverse/lychee-action@v2
+        uses: lycheeverse/lychee-action@e7477775783ea5526144ba13e8db5eec57747ce8 # v2.9.0
         with:
           args: >-
             --no-progress
@@ -73,14 +80,26 @@ jobs:
             skills/scaffold-project/SKILL.md
             skills/audit-project/SKILL.md
           fail: true
+
+  # Reports the link check's outcome from a separate job, so the third-party lychee step above
+  # never runs with a token that can write issues.
+  links-report:
+    needs: links
+    if: always() && github.event_name == 'schedule'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Track failure in an issue
-        if: failure() && github.event_name == 'schedule'
+        if: needs.links.result == 'failure'
         uses: ./.github/actions/issue-by-title
         with:
           title: Link check failed on scheduled run
           token: ${{ secrets.GITHUB_TOKEN }}
       - name: Close the tracking issue once the run recovers
-        if: success() && github.event_name == 'schedule'
+        if: needs.links.result == 'success'
         uses: ./.github/actions/issue-by-title
         with:
           title: Link check failed on scheduled run

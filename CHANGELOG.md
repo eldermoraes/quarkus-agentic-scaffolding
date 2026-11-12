@@ -75,6 +75,16 @@ versioning.
 - Prompt audit of 2026-10-05, remaining items: drop the "mandatory, not optional" reinforcement
   from the `quarkus_skills` step of `scaffold-project`; the skill already states the order in two
   other places.
+- Pin every external GitHub Action in the workflows to the commit SHA its tag pointed to, with
+  the exact version as a comment (`actions/checkout` v7.0.1, `actions/setup-java` v6.1.0,
+  `raven-actions/actionlint` v2.2.0, `DavidAnson/markdownlint-cli2-action` v25.0.0,
+  `lycheeverse/lychee-action` v2.9.0; SHAs resolved from each tag through the GitHub API), so a
+  moved tag cannot change what runs with the workflow token (#120). Renovate's
+  `helpers:pinGitHubActionDigests` preset keeps the pins current, the new
+  `ci/check-action-pinning.sh` gate in `quality.yml` fails on any external `uses:` that is not a
+  40-character SHA (it failed on every reference before the change), and `validate-templates`
+  now declares permissions per job: the link check holds `contents: read` only, and a separate
+  `links-report` job opens or closes the scheduled-run tracking issue with `issues: write`.
 
 ### Fixed
 

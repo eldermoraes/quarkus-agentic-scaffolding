@@ -35,6 +35,9 @@ This document states the trust boundary those skills operate under and how to re
 - A 21+ JDK for the MCP server, when none is present: `jbang jdk install 21` downloads one from
   JBang's JDK provider, only with the user's explicit approval. The skills add no checksum or
   signature verification of that download beyond whatever jbang performs itself.
+- This repository's own CI pins every external GitHub Action to a full commit SHA with a version
+  comment, kept current by Renovate and enforced by `ci/check-action-pinning.sh`, so a moved tag
+  cannot change the code that runs with a workflow's token.
 
 **Secrets.**
 
