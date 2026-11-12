@@ -297,6 +297,13 @@ versioning.
   `skills/scaffold-project/templates/` names `CLAUDE.md` or `AGENTS.md`. The check failed on all
   six lines before the rewording and passes after it; `ci/build-from-templates.sh` still compiles
   the generated project.
+- Agents keep no chat memory. The three agents in `Agent.java.template` shared one chat memory
+  that was never cleared, so the model requests for one ticket also carried earlier tickets. They
+  now declare `chatMemoryProviderSupplier = RegisterAiService.NoChatMemoryProviderSupplier.class`;
+  section 4 of `CLAUDE.md`, `AGENTS.md` and both seeds says an application-scoped AI service or
+  agent has no chat memory unless every method keys it with a `@MemoryId`, and `audit-project`
+  checks it. A boot test triages two tickets in sequence: on platform 3.40.1.2 the first
+  ticket's text is in the second's requests without the change, and all 20 tests pass with it.
 
 ## v0.23.4 — 2026-09-14
 

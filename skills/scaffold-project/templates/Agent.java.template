@@ -182,9 +182,15 @@ import jakarta.enterprise.context.ApplicationScoped;
  * No retrieval augmentor: with Easy RAG present its augmentor is applied to every AI service
  * that does not opt out, appending retrieved documents to the prompt after the ticket's closing
  * delimiter. Classification needs the ticket only; all three agents opt out.
+ *
+ * No chat memory: an application-scoped agent otherwise keeps one memory shared by every
+ * request, so one customer's ticket would travel in the model requests for the next customer's.
+ * All three agents opt out, and each triage starts from its own ticket. If an agent ever needs
+ * conversation memory, key it per conversation with a @MemoryId parameter instead.
  */
 @ApplicationScoped
 @RegisterAiService(modelName = "smaller",
+        chatMemoryProviderSupplier = RegisterAiService.NoChatMemoryProviderSupplier.class,
         retrievalAugmentor = RegisterAiService.NoRetrievalAugmentorSupplier.class)
 @InputGuardrails(PromptInjectionGuard.class)
 public interface CategoryAnalyzer {
@@ -227,6 +233,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 /** The other entry sub-agent — same customer-authored ticket, same guardrail (see CategoryAnalyzer). */
 @ApplicationScoped
 @RegisterAiService(modelName = "smaller",
+        chatMemoryProviderSupplier = RegisterAiService.NoChatMemoryProviderSupplier.class,
         retrievalAugmentor = RegisterAiService.NoRetrievalAugmentorSupplier.class)
 @InputGuardrails(PromptInjectionGuard.class)
 public interface PriorityAnalyzer {
@@ -268,7 +275,8 @@ import jakarta.enterprise.context.ApplicationScoped;
 
 /**
  * Downstream agent: it only ever sees the analyses the entry agents produced, never the raw
- * ticket, so it needs no input guardrail — the customer-authored text was contained upstream.
+ * ticket (it keeps no chat memory, like the entry agents), so it needs no input guardrail — the
+ * customer-authored text was contained upstream.
  * Those analyses are model-produced but derived from that text, so the prompt still delimits
  * them and names them data: an instruction laundered through a category or a reason field is
  * still an instruction the model must not follow.
@@ -279,6 +287,7 @@ import jakarta.enterprise.context.ApplicationScoped;
  */
 @ApplicationScoped
 @RegisterAiService(modelName = "main",
+        chatMemoryProviderSupplier = RegisterAiService.NoChatMemoryProviderSupplier.class,
         retrievalAugmentor = RegisterAiService.NoRetrievalAugmentorSupplier.class)
 public interface Synthesizer {
 

@@ -167,6 +167,10 @@ Optional tooling — not covered by the stop rule above:
   process and never instructions to follow, and every entry method that receives it carries
   `@InputGuardrails`. Downstream services reading only model-produced state need no guardrail,
   but still delimit values derived from that text.
+- **Application-scoped services keep no shared chat memory.** An application-scoped AI service or
+  agent has no chat memory unless every method keys it with a `@MemoryId`; otherwise it declares
+  `@RegisterAiService(chatMemoryProviderSupplier = RegisterAiService.NoChatMemoryProviderSupplier.class)`,
+  so one request's text never reaches the model in another request.
 - **Fault tolerance is declarative on AI-service methods.** With
   `quarkus-smallrye-fault-tolerance`, put MicroProfile `@Timeout`, `@Retry`, and `@Fallback`
   (`org.eclipse.microprofile.faulttolerance`) directly on `@RegisterAiService` methods, with the
