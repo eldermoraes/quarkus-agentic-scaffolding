@@ -1,72 +1,38 @@
-# Scaffold skill pilot
+# Scaffold skill pilot (retired)
 
-The fixed pilot uses three component tasks, two repetitions, and two arms (12 agent executions).
-Both arms receive the same Quarkus MCP-generated POM and project conventions. The treatment arm
-also receives `scaffold-project` and its templates, with an explicit instruction to read the skill.
-This measures incremental skill assistance with conventions already supplied, not the whole package.
+The pilot ran 12 Codex executions (three component tasks, two repetitions, a baseline arm and an
+arm that also read `scaffold-project`) to measure what the skill adds when the project
+conventions are already supplied.
 
-See the [2026-09-09 pilot report](results/2026-09-09/REPORT.md): the first collection was
-inconclusive because documentation prerequisites failed. The report pins the original protocol.
+It is retired. Its only collection, on 2026-09-09, was inconclusive: documentation prerequisites
+failed in every run and no attempt generated Java, so it says nothing about the skill's
+effectiveness. The [effectiveness eval](../effectiveness/README.md) supersedes it and does not
+use any of its files.
 
-## Protocol
+## Published results
 
-- Codex `gpt-6-astra`, low reasoning, existing ChatGPT account quota; no API key billing.
-- Fresh Git directory outside this repository for every attempt; no previous-run continuation.
-  Current runs snapshot tracked inputs from one commit and record their hashes.
-- Current runs probe Quarkus and Context7 documentation before invoking Codex. A failed probe
-  records collection-not-started and spends no model executions. A successful probe cannot
-  guarantee service availability or quota throughout collection.
-- Host skill discovery and plugins disabled in both arms. Treatment reads the local skill explicitly.
-  `codex debug prompt-input` confirmed the isolation flags remove the host skills catalog before runs.
-- Both arms get Quarkus Agents MCP 1.2.6 with Java 21+ and Context7 4.0.6 without an API key.
-  Quarkus documentation search may be unavailable without a container runtime; this environment
-  limitation applies to both arms. No live model, container installation, or network inference test.
-- The starter was generated through `quarkus_create` on Quarkus 3.39.2. Its compiler release was
-  raised from the generated 17 to 25. Shared BOMs, compiler settings, dependencies and native
-  profile are inherited infrastructure, excluded from compliance scoring.
-- Each task runs baseline then skill in repetition one, skill then baseline in repetition two.
-  Runs share the machine's dependency cache; elapsed time is descriptive, not a speed benchmark.
-- Each agent attempt has a 15-minute deadline, followed by an independent four-minute
-  `mvn -B -ntp -DskipTests test-compile`. No retries or best-of selection.
-- Every scheduled attempt remains in the results, including errors and timeouts. Raw logs stay in
-  the chosen external output directory. Never publish raw logs without inspecting for credentials.
+The record stays in the repository, unchanged, under [`results/2026-09-09/`](results/2026-09-09/):
+the [report](results/2026-09-09/REPORT.md), the raw metric records, the environment metadata and
+the tool-failure audit. These files mention the pilot's runner, tasks and starter project, which
+are no longer here.
 
-## Frozen scoring
+Everything under `evals/` is a record of what a run used and produced. `renovate.json` lists
+`evals/**` in `ignorePaths`, so dependency updates never rewrite published results or a build
+file a future eval checks in.
 
-`tasks.json` contains exact prompts and eight applicable checks per task. `run.py` defines their
-mechanical predicates. Each check has equal weight. These are source-presence checks, not proof of
-semantic correctness or complete convention compliance. Java comments are excluded. A sample
-RAG document is a nonempty file under a `docs` directory; embedding support is an added
-`langchain4j-embeddings-*` dependency. XML and documentation alone do not satisfy Java predicates.
+## Getting the inputs back
 
-Report compilation separately from checklist totals; an empty starter compiling is not a completed
-task. Successful generation requires an agent exit of zero, no timeout, generated Java sources,
-and an independent compile exit of zero. Report each task and arm, with denominators retained.
-The checklist maximum is 48 per arm (six runs × eight checks).
-
-Record CLI-reported token usage when present and failed shell commands from events. These are
-not “turns/errors until green”: that metric is unavailable here. Two repetitions per task support
-only a descriptive pilot, without significance claims or generalization to other models or tasks.
-Publish the observed result even if the difference is zero or negative.
-
-## Frozen inputs
-
-Checked-in inputs and results under `evals/` are a record of what a run used and produced, so
-they are frozen. `renovate.json` lists `evals/**` in `ignorePaths`, which keeps dependency
-updates away from the starter POM and any build file a future eval adds; the starter stays at the
-versions the 2026-09-09 collection ran on (Quarkus 3.39.2, Surefire 3.5.6). Change a frozen input
-only together with a new collection that records it.
-
-## Reproduce
-
-Use the pinned source revision listed with the results, Python 3, Codex CLI supporting
-`skip_host_skill_discovery`, JDK 25, Maven, JBang and Node/npm. Authenticate Codex with the existing
-ChatGPT account. With an authorized execution budget, run:
+The annotated tag `eval-pilot-2026-09-09` (commit `2237dd1`) holds the protocol as it was frozen
+for the published run: this README, `run.py`, `tasks.json`, `starter/pom.xml` and the scorer's
+test, `ci/test_eval_scoring.py`. It is the
+`source_commit` recorded in `results/2026-09-09/environment.json`, and its `tasks.json` and starter
+POM match the hashes recorded there and in `audit.json`.
 
 ```sh
-python3 evals/skill-pilot/run.py /tmp/new-skill-pilot-output
+git show eval-pilot-2026-09-09:evals/skill-pilot/run.py
+git checkout eval-pilot-2026-09-09   # the whole tree as the pilot ran it
 ```
 
-The output directory must not already exist. It contains exact prompts, generated projects,
-private event/compile logs, environment metadata and machine-readable results. Inspect all
-artifacts before copying a sanitized result into the repository.
+The documentation preflight (`preflight.py`, tested by `ci/test_eval_preflight.py`) and the input
+snapshotting in `run.py` were added after the pilot and never ran in a published collection. The last revision with every
+runnable file in its final form is `v0.25.0` (commit `969dea2`).

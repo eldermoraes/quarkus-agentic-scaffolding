@@ -551,7 +551,7 @@ instruction files once at startup.
 ├── renovate.json             # Release watcher: platform baseline and the pinned MCP versions
 ├── .github/                  # CI: quality gates, template validation, ecosystem watcher, release
 ├── ci/                       # Scripts and tests behind those workflows (see CONTRIBUTING.md)
-├── evals/                    # Skill-effectiveness eval and the earlier Codex pilot, with results
+├── evals/                    # Skill-effectiveness eval with results; the retired Codex pilot's report
 ├── .claude-plugin/           # Claude installable-plugin + marketplace manifests
 │   ├── plugin.json
 │   └── marketplace.json
@@ -744,7 +744,8 @@ python3 evals/effectiveness/run.py --with-claude-md /tmp/qas-eval-2   # rounds 2
 ```
 
 An earlier [12-run Codex pilot](evals/skill-pilot/results/2026-09-09/REPORT.md) was inconclusive
-because its documentation prerequisites failed; it is kept as published.
+because its documentation prerequisites failed. It is [retired](evals/skill-pilot/README.md): its
+report is kept as published, and its runnable inputs live on in the tag `eval-pilot-2026-09-09`.
 
 The [Anthropic community submission kit](docs/ANTHROPIC-SUBMISSION.md) is prepared and validated;
 submission remains pending authentication. No community or official-directory listing is claimed.
