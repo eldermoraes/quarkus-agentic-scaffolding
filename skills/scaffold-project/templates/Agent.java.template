@@ -116,6 +116,8 @@ public interface PriorityAnalyzer {
 /* ===================== File: ai/Synthesizer.java ===================== */
 package org.acme.ai;
 
+import org.acme.dto.CategoryReport;
+import org.acme.dto.PriorityReport;
 import org.acme.dto.TriageReport;
 import dev.langchain4j.agentic.Agent;
 import dev.langchain4j.service.SystemMessage;
@@ -130,6 +132,10 @@ import jakarta.enterprise.context.ApplicationScoped;
  * Those analyses are model-produced but derived from that text, so the prompt still delimits
  * them and names them data: an instruction laundered through a category or a reason field is
  * still an instruction the model must not follow.
+ *
+ * A downstream agent declares each input with the type the upstream agent produced under that
+ * outputKey: the agentic extension checks this at build time and refuses to start on a mismatch
+ * (an Object parameter is a mismatch too).
  */
 @ApplicationScoped
 @RegisterAiService(modelName = "main")
@@ -145,7 +151,7 @@ public interface Synthesizer {
             <priority>{priority}</priority>
             Write a short recommendation.""")
     @Agent(name = "synthesis", description = "Synthesizes the final triage recommendation", outputKey = "triageFinal")
-    TriageReport synthesize(@V("category") Object category, @V("priority") Object priority);
+    TriageReport synthesize(@V("category") CategoryReport category, @V("priority") PriorityReport priority);
 }
 
 /* ===================== File: workflow/WorkersParallel.java ===================== */
