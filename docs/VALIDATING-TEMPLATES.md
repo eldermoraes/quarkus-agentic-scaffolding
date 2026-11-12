@@ -30,9 +30,10 @@ starts and answers requests**. Run it before shipping a release, and whenever yo
    owns the shell. Instead, confirm the generated `pom.xml` imports both `quarkus-bom` and
    `quarkus-langchain4j-bom` under `io.quarkus.platform`, and that the extension list above still
    resolves. Then confirm the **non-extension** deps in `pom.xml.template`
-   (`langchain4j-embeddings-bge-small-en-v15-q`, `langchain4j-document-parser-apache-pdfbox`, and
-   the test-scoped `quarkus-langchain4j-testing-evaluation-junit5`) still resolve via the BOM with
-   no explicit `<version>`.
+   (`langchain4j-guardrails`, `langchain4j-embeddings-bge-small-en-v15-q`,
+   `langchain4j-document-parser-apache-pdfbox`, and the test-scoped
+   `quarkus-langchain4j-testing-evaluation-junit5`) still resolve via the BOM with no explicit
+   `<version>`.
 
 3. **Materialize the templates** into `src/main/java/org/acme/` and `src/main/resources/` (the
    same mapping `ci/build-from-templates.sh` applies; the templates import each other, so a
@@ -110,7 +111,8 @@ the `scaffold-project` skill never copies them into a user's project.
   each triage agent's request names the model the agent declares, at that model's temperature,
   and that only the RAG assistant's request carries the sample document's text. With the fake
   answering `{}` or null fields once, the triage asks again and reports DONE with a complete
-  report; answering `{}` every time, it reports ERROR; each agent's JSON schema lists every
+  report; answering `{}` every time, it reports ERROR; answering a complete object with one field
+  no record declares, it reports DONE without asking again; each agent's JSON schema lists every
   field as required; and of two tickets triaged in sequence, the second's requests carry no text
   of the first, the Synthesizer's no raw ticket.
 
@@ -122,8 +124,9 @@ augmentation and startup succeed with Easy RAG ingesting a document through the 
 embedding model, the MCP server and the MCP client connected to it; the `ChatAssistantTest` wiring
 smoke test passes; each entry service passes ordinary input to the model and rejects reserved
 delimiter markup before any model call; each triage agent reaches the model it names;
-retrieved content reaches the RAG assistant only; and an incomplete structured answer is asked
-again and, if it stays incomplete, reported as an error; and one triage's ticket does not reach
+retrieved content reaches the RAG assistant only; an incomplete structured answer is asked
+again and, if it stays incomplete, reported as an error, while an extra field is accepted; and
+one triage's ticket does not reach
 the model requests of the next. It does **not** prove anything about answer quality or a
 real model's behavior (tool calling, structured output from a live model): the fake answers with
 fixed text.

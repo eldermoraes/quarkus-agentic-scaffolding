@@ -124,8 +124,9 @@ use context7 for LangChain4j and other library API lookups.
 
 **Add the non-extension dependencies.** Project generators add only Quarkus extensions, so add
 the `dev.langchain4j` dependencies from `templates/pom.xml.template` by hand, with no
-`<version>`: the embedding model (required by Easy RAG) and, for PDF ingestion, the document
-parser.
+`<version>`: `langchain4j-guardrails` (the Agent template's `CompleteAnswerGuard` extends its
+`JsonExtractorOutputGuardrail`), the embedding model (required by Easy RAG) and, for PDF
+ingestion, the document parser.
 
 Then lay out the sub-packages (§2), drop in the templates you need (§4–§10), write the
 `application.properties` baseline (§11), and verify (§12).
@@ -221,7 +222,9 @@ reports its generic error and logs a rejection, not a failure. An output guardra
 Every service that returns a record attaches one: the Agent template's `CompleteAnswerGuard`
 rejects an answer that leaves a field missing, null or blank, asks again, and fails the call
 after `quarkus.langchain4j.guardrails.max-retries` attempts, so the triage reports an error
-instead of DONE with null fields. A JSON schema alone does not make a model comply.
+instead of DONE with null fields. A JSON schema alone does not make a model comply. The records
+it parses carry `@JsonIgnoreProperties(ignoreUnknown = true)`, so an extra field a model adds is
+not a reason to ask again.
 
 ## 11. `application.properties` baseline
 

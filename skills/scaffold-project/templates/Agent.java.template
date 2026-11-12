@@ -27,13 +27,16 @@ public record TicketInput(String ticket) {}
 /* ===================== File: dto/CategoryReport.java ===================== */
 package org.acme.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * An agent's typed result. @JsonProperty(required = true) lists each field as required in the
  * JSON schema sent to the model; a model may still ignore the schema, so CompleteAnswerGuard
- * enforces it on the answer.
+ * enforces it on the answer. @JsonIgnoreProperties(ignoreUnknown = true) lets an answer carry
+ * extra fields: the guard rejects missing and empty ones, not additions.
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public record CategoryReport(
         @JsonProperty(required = true) String category,
         @JsonProperty(required = true) String reason) {}
@@ -41,8 +44,10 @@ public record CategoryReport(
 /* ===================== File: dto/PriorityReport.java ===================== */
 package org.acme.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public record PriorityReport(
         @JsonProperty(required = true) String level,
         @JsonProperty(required = true) String reason) {}
@@ -56,9 +61,11 @@ public record TriageReport(CategoryReport category, PriorityReport priority, Str
 /* ===================== File: dto/Recommendation.java ===================== */
 package org.acme.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /** The Synthesizer's own result: only what it adds, so the model is not asked to repeat the analyses. */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public record Recommendation(@JsonProperty(required = true) String recommendation) {}
 
 /* ===================== File: dto/ProgressUpdate.java ===================== */
@@ -77,12 +84,11 @@ public record ProgressUpdate(String state, TriageReport result, String error) {
 /* ===================== File: guardrails/CompleteAnswerGuard.java ===================== */
 package org.acme.guardrails;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import dev.langchain4j.guardrail.JsonExtractorOutputGuardrail;
 import dev.langchain4j.guardrail.OutputGuardrailRequest;
 import dev.langchain4j.guardrail.OutputGuardrailResult;
+import dev.langchain4j.guardrails.JsonExtractorOutputGuardrail;
 import dev.langchain4j.invocation.InvocationContext;
 import java.util.ArrayList;
 import java.util.List;
@@ -99,16 +105,19 @@ import org.jboss.logging.Logger;
  * The JSON schema a service sends does not make a model comply: small models may answer {},
  * and some cloud models ignore the schema (see application.properties.template). Subclass this
  * once per record type and attach the subclass with @OutputGuardrails.
+ *
+ * The parent parses with a default ObjectMapper, which rejects a field the record does not
+ * declare. Annotate each record it parses, nested ones included, with
+ * @JsonIgnoreProperties(ignoreUnknown = true) so an extra field a model adds is not a reason to
+ * ask again. The parent lives in the langchain4j-guardrails artifact (see pom.xml.template).
  */
 public abstract class CompleteAnswerGuard<T> extends JsonExtractorOutputGuardrail<T> {
 
     private static final Logger LOG = Logger.getLogger(CompleteAnswerGuard.class);
-    /** Extra fields a model adds are ignored; missing and empty ones are what this guard rejects. */
-    private static final ObjectMapper JSON = new ObjectMapper()
-            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+    private static final ObjectMapper JSON = new ObjectMapper();
 
     protected CompleteAnswerGuard(Class<T> type) {
-        super(JSON, type);
+        super(type);
     }
 
     @Override
