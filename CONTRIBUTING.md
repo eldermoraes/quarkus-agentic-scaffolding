@@ -83,6 +83,9 @@ Conventions and templates should reflect how real Quarkus + LangChain4j systems 
 2. Confirm any API or configuration against the Quarkus Agents MCP or context7 before encoding it.
 3. Distill only the **recurring, defensible** patterns into `CLAUDE.md` / `AGENTS.md` and the
    templates; document any deliberate deviation inline (see `CLAUDE.md` §6 or `AGENTS.md` §6).
+   A new or renamed convention in §2–§5 also needs an audit decision: a row in the
+   `audit-project` catalog's convention coverage table, or an entry in its deliberately-not-audited
+   list. `ci/check-audit-coverage.sh` fails until it has one.
 4. When a change is driven by a build or runtime result, capture that rationale in the
    `CHANGELOG.md` entry.
 
