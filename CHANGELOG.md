@@ -18,6 +18,15 @@ versioning.
   failed when `Recommendation` lacked the annotation. With it, the boot test passes 21 of 21 on
   platform 3.40.1.2 with no removal warning, and 21 of 21 with `quarkus-langchain4j-bom` 1.15.1
   (LangChain4j 1.23.0), where the old guard did not compile.
+- The triage priority level is a `PriorityLevel` enum (`LOW`, `MEDIUM`, `HIGH`) instead of a
+  `String` in `Agent.java.template` (#150). With a real `qwen3:1.7b` at temperature 0, 4 of 13
+  v0.24.0 triages reported DONE with a level such as `"# of priority"`. The schema sent to the
+  model now reads `"level":{"type":"string","enum":["LOW","MEDIUM","HIGH"]}` (recorded by the
+  boot test's fake Ollama on platform 3.40.1.2); another level fails to parse in
+  `CompleteAnswerGuard`, the model is asked again, and after the guardrail's retries the triage
+  reports ERROR; the WebSocket still sends the level as a plain string (`"level":"LOW"`). New
+  boot tests cover each of these; the fake gains `answerNextFor(...)` to aim answers at one
+  agent's requests.
 
 ## v0.24.0 — 2026-11-12
 

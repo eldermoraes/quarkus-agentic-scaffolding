@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.langchain4j.guardrail.InputGuardrailException;
 import io.quarkus.test.common.QuarkusTestResource;
 import io.quarkus.test.junit.QuarkusTest;
@@ -15,12 +16,20 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.net.http.WebSocket;
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
+import java.util.concurrent.TimeUnit;
 import org.acme.ai.TicketOpsAssistant;
+import org.acme.dto.PriorityLevel;
 import org.acme.dto.ProgressUpdate;
 import org.acme.dto.TriageReport;
 import org.acme.rag.RagAssistant;
@@ -37,6 +46,8 @@ import org.junit.jupiter.api.Test;
 @QuarkusTestResource(FakeOllama.class)
 class EntryServicesBootTest {
 
+    private static final ObjectMapper JSON = new ObjectMapper();
+
     private static final Duration TRIAGE_TIMEOUT = Duration.ofSeconds(30);
 
     /** A sentence of the sample RAG document, ci/fixtures/boot-test/rag/refund-policy.md. */
@@ -47,8 +58,14 @@ class EntryServicesBootTest {
     private static final Set<String> PRIORITY_AGENT = Set.of("level", "reason");
     private static final Set<String> SYNTHESIZER = Set.of("recommendation");
 
+    /** The priority levels, in the order the PriorityLevel enum declares them. */
+    private static final List<String> LEVELS = List.of("LOW", "MEDIUM", "HIGH");
+
     @TestHTTPResource("/chat")
     URI chatEndpoint;
+
+    @TestHTTPResource("/ws/triage")
+    URI triageSocket;
 
     @Inject
     TriageBridge triageBridge;
@@ -172,13 +189,13 @@ class EntryServicesBootTest {
 
     @Test
     void answerWithAnExtraFieldIsAccepted() {
-        // The analyzers run in parallel, so the order of the first two requests is not fixed:
-        // one answer, queued three times, is complete for each agent's record (CategoryReport,
-        // PriorityReport, Recommendation) and carries fields that record does not declare,
-        // "confidence" among them for all three.
-        String answer = "{\"category\":\"billing\",\"level\":\"high\",\"reason\":\"Charged twice.\","
-                + "\"recommendation\":\"Refund the duplicate charge.\",\"confidence\":0.9}";
-        FakeOllama.answerNextWith(answer, answer, answer);
+        // Each agent gets its own complete answer plus a field its record does not declare.
+        FakeOllama.answerNextFor(CATEGORY_AGENT,
+                "{\"category\":\"billing\",\"reason\":\"Charged twice.\",\"confidence\":0.9}");
+        FakeOllama.answerNextFor(PRIORITY_AGENT,
+                "{\"level\":\"HIGH\",\"reason\":\"Charged twice.\",\"urgency\":\"soon\"}");
+        FakeOllama.answerNextFor(SYNTHESIZER,
+                "{\"recommendation\":\"Refund the duplicate charge.\",\"steps\":[\"refund\"]}");
 
         List<ProgressUpdate> updates = triage("I was charged twice for order 1234.");
 
@@ -189,7 +206,7 @@ class EntryServicesBootTest {
         TriageReport report = updates.getLast().result();
         assertComplete(report);
         assertEquals("billing", report.category().category(), () -> "report: " + report);
-        assertEquals("high", report.priority().level(), () -> "report: " + report);
+        assertEquals(PriorityLevel.HIGH, report.priority().level(), () -> "report: " + report);
         assertEquals("Refund the duplicate charge.", report.recommendation(), () -> "report: " + report);
     }
 
@@ -232,6 +249,57 @@ class EntryServicesBootTest {
         String synthesizerMessages = requestOf(SYNTHESIZER).path("messages").toString();
         assertTrue(!synthesizerMessages.contains("<ticket>") && !synthesizerMessages.contains("order 5678"),
                 () -> "synthesizer request: " + synthesizerMessages);
+    }
+
+    @Test
+    void prioritySchemaListsTheThreeLevels() {
+        triage("I was charged twice for order 1234.");
+
+        JsonNode level = requestOf(PRIORITY_AGENT).path("format").path("properties").path("level");
+        assertEquals(LEVELS, textValues(level.path("enum")), () -> "level schema: " + level);
+    }
+
+    @Test
+    void defaultAnswerFillsTheFirstLevel() {
+        List<ProgressUpdate> updates = triage("I was charged twice for order 1234.");
+
+        assertEquals("DONE", updates.getLast().state(), () -> "updates: " + updates);
+        assertEquals("LOW", Objects.toString(updates.getLast().result().priority().level(), null));
+    }
+
+    @Test
+    void levelOutsideTheThreeIsAskedAgain() {
+        FakeOllama.answerNextFor(PRIORITY_AGENT,
+                "{\"level\":\"# of priority\",\"reason\":\"Charged twice.\"}");
+
+        List<ProgressUpdate> updates = triage("I was charged twice for order 1234.");
+
+        assertEquals("DONE", updates.getLast().state(), () -> "updates: " + updates);
+        assertEquals(2, requestsOf(PRIORITY_AGENT).size(), () -> "requests: " + FakeOllama.requests());
+        assertEquals(4, FakeOllama.requests().size(), () -> "requests: " + FakeOllama.requests());
+        assertComplete(updates.getLast().result());
+    }
+
+    @Test
+    void persistentlyInvalidLevelFailsTheTriage() {
+        FakeOllama.answerNextFor(PRIORITY_AGENT, Collections.nCopies(30,
+                "{\"level\":\"URGENT\",\"reason\":\"Charged twice.\"}").toArray(String[]::new));
+
+        List<ProgressUpdate> updates = triage("I was charged twice for order 1234.");
+
+        assertEquals("ERROR", updates.getLast().state(), () -> "updates: " + updates);
+        assertTrue(updates.stream().noneMatch(update -> "DONE".equals(update.state())), () -> "updates: " + updates);
+        // Asked again, and bounded by quarkus.langchain4j.guardrails.max-retries.
+        int asked = requestsOf(PRIORITY_AGENT).size();
+        assertTrue(asked > 1 && asked < 30, () -> asked + " priority requests");
+    }
+
+    @Test
+    void triageSocketSendsTheLevelAsAPlainString() throws Exception {
+        String done = triageOverSocket("I was charged twice for order 1234.");
+
+        assertEquals("LOW", JSON.readTree(done).path("result").path("priority").path("level").textValue(),
+                () -> "DONE message: " + done);
     }
 
     @Test
@@ -290,6 +358,37 @@ class EntryServicesBootTest {
         return triageBridge.triage(ticket).collect().asList().await().atMost(TRIAGE_TIMEOUT);
     }
 
+    /** Sends a ticket to the triage WebSocket as a client would; returns the DONE message text. */
+    private String triageOverSocket(String ticket) throws Exception {
+        CompletableFuture<String> done = new CompletableFuture<>();
+        WebSocket.Listener listener = new WebSocket.Listener() {
+            private final StringBuilder message = new StringBuilder();
+
+            @Override
+            public CompletionStage<?> onText(WebSocket socket, CharSequence data, boolean last) {
+                message.append(data);
+                if (last) {
+                    String text = message.toString();
+                    message.setLength(0);
+                    if (!text.contains("\"STARTED\"")) {
+                        done.complete(text);
+                    }
+                }
+                socket.request(1);
+                return null;
+            }
+        };
+        URI uri = URI.create(triageSocket.toString().replaceFirst("^http", "ws"));
+        try (HttpClient client = HttpClient.newHttpClient()) {
+            WebSocket socket = client.newWebSocketBuilder().buildAsync(uri, listener).join();
+            socket.sendText(JSON.writeValueAsString(Map.of("ticket", ticket)), true).join();
+            String text = done.get(TRIAGE_TIMEOUT.toSeconds(), TimeUnit.SECONDS);
+            socket.sendClose(WebSocket.NORMAL_CLOSURE, "").join();
+            assertTrue(text.contains("\"DONE\""), () -> "message: " + text);
+            return text;
+        }
+    }
+
     private static void assertSingleRequestCarrying(String callerText) {
         List<JsonNode> requests = FakeOllama.requests();
         assertEquals(1, requests.size(), () -> "requests: " + requests);
@@ -307,17 +406,21 @@ class EntryServicesBootTest {
      * JSON schema the request carries (its property names) identifies the agent.
      */
     private static JsonNode requestOf(Set<String> agent) {
-        List<JsonNode> matching = FakeOllama.requests().stream()
-                .filter(request -> schemaProperties(request).equals(agent))
-                .toList();
+        List<JsonNode> matching = requestsOf(agent);
         assertEquals(1, matching.size(), () -> "requests: " + FakeOllama.requests());
         return matching.getFirst();
     }
 
-    private static Set<String> schemaProperties(JsonNode request) {
-        Set<String> names = new HashSet<>();
-        request.path("format").path("properties").fieldNames().forEachRemaining(names::add);
-        return names;
+    private static List<JsonNode> requestsOf(Set<String> agent) {
+        return FakeOllama.requests().stream()
+                .filter(request -> FakeOllama.schemaProperties(request).equals(agent))
+                .toList();
+    }
+
+    private static List<String> textValues(JsonNode array) {
+        List<String> values = new ArrayList<>();
+        array.forEach(value -> values.add(value.asText()));
+        return values;
     }
 
     /** Easy RAG augments a service by appending retrieved text to the user message it sends. */
@@ -346,7 +449,8 @@ class EntryServicesBootTest {
         assertNotNull(report, "report");
         for (String value : new String[] {
                 report.category().category(), report.category().reason(),
-                report.priority().level(), report.priority().reason(), report.recommendation()}) {
+                Objects.toString(report.priority().level(), null), report.priority().reason(),
+                report.recommendation()}) {
             assertTrue(value != null && !value.isBlank(), () -> "report: " + report);
         }
     }

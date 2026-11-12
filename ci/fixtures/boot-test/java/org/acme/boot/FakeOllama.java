@@ -9,8 +9,11 @@ import io.quarkus.test.common.QuarkusTestResourceLifecycleManager;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Executors;
@@ -23,10 +26,11 @@ import java.util.concurrent.Executors;
  *
  * Answers: plain text for a plain request; for a request that carries a JSON schema (a
  * record-returning service) a JSON object with every schema property filled in. A test can
- * queue different answers with {@link #answerNextWith(String...)}.
+ * queue different answers with {@link #answerNextWith(String...)}, or, for one agent's requests
+ * only, with {@link #answerNextFor(Set, String...)}.
  *
  * The recording API ({@link #requests()}, {@link #userTurns(JsonNode)}, {@link #reset()},
- * {@link #answerNextWith(String...)}) is the seam later regression tests build on (model routing,
+ * {@link #answerNextWith(String...)}, {@link #answerNextFor(Set, String...)}) is the seam later regression tests build on (model routing,
  * retrieval scoping, output validation, request isolation): keep these signatures stable.
  * Copied into the generated project's src/test/java by ci/boot_overlay.py.
  */
@@ -44,6 +48,8 @@ public class FakeOllama implements QuarkusTestResourceLifecycleManager {
     private static final ObjectMapper JSON = new ObjectMapper();
     private static final List<JsonNode> REQUESTS = new CopyOnWriteArrayList<>();
     private static final ConcurrentLinkedDeque<String> QUEUED_ANSWERS = new ConcurrentLinkedDeque<>();
+    private static final Map<Set<String>, ConcurrentLinkedDeque<String>> QUEUED_BY_SCHEMA =
+            new ConcurrentHashMap<>();
 
     private HttpServer server;
 
@@ -75,11 +81,29 @@ public class FakeOllama implements QuarkusTestResourceLifecycleManager {
     public static void reset() {
         REQUESTS.clear();
         QUEUED_ANSWERS.clear();
+        QUEUED_BY_SCHEMA.clear();
     }
 
     /** The next chat requests get these message contents, in order, instead of the default. */
     public static void answerNextWith(String... contents) {
         QUEUED_ANSWERS.addAll(List.of(contents));
+    }
+
+    /**
+     * The next chat requests whose JSON schema has exactly these property names get these message
+     * contents, in order, before any queued with {@link #answerNextWith(String...)}. The triage
+     * analyzers run in parallel, so this is how a test aims an answer at one of them.
+     */
+    public static void answerNextFor(Set<String> schemaProperties, String... contents) {
+        QUEUED_BY_SCHEMA.computeIfAbsent(Set.copyOf(schemaProperties), key -> new ConcurrentLinkedDeque<>())
+                .addAll(List.of(contents));
+    }
+
+    /** The property names of the JSON schema a recorded request carries; empty for plain text. */
+    public static Set<String> schemaProperties(JsonNode request) {
+        Set<String> names = new HashSet<>();
+        request.path("format").path("properties").fieldNames().forEachRemaining(names::add);
+        return Set.copyOf(names);
     }
 
     /** Every chat request received since the last reset, as the JSON the application sent. */
@@ -101,7 +125,11 @@ public class FakeOllama implements QuarkusTestResourceLifecycleManager {
     private static void chat(HttpExchange exchange) throws IOException {
         JsonNode request = JSON.readTree(exchange.getRequestBody());
         REQUESTS.add(request);
-        String queued = QUEUED_ANSWERS.poll();
+        ConcurrentLinkedDeque<String> forSchema = QUEUED_BY_SCHEMA.get(schemaProperties(request));
+        String queued = forSchema != null ? forSchema.poll() : null;
+        if (queued == null) {
+            queued = QUEUED_ANSWERS.poll();
+        }
         String content = queued != null ? queued : defaultAnswer(request.path("format"));
 
         ObjectNode response = JSON.createObjectNode();

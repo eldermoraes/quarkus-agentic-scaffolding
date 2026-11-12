@@ -101,10 +101,12 @@ the `scaffold-project` skill never copies them into a user's project.
 
 - `FakeOllama` is a `QuarkusTestResource` that serves the Ollama chat API from a JDK `HttpServer`
   and points the default, `main` and `smaller` models at it. It answers plain text, or a JSON
-  object filling every property of the schema a record-returning service sends, and records every
-  request. Its recording API — `requests()`, `userTurns(request)`, `reset()` and
-  `answerNextWith(...)` — is the seam for regression tests on model routing, retrieval scoping,
-  output validation and request isolation, so keep it stable.
+  object filling every property of the schema a record-returning service sends (an `enum`
+  property gets its first value), and records every request. Its recording API — `requests()`,
+  `userTurns(request)`, `schemaProperties(request)`, `reset()`, `answerNextWith(...)` and
+  `answerNextFor(schemaProperties, ...)`, which aims answers at one agent's requests — is the
+  seam for regression tests on model routing, retrieval scoping, output validation and request
+  isolation, so keep it stable.
 - `EntryServicesBootTest` drives the chat REST endpoint, the triage bridge, the RAG assistant and
   the MCP-client assistant: ordinary input must produce a recorded model request, and input
   carrying reserved delimiter markup must be rejected with no model request. It also checks that
@@ -113,8 +115,11 @@ the `scaffold-project` skill never copies them into a user's project.
   answering `{}` or null fields once, the triage asks again and reports DONE with a complete
   report; answering `{}` every time, it reports ERROR; answering a complete object with one field
   no record declares, it reports DONE without asking again; each agent's JSON schema lists every
-  field as required; and of two tickets triaged in sequence, the second's requests carry no text
-  of the first, the Synthesizer's no raw ticket.
+  field as required; the priority agent's schema lists `LOW`, `MEDIUM` and `HIGH` for the level;
+  with the fake answering another level once, the triage asks again and reports DONE, and
+  answering it every time, ERROR; the triage WebSocket sends the level as a plain string; and of
+  two tickets triaged in sequence, the second's requests carry no text of the first, the
+  Synthesizer's no raw ticket.
 
 The generated pom carries no REST Assured (`-DnoCode` adds no test dependencies beyond
 `quarkus-junit`), so the fixtures call the endpoint with the JDK `HttpClient`.
@@ -125,11 +130,11 @@ embedding model, the MCP server and the MCP client connected to it; the `ChatAss
 smoke test passes; each entry service passes ordinary input to the model and rejects reserved
 delimiter markup before any model call; each triage agent reaches the model it names;
 retrieved content reaches the RAG assistant only; an incomplete structured answer is asked
-again and, if it stays incomplete, reported as an error, while an extra field is accepted; and
-one triage's ticket does not reach
-the model requests of the next. It does **not** prove anything about answer quality or a
-real model's behavior (tool calling, structured output from a live model): the fake answers with
-fixed text.
+again and, if it stays incomplete, reported as an error, while an extra field is accepted; a
+priority level outside the three allowed values is treated like an incomplete answer; and one
+triage's ticket does not reach the model requests of the next. It does **not** prove anything
+about answer quality or a real model's behavior (tool calling, structured output from a live
+model): the fake answers with fixed text.
 
 ## Last validated
 

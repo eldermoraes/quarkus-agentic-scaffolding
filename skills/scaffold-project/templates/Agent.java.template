@@ -41,6 +41,16 @@ public record CategoryReport(
         @JsonProperty(required = true) String category,
         @JsonProperty(required = true) String reason) {}
 
+/* ===================== File: dto/PriorityLevel.java ===================== */
+package org.acme.dto;
+
+/**
+ * A closed set as an enum, not a String: the JSON schema sent to the model lists these values,
+ * and an answer with any other value fails to parse, so CompleteAnswerGuard asks the model again.
+ * Clients receive the value as a plain string ("HIGH").
+ */
+public enum PriorityLevel { LOW, MEDIUM, HIGH }
+
 /* ===================== File: dto/PriorityReport.java ===================== */
 package org.acme.dto;
 
@@ -49,7 +59,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public record PriorityReport(
-        @JsonProperty(required = true) String level,
+        @JsonProperty(required = true) PriorityLevel level,
         @JsonProperty(required = true) String reason) {}
 
 /* ===================== File: dto/TriageReport.java ===================== */
