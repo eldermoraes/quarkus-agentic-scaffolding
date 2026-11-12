@@ -49,6 +49,33 @@ import io.quarkiverse.langchain4j.RegisterAiService;
  * service that must not see retrieved documents (classifiers, tool-calling assistants) opts
  * out with @RegisterAiService(retrievalAugmentor = RegisterAiService.NoRetrievalAugmentorSupplier.class),
  * as the other templates' services do.
+ *
+ * ---------------------------------------------------------------------------
+ * NATIVE BUILDS: Easy RAG reads text and Markdown only
+ * ---------------------------------------------------------------------------
+ * Easy RAG brings the Apache Tika document parser, which did not build into a native image as
+ * shipped (seen on macOS arm64; Linux not checked). The `native` profile part of
+ * pom.xml.template re-declares the easy-rag extension without it, for the native build only:
+ * the native executable then reads documents with LangChain4j's plain-text parser, so it
+ * ingests text and Markdown, not PDF or Office files. The JVM build keeps Tika.
+ *
+ * The native executable also cannot read documents from the classpath: Easy RAG's classpath
+ * loader fails at startup with "FileSystemNotFoundException: The Native Image Resource File
+ * System is not present". It reads them from a folder on the filesystem instead, set with two
+ * environment variables:
+ *   QUARKUS_LANGCHAIN4J_EASY_RAG_PATH_TYPE=filesystem
+ *   QUARKUS_LANGCHAIN4J_EASY_RAG_PATH=<absolute path of the documents folder>
+ * `mvn verify -Dnative` sets both for its integration tests (the failsafe configuration in that
+ * profile part points at src/main/resources/rag). When you run the executable yourself
+ * (target/*-runner, a container), ship the documents folder with it and set both.
+ *
+ * Upstream gaps behind these workarounds (platform 3.40.1.2, quarkus-langchain4j 1.13.4), each
+ * to drop once fixed upstream: the document parsers' build steps pull in AWT, on which the
+ * macOS native build stopped; the Tika parser needs jakarta.mail at build time, and Tika
+ * resources and reflection at run time that no extension registers; Easy RAG's classpath loader
+ * needs a file system a native image does not have. The errors each one produces, and how each was observed, are listed in
+ * docs/VALIDATING-TEMPLATES.md ("Easy RAG in native builds") of the scaffolding repository.
+ * A native project that must ingest PDFs has to supply that Tika configuration itself.
  */
 @RegisterAiService(modelName = "main")
 public interface RagAssistant {

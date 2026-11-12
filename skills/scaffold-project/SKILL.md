@@ -126,7 +126,8 @@ use context7 for LangChain4j and other library API lookups.
 the `dev.langchain4j` dependencies from `templates/pom.xml.template` by hand, with no
 `<version>`: `langchain4j-guardrails` (the Agent template's `CompleteAnswerGuard` extends its
 `JsonExtractorOutputGuardrail`), the embedding model (required by Easy RAG) and, for PDF
-ingestion, the document parser.
+ingestion, the document parser. With Easy RAG, also copy the template's `native` profile part
+into the generated `native` profile (§9).
 
 Then lay out the sub-packages (§2), drop in the templates you need (§4–§10), write the
 `application.properties` baseline (§11), and verify (§12).
@@ -222,6 +223,18 @@ does not provide. Easy RAG augments every AI service that does not opt out: the 
 services declare `retrievalAugmentor = RegisterAiService.NoRetrievalAugmentorSupplier.class`, and
 so does any service you add that must not see retrieved documents. Bring in
 `templates/Guardrails.java.template` for the entry method (§10).
+
+For the native build, copy the `native` profile part of `templates/pom.xml.template` (its
+`<dependencies>` and `<build>`) into the generated `native` profile. The dependency re-declares
+Easy RAG without its Apache Tika document parser, which did not build natively as shipped (seen on
+macOS arm64): the native executable then ingests text and Markdown only, and the JVM build is
+unchanged. The native executable cannot read the documents from the classpath (Easy RAG's
+classpath loader fails in a native image), so the failsafe configuration sets
+`QUARKUS_LANGCHAIN4J_EASY_RAG_PATH_TYPE=filesystem` and `QUARKUS_LANGCHAIN4J_EASY_RAG_PATH` to the
+project's `src/main/resources/rag` for `mvn verify -Dnative`, which then needs no extra argument.
+To run the executable yourself (or in a container), ship the documents folder with it and set the
+same two variables. The RAG template's "NATIVE BUILDS" note names the upstream gaps; the errors
+and how each was observed are in this repository's `docs/VALIDATING-TEMPLATES.md`.
 
 ## 10. Guardrails
 

@@ -89,6 +89,14 @@ quarkus.langchain4j.devservices.enabled=false
 # loaded in another classloader". The store stays empty in tests. A test that
 # needs retrieved passages must turn ingestion back on, so it cannot run through
 # continuous testing; it runs in a JVM of its own (`mvn test`, e.g. in CI).
+# Native builds: Easy RAG needs the `native` profile part of pom.xml.template,
+# which leaves its Tika document parser out of the native build; the native
+# executable then ingests text and Markdown documents only. It cannot read them
+# from the classpath (startup fails with FileSystemNotFoundException: "The Native
+# Image Resource File System is not present"), so it takes the two environment
+# variables above (filesystem, absolute path). That profile part sets them for
+# `mvn verify -Dnative`; to run the executable yourself, ship the documents folder
+# with it and set both. See RagSetup.java.template, "NATIVE BUILDS".
 # ============================================================================
 # quarkus.langchain4j.easy-rag.path-type=classpath
 # quarkus.langchain4j.easy-rag.path=rag

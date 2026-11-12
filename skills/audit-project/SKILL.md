@@ -172,6 +172,7 @@ emit the §5.0 finding only and mark the §5 check as subsumed by it — do not 
 | Reactive only at the edge | Mutiny usage | `Multi` / `Uni` only in `@WebSocket` edge beans; **none** inside engine/agent/tool logic |
 | Declarative fault tolerance | retry/timeout logic on AI methods | MicroProfile `@Timeout` / `@Retry` / `@Fallback` on `@RegisterAiService` methods, **not** hand-rolled try/retry loops |
 | Long system prompts as skills | `@SystemMessage` text (inline, or the file a `fromResource` names) on `@RegisterAiService` interfaces and methods | no service without `@Skills` carries a system message longer than 30 lines; a longer one is a candidate for a `SKILL.md`, reported as LOW at most (the extension is `status:preview`) |
+| Easy RAG in native builds | `quarkus-langchain4j-easy-rag` together with a `native` profile | the profile re-declares the extension excluding `langchain4j-document-parser-apache-tika` and `quarkus-langchain4j-parsers-base-deployment`, or the project documents a native setup of its own for Tika; otherwise the native build fails (seen on macOS arm64, Linux not checked: first on AWT, then on `jakarta/mail/MessagingException`); and the native executable gets `easy-rag.path-type=filesystem` with an absolute `easy-rag.path` at runtime (in its deployment, and for the native integration tests from the `native` profile, e.g. failsafe `environmentVariables`), since a classpath path fails at startup in a native image (`FileSystemNotFoundException`) |
 | Easy RAG first | a hand-built `RetrievalAugmentor` / `EmbeddingStore` producer | `quarkus-langchain4j-easy-rag` is used, or the project states the control Easy RAG does not provide |
 | Request/response logging (dev) | `application.properties` | dev-scoped logging: `%dev.quarkus.langchain4j.log-requests=true` + `%dev.quarkus.langchain4j.log-responses=true` (unscoped `true` in prod is itself a finding — it records user content) |
 
@@ -228,7 +229,7 @@ row here and no entry in the list below, so adding a convention means deciding h
 | §4 | Externally originated free text is data, never instructions | Entry methods guard externally originated text |
 | §4 | Fault tolerance is declarative on AI-service methods | Declarative fault tolerance |
 | §4 | Reusable instructions ship as skills, not as prompt strings | Long system prompts as skills |
-| §4 | RAG starts simple with Easy RAG | Easy RAG first; Retrieval scoped to RAG services |
+| §4 | RAG starts simple with Easy RAG | Easy RAG first; Retrieval scoped to RAG services; Easy RAG in native builds |
 | §4 | Enable request/response logging in dev | Request/response logging (dev) |
 | §5 | Every project keeps a `@QuarkusTest` smoke test | Wiring smoke test |
 | §5 | Use `@QuarkusTest` | Test tooling |

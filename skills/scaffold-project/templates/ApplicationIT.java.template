@@ -17,6 +17,13 @@
  *
  * The started application is the packaged artifact in the prod profile: an injected bean is not
  * available here, only its HTTP surface. Keep this file's public type name ending in IT.
+ *
+ * With Easy RAG: the native executable reads its documents from the filesystem, since Easy
+ * RAG's classpath loader fails in a native image. The `native` profile part of pom.xml.template
+ * sets the two environment variables for this test (failsafe configuration, pointing at
+ * src/main/resources/rag). Running the executable outside the test, set them yourself:
+ * QUARKUS_LANGCHAIN4J_EASY_RAG_PATH_TYPE=filesystem and QUARKUS_LANGCHAIN4J_EASY_RAG_PATH=<the
+ * absolute path of the documents folder shipped with it> (RagSetup.java.template, "NATIVE BUILDS").
  */
 package org.acme;
 

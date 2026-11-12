@@ -199,6 +199,14 @@ Optional tooling - not covered by the stop rule above:
   only when a project needs control Easy RAG does not provide. Easy RAG augments every AI
   service that does not opt out, so each service that must not see retrieved documents declares
   `@RegisterAiService(retrievalAugmentor = RegisterAiService.NoRetrievalAugmentorSupplier.class)`.
+  Easy RAG's Apache Tika document parser did not build into a native image as shipped (seen on
+  macOS arm64; Linux not checked), so a project that builds natively re-declares the extension
+  in its `native` profile without `langchain4j-document-parser-apache-tika` and
+  `quarkus-langchain4j-parsers-base-deployment`; its native executable then ingests text and
+  Markdown documents only, and reads them from a folder on the filesystem
+  (`easy-rag.path-type=filesystem` with an absolute path, set at runtime and, for the native
+  integration tests, by the `native` profile): Easy RAG's classpath loader fails in a native
+  image.
 - **Enable request/response logging in dev.** Set `%dev.quarkus.langchain4j.log-requests=true` and
   `%dev.quarkus.langchain4j.log-responses=true` so prompts and model output are observable during
   development without recording user content in production.
