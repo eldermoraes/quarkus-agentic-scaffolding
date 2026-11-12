@@ -1,12 +1,15 @@
 #!/usr/bin/env bash
 #
-# build-from-templates.sh — static template validation (VALIDATING-TEMPLATES.md fallback,
-# scripted). Generates a throwaway Quarkus project via the quarkus-maven-plugin (the same
-# codestart generator behind quarkus_create / code.quarkus.io), materializes EVERY template
-# by convention, injects the non-extension deps from pom.xml.template, removes easy-rag
-# (compile-only run needs no embedding model), and runs `mvn test-compile`.
+# build-from-templates.sh — template boot test (VALIDATING-TEMPLATES.md, automated). Generates a
+# throwaway Quarkus project via the quarkus-maven-plugin (the same codestart generator behind
+# quarkus_create / code.quarkus.io), materializes EVERY template by convention, injects the
+# non-extension deps from pom.xml.template, applies the boot overlay (ci/boot_overlay.py: keeps
+# Easy RAG, enables the RAG and MCP keys, adds a documents folder and the CI test fixtures from
+# ci/fixtures/boot-test/), and runs `mvn test`: Quarkus starts, the wiring smoke test runs, and
+# EntryServicesBootTest drives every entry service against a fake Ollama. No live model, no
+# container.
 #
-# Usage: ci/build-from-templates.sh [PLATFORM_VERSION]
+# Usage: ci/build-from-templates.sh [--compile-only] [PLATFORM_VERSION]
 #        ci/build-from-templates.sh --resolve-only
 #   No argument: resolves the latest STABLE io.quarkus.platform version from Maven Central.
 #     Maven's <latest>/<release> hints are ignored on purpose: they point at pre-releases too
@@ -16,11 +19,13 @@
 #     carry a fourth numeric field (3.40.1.1) and are stable releases, so they count.
 #   --resolve-only: print the resolved stable version and exit, generating nothing (used by
 #     ci/test-platform-version-resolution.sh and handy for a quick manual check).
+#   --compile-only: same project and overlay, but stop at `mvn -DskipTests test-compile`
+#     (a quick local check that the Java compiles; it does not start Quarkus).
 # Env: WORKDIR (optional) — where the throwaway project is generated.
 #      PLATFORM_METADATA_URL (optional) — where maven-metadata.xml is fetched from; defaults to
 #        Maven Central. Any URL curl accepts works, file:// included (that is how the test
 #        feeds a fixture).
-# Requires: python3 (materializes the templates and injects the pom deps), Maven,
+# Requires: python3 (materializes the templates, injects the pom deps, applies the overlay), Maven,
 #   a JDK 25+, and curl (only when PLATFORM_VERSION is resolved from Maven Central).
 #
 # Template conventions this script relies on (keep new templates compliant):
@@ -36,6 +41,7 @@ set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 TEMPLATES="$REPO_ROOT/skills/scaffold-project/templates"
+BOOT_FIXTURES="$REPO_ROOT/ci/fixtures/boot-test"
 EXTENSIONS="rest,rest-jackson,smallrye-openapi,websockets-next,langchain4j-ollama,langchain4j-agentic,langchain4j-easy-rag,langchain4j-mcp,mcp-server-http"
 
 PLATFORM_METADATA_URL="${PLATFORM_METADATA_URL:-https://repo1.maven.org/maven2/io/quarkus/platform/quarkus-bom/maven-metadata.xml}"
@@ -78,6 +84,13 @@ if [[ "${1:-}" == "--resolve-only" ]]; then
   resolve_latest_stable_platform
   exit $?
 fi
+
+COMPILE_ONLY=false
+if [[ "${1:-}" == "--compile-only" ]]; then
+  COMPILE_ONLY=true
+  shift
+fi
+[[ "${1:-}" != -* ]] || { echo "ERROR: unknown option $1 (usage: $0 [--compile-only] [PLATFORM_VERSION] | --resolve-only)" >&2; exit 2; }
 
 PLATFORM_VERSION="${1:-}"
 if [[ -z "$PLATFORM_VERSION" ]]; then
@@ -136,18 +149,13 @@ res.mkdir(parents=True, exist_ok=True)
 (res / "application.properties").write_text(props.read_text())
 print("materialized src/main/resources/application.properties")
 
-# Inject non-extension deps from pom.xml.template (comments stripped first),
-# then drop easy-rag from the generated pom (needs no embedding model to compile).
+# Inject non-extension deps from pom.xml.template (comments stripped first). Easy RAG stays:
+# the boot test starts the application, so ingestion and the embedding provider are exercised.
 ref = re.sub(r"<!--.*?-->", "", (templates / "pom.xml.template").read_text(), flags=re.S)
 deps = re.findall(r"<dependency>.*?</dependency>", ref, flags=re.S)
 dep_ids = re.findall(r"<artifactId>\s*([\w.\-]+)\s*</artifactId>", "\n".join(deps))
 pom_path = proj / "pom.xml"
 pom = pom_path.read_text()
-
-# Drop easy-rag from the generated pom; report it only if the regex matched.
-pom, n_removed = re.subn(
-    r"\s*<dependency>(?:(?!</dependency>).)*quarkus-langchain4j-easy-rag(?:(?!</dependency>).)*</dependency>",
-    "", pom, flags=re.S)
 
 # Inject into the RUNTIME <dependencies>, NOT <dependencyManagement>'s BOM block.
 # The FIRST </dependencies> in a Quarkus pom closes <dependencyManagement><dependencies>
@@ -169,10 +177,17 @@ if missing:
     sys.exit("ERROR: injected deps did not land in the runtime <dependencies> block "
              f"(after </dependencyManagement>): {', '.join(missing)}")
 
-if n_removed:
-    print("removed easy-rag")
 print(f"injected {len(deps)} non-extension dependencies")
 PY
 
-mvn -B -ntp -DskipTests test-compile
-echo "==> OK: templates compile against platform $PLATFORM_VERSION"
+python3 "$REPO_ROOT/ci/boot_overlay.py" . "$BOOT_FIXTURES"
+
+if [[ "$COMPILE_ONLY" == true ]]; then
+  mvn -B -ntp -DskipTests test-compile
+  echo "==> OK: templates compile against platform $PLATFORM_VERSION (compile only; Quarkus not started)"
+else
+  # Full stack traces (Surefire's default, stated explicitly), so a failed boot prints its
+  # startup cause in the CI log.
+  mvn -B -ntp -DtrimStackTrace=false test
+  echo "==> OK: project generated from the templates starts and serves its entry services on platform $PLATFORM_VERSION"
+fi

@@ -7,7 +7,9 @@
  * fast, deterministic, and passes without a running Ollama and without any inference.
  *
  * What it does NOT do: it does not call the model, does not assert on generated text, and does
- * not exercise tools, guardrails, or RAG. Those need a live model — see the commented examples.
+ * not exercise tools, guardrails, or RAG. Those need something answering as the model: a live
+ * one, as in the commented examples, or a fake chat endpoint the test points the model's
+ * base-url at (the scaffolding's own CI drives every entry service that way).
  *
  * Only quarkus-junit is required on the test classpath for the active test to compile and run.
  * The commented model-dependent and evaluation examples additionally need a live Ollama and,

@@ -14,8 +14,11 @@ permissions:
   issues: write
 
 jobs:
-  compile:
+  boot:
     runs-on: ubuntu-latest
+    # Generating the project, resolving dependencies on a cold cache and starting Quarkus for
+    # the tests fit well inside this; a hung boot or test fails the job instead of idling.
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v7
       - name: Load baseline versions
@@ -28,7 +31,9 @@ jobs:
           # This repo ships no pom.xml (the project is generated at validation time),
           # so key the ~/.m2 cache on the baseline versions instead.
           cache-dependency-path: ci/baseline.env
-      - name: Build from templates
+      - name: Boot the project generated from the templates
+        # Runs the generated project's tests (mvn test): Quarkus starts with Easy RAG, the MCP
+        # client and server enabled, and every entry service is driven against a fake Ollama.
         # PR/push: reproducible build against the Renovate-tracked baseline.
         # schedule/dispatch: empty arg -> the script resolves the live latest platform.
         run: |

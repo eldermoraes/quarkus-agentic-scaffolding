@@ -557,7 +557,7 @@ instruction files once at startup.
 │   ├── install-bob-skill.sh    # Fallback: copy the skills into a project's (or global) .bob/skills/
 │   └── uninstall-bob-skill.sh  # The mirror: remove them again (see Uninstall)
 ├── docs/
-│   ├── VALIDATING-TEMPLATES.md   # How to verify the templates still build
+│   ├── VALIDATING-TEMPLATES.md   # How to verify the templates still build and start
 │   ├── AGENTIC-COMPENSATION.md   # Decision record: why compensation is not a default convention
 │   ├── ANTHROPIC-SUBMISSION.md   # Community-marketplace submission kit
 │   ├── EVOLUTION-PLAN.md         # Frontier audit and action plan (2026-07-10)
@@ -751,4 +751,4 @@ Licensed under the **Apache License 2.0**. See [`LICENSE`](LICENSE) for the full
 
 See [`CONTRIBUTING.md`](CONTRIBUTING.md) for how to propose changes to the conventions, the skills,
 and the templates — including how to keep new patterns evidence-backed, and how to confirm the
-templates still build (see [`docs/VALIDATING-TEMPLATES.md`](docs/VALIDATING-TEMPLATES.md)).
+templates still build and start (see [`docs/VALIDATING-TEMPLATES.md`](docs/VALIDATING-TEMPLATES.md)).

@@ -39,6 +39,7 @@ jobs:
       - run: ci/test-uninstall-bob-skill.sh
       - run: ci/test-conventions-block-removal.sh
       - run: ci/test-platform-version-resolution.sh
+      - run: ci/test-boot-overlay.sh
       - run: python3 -m unittest discover -s ci -p 'test_*.py'
 
   mcp-java-floor:
