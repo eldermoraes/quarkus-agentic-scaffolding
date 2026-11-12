@@ -3,6 +3,20 @@
 All notable changes to this artifact are documented here. This project adheres to semantic
 versioning.
 
+## Unreleased
+
+### Removed
+
+- The September skill pilot is retired (#162): its only collection was inconclusive and the
+  effectiveness eval in `evals/effectiveness/` supersedes it. Its runnable inputs are gone —
+  `evals/skill-pilot/starter/pom.xml` (which Renovate kept updating until #118), `run.py`,
+  `preflight.py`, `tasks.json` and their tests `ci/test_eval_scoring.py` and
+  `ci/test_eval_preflight.py` — so no package file remains under `evals/`. The published
+  `results/2026-09-09/` stay unchanged, and `evals/skill-pilot/README.md` is now a retirement note
+  that points to the tag `eval-pilot-2026-09-09` (commit `2237dd1`), which holds the inputs the
+  published run used, and to `v0.25.0` for the later preflight. `renovate.json` keeps `evals/**`
+  in `ignorePaths` to protect published results and future eval inputs.
+
 ## v0.25.0 — 2026-11-12
 
 ### Fixed
