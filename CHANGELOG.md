@@ -27,6 +27,24 @@ versioning.
   reports ERROR; the WebSocket still sends the level as a plain string (`"level":"LOW"`). New
   boot tests cover each of these; the fake gains `answerNextFor(...)` to aim answers at one
   agent's requests.
+- The packaged RAG application starts from any directory (#151). The properties baseline and the
+  RAG template now read the Easy RAG documents from the classpath
+  (`quarkus.langchain4j.easy-rag.path-type=classpath`, `path=rag`; the setting is in the
+  extension's 1.13.4 config metadata) instead of `src/main/resources/rag`, a path resolved
+  against the working directory. Reproduced on the v0.24.0 templates: `java -jar
+  target/quarkus-app/quarkus-run.jar` started from another directory failed with
+  `'src/main/resources/rag' is not a directory`; with the fix it logs `Ingested 1 files`. Both
+  templates and `scaffold-project` §9/§11 say how to point at an external folder
+  (`QUARKUS_LANGCHAIN4J_EASY_RAG_PATH_TYPE=filesystem` plus an absolute
+  `QUARKUS_LANGCHAIN4J_EASY_RAG_PATH`, checked against the packaged jar) and that dev mode
+  ingests at each restart, not on a document change (the same with the old path).
+  `ci/build-from-templates.sh` now packages the generated project after the boot test and starts
+  it from an empty directory, expecting Easy RAG's `Ingested N files`: red on the old template,
+  green on the new one, about 8 s more on a quiet machine (27 s against 19 s for the script).
+  The step accepts readiness only from the process it started (alive, its log listening on the
+  port), fails with a message when another process holds the port, bounds each poll to 5 s, and
+  stops the process and removes its directory on every exit; an interrupted run (SIGINT,
+  SIGTERM) and a dummy server on the port were each checked.
 
 ## v0.24.0 — 2026-11-12
 

@@ -10,7 +10,8 @@ Turns the materialized project into one that `mvn test` can start without a live
      alternatives listed after it), then sets the RAG block's test-profile
      ingestion-strategy back to on: the template skips ingestion in tests for continuous
      testing (#113), while the boot test runs in its own JVM and asserts on retrieval;
-  3. copies the sample documents into the folder the uncommented easy-rag.path names;
+  3. copies the sample documents into the folder the uncommented easy-rag.path names (under
+     src/main/resources when easy-rag.path-type is classpath);
   4. adds a %test override pointing the "ops" MCP client at the application's own MCP server
      on the Quarkus test port, so the client has a server to connect to;
   5. adds %test model ids that tell the default, "main" and "smaller" models apart (the
@@ -33,6 +34,7 @@ import sys
 TEST_INGESTION_KEY = "%test.quarkus.langchain4j.easy-rag.ingestion-strategy"
 # Keys the template ships commented out and the boot test needs active, in template order.
 KEYS_TO_ENABLE = (
+    "quarkus.langchain4j.easy-rag.path-type",
     "quarkus.langchain4j.easy-rag.path",
     "quarkus.langchain4j.embedding-model.provider",
     TEST_INGESTION_KEY,
@@ -116,7 +118,11 @@ def main(argv):
     for key in KEYS_TO_ENABLE:
         print(f"enabled {key}={values[key]}")
 
-    rag_dir = proj / values["quarkus.langchain4j.easy-rag.path"]
+    # A classpath path is relative to the resources root; a filesystem one, to the working
+    # directory, which for `mvn test` is the project directory.
+    rag_root = proj / "src/main/resources" if (
+        values["quarkus.langchain4j.easy-rag.path-type"] == "classpath") else proj
+    rag_dir = rag_root / values["quarkus.langchain4j.easy-rag.path"]
     rag_dir.mkdir(parents=True, exist_ok=True)
     docs = sorted((fixtures / "rag").glob("*"))
     if not docs:
