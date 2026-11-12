@@ -567,6 +567,8 @@ instruction files once at startup.
 │   ├── install-bob-skill.sh    # Fallback: copy the skills into a project's (or global) .bob/skills/
 │   └── uninstall-bob-skill.sh  # The mirror: remove them again (see Uninstall)
 ├── docs/
+│   ├── agents/
+│   │   └── issue-tracker.md      # Where issues live and how agent skills read and write them
 │   ├── VALIDATING-TEMPLATES.md   # How to verify the templates still build and start
 │   ├── AGENTIC-COMPENSATION.md   # Decision record: why compensation is not a default convention
 │   ├── ANTHROPIC-SUBMISSION.md   # Community-marketplace submission kit

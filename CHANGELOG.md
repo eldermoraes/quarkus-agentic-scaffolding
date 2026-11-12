@@ -36,6 +36,11 @@ versioning.
   `ci/test_effectiveness_scoring.py` now asserts that. On those rounds' `parallel` runs the new
   check passes 0/3 in each arm that wrote agents, where `named_model` passed 5 of those 6 runs in
   round 2 and 6/6 in round 3.
+- `docs/agents/issue-tracker.md` tells the maintainer's agent skills (`to-tickets`, `to-spec`,
+  `triage`, `code-review`) where issues live and how to read and write them. It follows the
+  GitHub template of `setup-matt-pocock-skills` and records this repo's labels (from
+  `gh label list`), the ticket layout with the spec as its first comment, private security
+  advisories for security findings per `SECURITY.md`, and `Closes #<number>` in pull requests.
 
 ### Changed
 
