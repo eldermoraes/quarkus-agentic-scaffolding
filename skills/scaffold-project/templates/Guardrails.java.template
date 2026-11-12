@@ -22,6 +22,8 @@ import java.util.regex.Pattern;
  *
  * An output guardrail may force the model to answer again with reprompt(...); cap the attempts
  * with quarkus.langchain4j.guardrails.max-retries (Quarkus default 3, 0 disables retries).
+ * For a service that returns a record, use CompleteAnswerGuard from Agent.java.template: it
+ * rejects an answer with a missing, null or blank field, which a JSON schema alone does not.
  *
  * The script names this file after the first public type; both guards live here for that reason.
  */

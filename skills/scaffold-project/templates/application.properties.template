@@ -51,6 +51,11 @@ quarkus.langchain4j.devservices.enabled=false
 #   quarkus.langchain4j.ollama.chat-model.model-id=deepseek-v4-pro:cloud
 #   quarkus.langchain4j.ollama.main.chat-model.model-id=deepseek-v4-pro:cloud
 #   quarkus.langchain4j.ollama.smaller.chat-model.model-id=gpt-oss:20b-cloud
+# Structured output: deepseek-v4-pro:cloud and gpt-oss:20b-cloud did not enforce
+# the JSON schema `format` when tested directly against Ollama (they answered in
+# prose); local qwen3:1.7b did. Record-returning services then depend on their
+# output guardrail (CompleteAnswerGuard in Agent.java.template), which asks again
+# and fails after quarkus.langchain4j.guardrails.max-retries attempts.
 # ============================================================================
 
 # ============================================================================
