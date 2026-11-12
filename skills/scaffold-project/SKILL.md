@@ -200,7 +200,9 @@ extension brings an embedding model too, so without that key the application fai
 asking which provider to use. The template also
 includes a commented, opt-in manual path (a CDI-produced `EmbeddingStore` +
 `EmbeddingStoreContentRetriever` + `RetrievalAugmentor`) for when a project needs control Easy RAG
-does not provide. Bring in
+does not provide. Easy RAG augments every AI service that does not opt out: the other templates'
+services declare `retrievalAugmentor = RegisterAiService.NoRetrievalAugmentorSupplier.class`, and
+so does any service you add that must not see retrieved documents. Bring in
 `templates/Guardrails.java.template` for the entry method (§10).
 
 ## 10. Guardrails

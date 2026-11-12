@@ -184,7 +184,9 @@ Optional tooling — not covered by the stop rule above:
   `quarkus-langchain4j-easy-rag` extension plus an in-process embedding model: point
   `quarkus.langchain4j.easy-rag.path` at a documents folder and let it ingest on startup. Move to
   a hand-built `RetrievalAugmentor` (a CDI-produced `EmbeddingStore` + `EmbeddingStoreContentRetriever`)
-  only when a project needs control Easy RAG does not provide.
+  only when a project needs control Easy RAG does not provide. Easy RAG augments every AI
+  service that does not opt out, so each service that must not see retrieved documents declares
+  `@RegisterAiService(retrievalAugmentor = RegisterAiService.NoRetrievalAugmentorSupplier.class)`.
 - **Enable request/response logging in dev.** Set `%dev.quarkus.langchain4j.log-requests=true` and
   `%dev.quarkus.langchain4j.log-responses=true` so prompts and model output are observable during
   development without recording user content in production.

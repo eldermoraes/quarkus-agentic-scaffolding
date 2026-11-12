@@ -95,7 +95,8 @@ the `scaffold-project` skill never copies them into a user's project.
 - `EntryServicesBootTest` drives the chat REST endpoint, the triage bridge, the RAG assistant and
   the MCP-client assistant: ordinary input must produce a recorded model request, and input
   carrying reserved delimiter markup must be rejected with no model request. It also checks that
-  each triage agent's request names the model the agent declares, at that model's temperature.
+  each triage agent's request names the model the agent declares, at that model's temperature,
+  and that only the RAG assistant's request carries the sample document's text.
 
 The generated pom carries no REST Assured (`-DnoCode` adds no test dependencies beyond
 `quarkus-junit`), so the fixtures call the endpoint with the JDK `HttpClient`.
@@ -104,7 +105,8 @@ The generated pom carries no REST Assured (`-DnoCode` adds no test dependencies 
 augmentation and startup succeed with Easy RAG ingesting a document through the in-process
 embedding model, the MCP server and the MCP client connected to it; the `ChatAssistantTest` wiring
 smoke test passes; each entry service passes ordinary input to the model and rejects reserved
-delimiter markup before any model call; and each triage agent reaches the model it names. It does **not** prove anything about answer quality or a
+delimiter markup before any model call; each triage agent reaches the model it names; and
+retrieved content reaches the RAG assistant only. It does **not** prove anything about answer quality or a
 real model's behavior (tool calling, structured output from a live model): the fake answers with
 fixed text.
 

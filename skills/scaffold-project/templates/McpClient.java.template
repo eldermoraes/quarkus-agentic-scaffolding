@@ -24,7 +24,10 @@ import io.quarkiverse.langchain4j.mcp.runtime.McpToolBox;
  * Health: each configured client contributes a readiness check; set
  * quarkus.langchain4j.mcp.health.enabled=false if the remote server may be down at startup.
  */
-@RegisterAiService(modelName = "main")
+@RegisterAiService(modelName = "main",
+        // No retrieval: this assistant answers from its tools, and Easy RAG would otherwise
+        // append retrieved documents to its prompt as well (RagSetup.java.template).
+        retrievalAugmentor = RegisterAiService.NoRetrievalAugmentorSupplier.class)
 public interface TicketOpsAssistant {
 
     @SystemMessage("""

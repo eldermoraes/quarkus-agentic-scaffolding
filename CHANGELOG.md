@@ -155,6 +155,17 @@ versioning.
   and the 11 tests pass with it. The effectiveness eval's `named_model` predicate still passes
   on the registration attribute alone; its README now says so, and the scorer is unchanged to
   keep the published rounds comparable.
+- Easy RAG content was appended to every AI service's prompt, not only the RAG assistant's
+  (#111). Easy RAG's retrieval augmentor applies to every AI service that does not opt out, so
+  the chat assistant, the three agents and the MCP operations assistant received the sample
+  document after their closing delimiter. They now declare
+  `retrievalAugmentor = RegisterAiService.NoRetrievalAugmentorSupplier.class`; the RAG assistant
+  keeps the default. `RagSetup.java.template`, the RAG block of the properties baseline,
+  `scaffold-project` section 9 and section 4 of `CLAUDE.md`, `AGENTS.md` and both seeds say Easy
+  RAG augments every service that does not opt out; `audit-project` checks it. Four boot tests
+  check, per service, whether the request's user message carries the sample document: on
+  platform 3.40.1.2 the chat, MCP-client and triage checks fail without the opt-out and all 15
+  tests pass with it.
 
 ## v0.23.4 — 2026-09-14
 
