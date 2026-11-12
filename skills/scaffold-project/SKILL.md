@@ -172,8 +172,9 @@ template delegates to the `TicketTools` bean so one implementation backs both. E
 Use `templates/Agent.java.template`. It shows the full declarative agentic shape:
 
 - individual `@Agent` AI services (sub-agents) returning records, each naming its model with
-  `@ModelName` on the agent method (the registration's `modelName` does not reach agent calls)
-  and checking its answer with an output guardrail (`CompleteAnswerGuard`, §10);
+  `@ModelName` on the agent method (the registration's `modelName` does not reach agent calls),
+  checking its answer with an output guardrail (`CompleteAnswerGuard`, §10), and keeping no chat
+  memory, so each request sees only its own input;
 - an orchestrator interface using `@SequenceAgent` / `@ParallelAgent` (and the
   `@SupervisorAgent` + `@SupervisorRequest` variant for routing) with `@Output` assembling the
   result from the `AgenticScope`;

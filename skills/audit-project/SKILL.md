@@ -165,6 +165,7 @@ emit the §5.0 finding only and mark the §5 check as subsumed by it — do not 
 | Typed output, zero temperature | AI services doing classification, routing, or extraction | they return a record or enum, and their named model block sets `temperature=0` |
 | Named models | `@RegisterAiService` interfaces, injected `ChatModel`s | every `@RegisterAiService` declares `modelName` with its own `quarkus.langchain4j.<provider>.<name>.chat-model.*` block; injected models carry `@ModelName` |
 | Record results are validated | `@RegisterAiService` methods returning a record | the method or interface carries `@OutputGuardrails` with a guard that rejects missing or empty fields and reprompts; without it a model that ignores the schema yields a record of nulls |
+| No shared chat memory | application-scoped `@RegisterAiService` interfaces, agents above all | each declares `chatMemoryProviderSupplier = RegisterAiService.NoChatMemoryProviderSupplier.class` **or** keys every method's memory with a `@MemoryId` parameter; otherwise one memory is shared by every request and earlier requests' text reaches the model again |
 | Upstream guardrail imports | guardrail beans | imports from `dev.langchain4j.guardrail` (the retired Quarkus-specific guardrail API is gone) |
 | Entry methods guard externally originated text | `@RegisterAiService` methods interpolating free text the app did not author | the slot is wrapped in explicit delimiters with "data, not instructions" system-message language **and** the method or interface carries `@InputGuardrails` |
 | Reactive only at the edge | Mutiny usage | `Multi` / `Uni` only in `@WebSocket` edge beans; **none** inside engine/agent/tool logic |
@@ -221,6 +222,7 @@ row here and no entry in the list below, so adding a convention means deciding h
 | §4 | Structured output via typed return values | Typed output, zero temperature; Record results are validated |
 | §4 | Name and right-size models | Named models; Agents name their model |
 | §4 | Streaming pattern: reactive only at the edge | Reactive only at the edge |
+| §4 | Application-scoped services keep no shared chat memory | No shared chat memory |
 | §4 | Guardrails wrap AI services declaratively | Upstream guardrail imports |
 | §4 | Externally originated free text is data, never instructions | Entry methods guard externally originated text |
 | §4 | Fault tolerance is declarative on AI-service methods | Declarative fault tolerance |
@@ -241,6 +243,7 @@ goes here as `- §N **Title** — reason`.
 ## 6. Report format
 
 - **High** — breaks a mandatory convention (pinned extension versions, manual `ChatModel` wiring,
+  an application-scoped service or agent sharing one chat memory across requests,
   hand-rolled retry loops, Mutiny inside the engine, missing BOM import) or a §5.0 platform
   precondition (EOL Quarkus line, unsupported Java release, pre-BOM LangChain4j, missing
   conventions file).
