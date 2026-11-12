@@ -78,6 +78,13 @@ versioning.
 
 ### Fixed
 
+- Bob fallback installation refuses foreign, unverifiable and symlinked skill targets
+  before copying or removing support files (#119). Skips leave user files unchanged,
+  continue installing other skills and produce a non-zero exit status. Install and
+  uninstall share the existing ownership-name reader; owned installs still refresh.
+  Offline behavior tests reproduce the previous overwrite and cover temporary project
+  and home paths, symlink ancestors/manifests, unreadable manifests and stale references.
+
 - Make the weekly template validation resolve the latest **stable** Quarkus platform instead
   of Maven's `<latest>` hint, which on 2026-10-05 pointed at `4.0.0.Beta1` — a pre-release
   whose platform has no `langchain4j-mcp` extension, so the scheduled run failed (#79).

@@ -32,6 +32,8 @@ EOF
 # Resolve the skills source relative to this script, so it works from any working directory.
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SKILLS_ROOT="$SCRIPT_DIR/../skills"
+# shellcheck source=scripts/bob-skill-common.sh
+source "$SCRIPT_DIR/bob-skill-common.sh"
 
 case "${1:-}" in
   -h|--help) usage; exit 0 ;;
@@ -46,6 +48,7 @@ case "${1:-}" in
     ;;
 esac
 
+SKIPPED=0
 for SKILL_NAME in "${SKILL_NAMES[@]}"; do
   SRC="$SKILLS_ROOT/$SKILL_NAME"
   if [[ ! -f "$SRC/SKILL.md" ]]; then
@@ -54,6 +57,29 @@ for SKILL_NAME in "${SKILL_NAMES[@]}"; do
   fi
 
   DEST="$BASE/.bob/skills/$SKILL_NAME"
+
+  # Refuse before mkdir, cp or stale-support cleanup can change a user's files.
+  if bob_skill_has_symlink "$DEST" || [[ -L "$DEST/SKILL.md" ]]; then
+    echo "Skipped '$SKILL_NAME': target or manifest uses a symlink — left in place" >&2
+    SKIPPED=1
+    continue
+  fi
+  if [[ -e "$DEST" ]]; then
+    DECLARED=""
+    if [[ -d "$DEST" ]]; then
+      # A read error is a refusal for this skill, not permission to overwrite it.
+      if ! DECLARED="$(bob_skill_declared_name "$DEST/SKILL.md")"; then
+        echo "Skipped '$SKILL_NAME': cannot read SKILL.md — left in place" >&2
+        SKIPPED=1
+        continue
+      fi
+    fi
+    if [[ "$DECLARED" != "$SKILL_NAME" ]]; then
+      echo "Skipped '$SKILL_NAME': SKILL.md declares '${DECLARED:-<none>}', not ours — left in place" >&2
+      SKIPPED=1
+      continue
+    fi
+  fi
 
   # Bob reads SKILL.md plus its supporting files; agents/openai.yaml is Codex/OpenAI-specific
   # metadata and is intentionally not copied.
@@ -70,3 +96,5 @@ for SKILL_NAME in "${SKILL_NAMES[@]}"; do
 done
 
 echo "Open the project in Bob and try: \"scaffold a new Quarkus + LangChain4j project\""
+
+exit "$SKIPPED"

@@ -24,6 +24,10 @@
 #
 set -euo pipefail
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=scripts/bob-skill-common.sh
+source "$SCRIPT_DIR/bob-skill-common.sh"
+
 SKILL_NAMES=(setup-agentic-scaffolding scaffold-project audit-project)
 
 usage() {
@@ -64,12 +68,7 @@ for SKILL_NAME in "${SKILL_NAMES[@]}"; do
   fi
 
   # Ownership check. Reading through a symlink is fine - this is read-only.
-  DECLARED=""
-  if [[ -f "$DEST/SKILL.md" ]]; then
-    DECLARED="$(awk '/^name:/ {
-      sub(/^name:[[:space:]]*/, ""); sub(/[[:space:]]+$/, ""); print; exit
-    }' "$DEST/SKILL.md" | tr -d '\r')"
-  fi
+  DECLARED="$(bob_skill_declared_name "$DEST/SKILL.md")"
   if [[ "$DECLARED" != "$SKILL_NAME" ]]; then
     echo "Skipped '$SKILL_NAME': SKILL.md declares '${DECLARED:-<none>}', not ours — left in place" >&2
     continue

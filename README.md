@@ -169,6 +169,18 @@ skills into `.bob/skills/` for you:
 # ./scripts/install-bob-skill.sh --global          # into ~/.bob/skills/
 ```
 
+Run the fallback scripts from this repository checkout, keeping
+`scripts/bob-skill-common.sh` beside them. The installer refuses an existing skill whose
+manifest is missing, unreadable or declares a different name; it also refuses symlinked
+target paths or manifests rather than writing through them. It warns, leaves that skill
+untouched, continues with the others, and exits non-zero if anything was skipped. Rename
+or remove a conflicting skill deliberately before retrying; there is no force option.
+Reinstalling our own skills still refreshes their manifest and removes stale `templates/`
+and `references/` files, while leaving unrelated files in the skill directory alone.
+As with the uninstaller, a user skill that declares exactly our name is indistinguishable
+from ours. This ownership check is not protection against another process concurrently
+changing the target paths.
+
 Bob asks for approval before activating a skill — once per conversation, not once ever; the setting
 is a single global toggle rather than a per-skill grant. Two things to know while you are here: a
 skill's `description` front-matter field is load-bearing (Bob ignores a skill without one), and
@@ -550,7 +562,8 @@ instruction files once at startup.
 │   └── quarkus-agentic-scaffolding/  # Codex marketplace wrapper; symlinks to .codex-plugin + skills
 ├── scripts/
 │   ├── install-bob-skill.sh    # Fallback: copy the skills into a project's (or global) .bob/skills/
-│   └── uninstall-bob-skill.sh  # The mirror: remove them again (see Uninstall)
+│   ├── uninstall-bob-skill.sh  # The mirror: remove them again (see Uninstall)
+│   └── bob-skill-common.sh     # Shared ownership reader; stays in the checkout
 ├── docs/
 │   └── VALIDATING-TEMPLATES.md   # How to verify the templates still build
 └── skills/
