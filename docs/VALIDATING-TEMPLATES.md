@@ -78,13 +78,15 @@ neither the MCP nor a live Ollama:
 ci/build-from-templates.sh 3.40.1.2          # boot test against a given platform
 ci/build-from-templates.sh                   # boot test against the latest stable platform
 ci/build-from-templates.sh --compile-only    # quick check: stop after mvn test-compile
+ci/build-from-templates.sh --native 3.40.1.2 # native check (GraalVM; see "Native check" below)
 ```
 
 It needs Maven, python3 and a JDK 25. What it does:
 
 1. Generates the project with the quarkus-maven-plugin (the extension list above, `-DnoCode`) and
    materializes every template, as in step 3.
-2. Injects the non-extension dependencies from `pom.xml.template`. Easy RAG and the in-process
+2. Injects the non-extension dependencies from `pom.xml.template`, and the dependencies of its
+   `native` profile part into the generated `native` profile. Easy RAG and the in-process
    embedding model stay in.
 3. Applies the boot overlay (`ci/boot_overlay.py`): uncomments the template's RAG keys
    (`easy-rag.path-type`, `easy-rag.path`, `embedding-model.provider`, and the test-profile
@@ -157,28 +159,78 @@ model): the fake answers with fixed text.
 ## Native check (manual, before each release)
 
 The boot test runs on the JVM, and a native executable fails differently: GraalVM keeps only the
-reflection that is registered, and a missing registration shows only when that code path first
-runs (the generated project from v0.24.0 started natively, then failed on its first WebSocket
-message and its first triage, #152). No CI job builds natively yet: a native build takes 5 to 8
-minutes and about 4 GB of memory, and the Linux build that a scheduled job would run has not been
-verified. Until it is, run this check by hand before each release and whenever the Agent
-template, its DTOs or the WebSocket change. It needs GraalVM for JDK 25 as the JDK
-(`native-image` on the path).
+reflection and resources that are registered, and a gap often shows only when that code path
+first runs (the project generated from v0.24.0 started natively, then failed on its first
+WebSocket message and its first triage, #152; with Easy RAG it did not build at all, #153). No CI
+job builds natively yet: a native build takes 5 to 8 minutes and about 4 GB of memory, and the
+Linux build a scheduled job would run has not been verified. Until it is, run this check by hand
+before each release and whenever the Agent or RAG template, their DTOs, the WebSocket or the
+`native` profile part of `pom.xml.template` change. It needs GraalVM for JDK 25 as the JDK
+(`native-image` on the path):
 
-1. Generate the project: `ci/build-from-templates.sh --compile-only <platform>`.
-2. Leave Easy RAG out until it builds natively (#153): remove the
-   `quarkus-langchain4j-easy-rag` and `langchain4j-embeddings-bge-small-en-v15-q` dependencies, the
-   RAG keys in `application.properties` and `src/test/java/org/acme/boot/EntryServicesBootTest.java`
-   (it asserts on retrieval).
-3. In the generated project run `mvn verify -Dnative`. It builds the executable and the failsafe
-   plugin of the `native` profile runs `ApplicationIT` (from `ApplicationIT.java.template`)
-   against it: the executable starts and serves its OpenAPI document. The run must end with
-   `Tests run: 1, Failures: 0` for `ApplicationIT` and `BUILD SUCCESS`.
-4. Drive the workflow: start `target/*-runner` with the three models' base URLs
-   (`quarkus.langchain4j.ollama.base-url`, `.main.base-url`, `.smaller.base-url`) pointed at a
-   stand-in for the Ollama chat API that answers a JSON-schema request with every property filled
-   (as `FakeOllama` does), send `{"ticket": "..."}` to `/ws/triage`, and expect a `STARTED`
-   update followed by `DONE` with a complete report.
+```
+ci/build-from-templates.sh --native 3.40.1.2
+```
+
+It generates the same project as the boot test, adds the native fixtures from
+`ci/fixtures/native-test/` (a REST probe for the RAG assistant, copied into `src/main/java`, and
+`NativeEntryServicesIT`) and runs `mvn verify -Dnative`: the JVM tests, the native build, then
+the failsafe plugin of the `native` profile runs the `*IT` tests against the executable in the
+prod profile, with every model pointed at `FakeOllama`. The executable reads the RAG documents
+from the filesystem, set by the `native` profile part of `pom.xml.template` that the script
+injects as a scaffolded project carries it: its failsafe configuration passes
+`QUARKUS_LANGCHAIN4J_EASY_RAG_PATH_TYPE=filesystem` and
+`QUARKUS_LANGCHAIN4J_EASY_RAG_PATH=${project.basedir}/src/main/resources/rag` as environment
+variables, which the executable the test starts inherits (checked in JVM mode: a folder that does
+not exist made the started application fail with `'.../no such rag' is not a directory`, the
+space in the path kept). The script passes no extra argument. The classpath path the properties
+baseline uses fails at startup in a native image (see the list below):
+
+- `ApplicationIT` (from `ApplicationIT.java.template`): the executable starts and serves its
+  OpenAPI document;
+- `NativeEntryServicesIT`: a ticket sent to `/ws/triage` ends in `DONE` with a complete report, and
+  a RAG question is answered with the sample document's text in the model request, so Easy RAG
+  ingested the document natively.
+
+A green run ends with `Tests run: 3, Failures: 0` from failsafe and `BUILD SUCCESS`.
+
+**Easy RAG in native builds.** The `native` profile part of `pom.xml.template` re-declares Easy
+RAG without `langchain4j-document-parser-apache-tika` and
+`quarkus-langchain4j-parsers-base-deployment`; the native executable then reads documents with
+LangChain4j's plain-text parser (text and Markdown, not PDF or Office files), and the JVM build
+keeps Tika. With no `DocumentParserFactory` on the classpath LangChain4j falls back to that parser
+(`DocumentParserLoader` and `FileSystemDocumentLoader`, langchain4j 1.19.3 bytecode), and the
+Easy RAG extension has no configuration key that selects a parser (its 1.13.4 config metadata
+lists eleven keys: path, path type, matcher, recursion, segment and overlap sizes, result count,
+minimum score, ingestion strategy and two for reusing embeddings), so the exclusions are the
+lightest option found. Each exclusion was shown necessary by a native build without it
+(GraalVM 25.0.2, macOS arm64, platform 3.40.1.2, quarkus-langchain4j 1.13.4).
+
+These are upstream gaps; each workaround can be dropped once the extension fixes its gap. What a
+developer sees without the workaround, and where each observation comes from:
+
+- Build, observed while fixing #153 (macOS arm64): without the deployment exclusion, the build stops
+  with `UnsupportedOperationException: MacOS AWT integration is not ready in Quarkus native-image`
+  (the parsers pull in the POI extension, which needs AWT; excluding only the runtime artifacts is
+  not enough, the deployment side keeps the AWT build step). That this error is specific to macOS
+  is inferred from its message; no build ran on Linux.
+- Build, observed while fixing #153 (macOS arm64): without the Tika exclusion, the build fails with
+  `Feature defined by org.eclipse.angus.activation.nativeimage.AngusActivationFeature unexpectedly
+  failed with a(n) java.lang.NoClassDefFoundError` (`jakarta/mail/MessagingException`).
+- Run time, observed only in the earlier investigation that kept Tika (macOS arm64, reported in
+  #153), not while fixing it: with `jakarta.mail-api` added, the executable does not start, with a
+  `NullPointerException` in Tika's `MimeTypesFactory`; with Tika's resources included, every
+  document reads as blank and startup fails with `segments cannot be null or empty` until Tika's
+  text parser and encoding detectors are registered for reflection.
+- Run time, observed while fixing #153 (macOS arm64): with the classpath documents path (#151), the
+  executable fails at startup with `'rag' was not found as a classpath resource`, and with the
+  folder listed in `quarkus.native.resources.includes` with `FileSystemNotFoundException: The
+  Native Image Resource File System is not present`: Easy RAG registers no resources, and its
+  classpath loader needs a file system a native image does not have. The filesystem path above
+  works around it.
+
+Only the AWT and jakarta.mail build failures and the classpath-loader failure were reproduced
+while fixing #153; nothing was run on Linux.
 
 ## Last validated
 

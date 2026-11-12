@@ -9,7 +9,10 @@
   It is intentionally NOT hand-maintained here: a pinned copy only drifts (in v0.5.0 the baseline
   had already fallen behind the live platform).
 
-  So this file keeps only the two things a project generator does NOT give you.
+  So this file keeps only what a project generator does NOT give you: the extensions to ask
+  for (1), the non-extension dependencies (2) and the native-profile additions for Easy RAG (3).
+  The <project> element below only groups them; copy each part to the same place in the
+  generated pom.xml.
 
   ==========================================================================
   1. Extensions to pass to quarkus_create (resolved against the current platform BOM)
@@ -39,7 +42,15 @@
   quarkus_create nor code.quarkus.io will add any of them, and their versions are managed by
   quarkus-langchain4j-bom, so they take NO <version>. Add each only when its feature is used
   (output guardrails, RAG embedding model, PDF parsing, AI-quality evals).
+
+  ==========================================================================
+  3. Native profile additions — paste into the generated `native` profile, Easy RAG projects only
+  ==========================================================================
+  See the <profiles> part at the end of this file: its <dependencies> and <build> go into the
+  generated `native` profile; with them `mvn verify -Dnative` builds the executable and runs the
+  native integration tests with no extra argument.
 -->
+<project>
 <dependencies>
 
     <!-- agents: CompleteAnswerGuard extends dev.langchain4j.guardrails.JsonExtractorOutputGuardrail
@@ -69,3 +80,56 @@
     </dependency>
 
 </dependencies>
+
+<profiles>
+    <profile>
+        <id>native</id>
+        <!-- Easy RAG in a native build (add only with the easy-rag extension). Two parts:
+             1. The dependency re-declares Easy RAG for the native profile only, without the
+                Apache Tika document parser, which did not build natively as shipped (seen on
+                macOS arm64, GraalVM 25.0.2, platform 3.40.1.2; see RagSetup.java.template,
+                "NATIVE BUILDS"). LangChain4j then reads documents with its plain-text parser:
+                the native executable ingests text and Markdown, not PDF or Office files. The JVM
+                build keeps Tika. Each exclusion was shown necessary by a native build without it.
+             2. The failsafe configuration sets the two environment variables the native
+                executable needs to find its documents, because Easy RAG's classpath loader fails
+                in a native image: filesystem path type, and the absolute path of the project's
+                rag folder. The executable that `mvn verify -Dnative` starts inherits them. An
+                environment variable is passed as is, so a project path containing spaces works.
+                Outside the test, set the same two variables yourself (RagSetup.java.template). -->
+        <dependencies>
+            <dependency>
+                <groupId>io.quarkiverse.langchain4j</groupId>
+                <artifactId>quarkus-langchain4j-easy-rag</artifactId>
+                <exclusions>
+                    <!-- the Tika parser itself: without this exclusion the build failed on
+                         jakarta/mail/MessagingException -->
+                    <exclusion>
+                        <groupId>dev.langchain4j</groupId>
+                        <artifactId>langchain4j-document-parser-apache-tika</artifactId>
+                    </exclusion>
+                    <!-- the parsers' build steps, which pull in the POI and AWT extensions: without
+                         this exclusion the macOS build stopped on AWT -->
+                    <exclusion>
+                        <groupId>io.quarkiverse.langchain4j</groupId>
+                        <artifactId>quarkus-langchain4j-parsers-base-deployment</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+        </dependencies>
+        <build>
+            <plugins>
+                <plugin>
+                    <artifactId>maven-failsafe-plugin</artifactId>
+                    <configuration>
+                        <environmentVariables>
+                            <QUARKUS_LANGCHAIN4J_EASY_RAG_PATH_TYPE>filesystem</QUARKUS_LANGCHAIN4J_EASY_RAG_PATH_TYPE>
+                            <QUARKUS_LANGCHAIN4J_EASY_RAG_PATH>${project.basedir}/src/main/resources/rag</QUARKUS_LANGCHAIN4J_EASY_RAG_PATH>
+                        </environmentVariables>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </build>
+    </profile>
+</profiles>
+</project>

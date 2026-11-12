@@ -10,7 +10,7 @@
 # project and starts the packaged application from another working directory, expecting it to
 # come up with its RAG documents ingested (#151). No live model, no container.
 #
-# Usage: ci/build-from-templates.sh [--compile-only] [PLATFORM_VERSION]
+# Usage: ci/build-from-templates.sh [--compile-only | --native] [PLATFORM_VERSION]
 #        ci/build-from-templates.sh --resolve-only
 #   No argument: resolves the latest STABLE io.quarkus.platform version from Maven Central.
 #     Maven's <latest>/<release> hints are ignored on purpose: they point at pre-releases too
@@ -22,6 +22,14 @@
 #     ci/test-platform-version-resolution.sh and handy for a quick manual check).
 #   --compile-only: same project and overlay, but stop at `mvn -DskipTests test-compile`
 #     (a quick local check that the Java compiles; it does not start Quarkus).
+#   --native: same project and overlay, plus the native fixtures from ci/fixtures/native-test/,
+#     then `mvn verify -Dnative`: the JVM tests run, the native executable is built, and the
+#     failsafe plugin runs the *IT tests against it (ApplicationIT from the templates,
+#     NativeEntryServicesIT from the fixtures). Needs GraalVM for JDK 25 as the JDK, 5 to 8
+#     minutes and about 4 GB of memory (VALIDATING-TEMPLATES.md, "Native check"). The
+#     executable reads the RAG documents from the filesystem, as the `native` profile part
+#     of pom.xml.template configures for every scaffolded project. The packaged-JVM
+#     start from another directory runs in the default mode only.
 # Env: WORKDIR (optional) — where the throwaway project is generated.
 #      PLATFORM_METADATA_URL (optional) — where maven-metadata.xml is fetched from; defaults to
 #        Maven Central. Any URL curl accepts works, file:// included (that is how the test
@@ -42,12 +50,15 @@
 #     src/test/java, everything else in src/main/java.
 #   - application.properties.template -> src/main/resources/application.properties.
 #   - pom.xml.template is a dependency reference: every <dependency> in it (comments
-#     stripped) is injected into the generated pom before </dependencies>.
+#     stripped) outside its <profiles> part is injected into the generated pom before
+#     </dependencies>; the <dependencies> and <build> of each of its <profile>s go into the
+#     generated profile with the same <id>.
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 TEMPLATES="$REPO_ROOT/skills/scaffold-project/templates"
 BOOT_FIXTURES="$REPO_ROOT/ci/fixtures/boot-test"
+NATIVE_FIXTURES="$REPO_ROOT/ci/fixtures/native-test"
 EXTENSIONS="rest,rest-jackson,smallrye-openapi,websockets-next,langchain4j-ollama,langchain4j-agentic,langchain4j-easy-rag,langchain4j-mcp,mcp-server-http"
 
 PLATFORM_METADATA_URL="${PLATFORM_METADATA_URL:-https://repo1.maven.org/maven2/io/quarkus/platform/quarkus-bom/maven-metadata.xml}"
@@ -91,12 +102,15 @@ if [[ "${1:-}" == "--resolve-only" ]]; then
   exit $?
 fi
 
-COMPILE_ONLY=false
+MODE=boot
 if [[ "${1:-}" == "--compile-only" ]]; then
-  COMPILE_ONLY=true
+  MODE=compile
+  shift
+elif [[ "${1:-}" == "--native" ]]; then
+  MODE=native
   shift
 fi
-[[ "${1:-}" != -* ]] || { echo "ERROR: unknown option $1 (usage: $0 [--compile-only] [PLATFORM_VERSION] | --resolve-only)" >&2; exit 2; }
+[[ "${1:-}" != -* ]] || { echo "ERROR: unknown option $1 (usage: $0 [--compile-only | --native] [PLATFORM_VERSION] | --resolve-only)" >&2; exit 2; }
 
 PLATFORM_VERSION="${1:-}"
 if [[ -z "$PLATFORM_VERSION" ]]; then
@@ -161,7 +175,11 @@ print("materialized src/main/resources/application.properties")
 
 # Inject non-extension deps from pom.xml.template (comments stripped first). Easy RAG stays:
 # the boot test starts the application, so ingestion and the embedding provider are exercised.
+# The template's <profiles> part is injected separately, into the generated profile of the
+# same id, below.
 ref = re.sub(r"<!--.*?-->", "", (templates / "pom.xml.template").read_text(), flags=re.S)
+profiles = re.findall(r"<profile>.*?</profile>", ref, flags=re.S)
+ref = re.sub(r"<profiles>.*?</profiles>", "", ref, flags=re.S)
 deps = re.findall(r"<dependency>.*?</dependency>", ref, flags=re.S)
 dep_ids = re.findall(r"<artifactId>\s*([\w.\-]+)\s*</artifactId>", "\n".join(deps))
 pom_path = proj / "pom.xml"
@@ -188,6 +206,28 @@ if missing:
              f"(after </dependencyManagement>): {', '.join(missing)}")
 
 print(f"injected {len(deps)} non-extension dependencies")
+
+# Each template profile's <dependencies> and <build> go into the generated profile with the same
+# <id> (the generator creates the `native` profile with properties only). A missing profile, or
+# one that already declares the part, stops the run instead of being silently skipped.
+for profile in profiles:
+    pid = re.search(r"<id>\s*([\w.\-]+)\s*</id>", profile)
+    blocks = [m.group(0) for tag in ("dependencies", "build")
+              for m in [re.search(rf"<{tag}>.*?</{tag}>", profile, flags=re.S)] if m]
+    if not (pid and blocks):
+        sys.exit("ERROR: a <profile> in pom.xml.template has no <id>, or neither <dependencies> nor <build>")
+    pom = pom_path.read_text()
+    start = pom.find(f"<id>{pid.group(1)}</id>")
+    end = pom.find("</profile>", start)
+    if start == -1 or end == -1:
+        sys.exit(f"ERROR: the generated pom.xml has no profile {pid.group(1)!r} for pom.xml.template")
+    for block in blocks:
+        tag = re.match(r"<(\w+)>", block).group(1)
+        if f"<{tag}>" in pom[start:end]:
+            sys.exit(f"ERROR: the generated profile {pid.group(1)!r} already has a <{tag}>")
+    pom_path.write_text(pom[:end] + "\n        ".join(blocks) + "\n        " + pom[end:])
+    names = " and ".join(re.match(r"<(\w+)>", block).group(1) for block in blocks)
+    print(f"injected the {names} of profile {pid.group(1)}")
 PY
 
 python3 "$REPO_ROOT/ci/boot_overlay.py" . "$BOOT_FIXTURES"
@@ -270,9 +310,19 @@ start_packaged_elsewhere() {
   fi
 }
 
-if [[ "$COMPILE_ONLY" == true ]]; then
+if [[ "$MODE" == compile ]]; then
   mvn -B -ntp -DskipTests test-compile
   echo "==> OK: templates compile against platform $PLATFORM_VERSION (compile only; Quarkus not started)"
+elif [[ "$MODE" == native ]]; then
+  # The native fixtures: a REST probe for the RAG assistant (it has no REST edge of its own) and
+  # NativeEntryServicesIT, which drives the executable against the fake Ollama.
+  cp -R "$NATIVE_FIXTURES/main/." src/main/java/
+  cp -R "$NATIVE_FIXTURES/test/." src/test/java/
+  # No extra argument: the `native` profile part of pom.xml.template, injected above, points the
+  # executable at the project's rag folder as a filesystem path (Easy RAG's classpath loader
+  # fails in a native image), as it does in a scaffolded project.
+  mvn -B -ntp -DtrimStackTrace=false verify -Dnative
+  echo "==> OK: native executable built from the templates starts, triages and answers from retrieved documents on platform $PLATFORM_VERSION"
 else
   # Full stack traces (Surefire's default, stated explicitly), so a failed boot prints its
   # startup cause in the CI log.

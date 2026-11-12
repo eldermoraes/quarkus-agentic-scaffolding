@@ -62,6 +62,37 @@ versioning.
   `ApplicationIT` green and a triage over `/ws/triage` against a stand-in model reported `DONE`.
   The scheduled Linux native CI job the spec asks for is left out, because no Linux native
   build could be run before merging; a follow-up issue tracks it.
+- Easy RAG builds and runs in a native executable (#153). `pom.xml.template` gains a `native`
+  profile part that re-declares Easy RAG without `langchain4j-document-parser-apache-tika` and
+  `quarkus-langchain4j-parsers-base-deployment`, so the native executable reads text and Markdown
+  with LangChain4j's plain-text parser while the JVM build keeps Tika. A lighter option was looked
+  for first: LangChain4j falls back to that parser when no document parser factory is on the
+  classpath, and the Easy RAG extension has no configuration key that selects a parser (its
+  1.13.4 config metadata, read under `~/.m2`), so excluding Tika is the lightest found. The same
+  profile part carries a failsafe configuration that sets
+  `QUARKUS_LANGCHAIN4J_EASY_RAG_PATH_TYPE=filesystem` and
+  `QUARKUS_LANGCHAIN4J_EASY_RAG_PATH=${project.basedir}/src/main/resources/rag`, because
+  Easy RAG's classpath loader fails in a native image; a scaffolded project's own `mvn verify
+  -Dnative` therefore needs no extra argument, and environment variables keep a project path
+  with spaces intact (checked in JVM mode: a missing folder under `with space/` was reported with
+  its full path). `ApplicationIT`, `RagSetup` and the properties template say which two variables
+  to set when running the executable outside the test. The RAG template names the upstream gaps
+  (AWT from the parsers' build steps, Tika's jakarta.mail, resources and reflection, Easy RAG's
+  classpath loader: `FileSystemNotFoundException: The Native Image Resource File System is not
+  present`) so each workaround can be dropped when fixed; the errors, each marked with where it
+  was observed, are listed once in `docs/VALIDATING-TEMPLATES.md`. Conventions §4 (with an audit
+  check) say the same. `ci/build-from-templates.sh --native` injects the whole profile part,
+  builds natively and runs `ApplicationIT` plus a new `NativeEntryServicesIT` fixture (WebSocket
+  triage, RAG answer from the ingested sample document) against `FakeOllama`. Evidence (GraalVM
+  25.0.2, macOS arm64, platform 3.40.1.2): without the dependency part the run stopped on "MacOS
+  AWT integration is not ready"; builds without the Tika exclusion
+  (`NoClassDefFoundError: jakarta/mail/MessagingException`) and without the deployment exclusion
+  (the AWT error) failed; a third exclusion, of the runtime `quarkus-langchain4j-parsers-base`,
+  proved unnecessary. The Tika run-time errors (`MimeTypesFactory` NullPointerException,
+  `segments cannot be null or empty`) were seen only in the earlier investigation that kept Tika,
+  and that the AWT error is macOS-only is inferred from its message: nothing ran on Linux. With
+  the shipped profile part and no script override, `--native` ran surefire 26/26 and failsafe
+  `Tests run: 3, Failures: 0`, the executable logging `Ingested 1 files`.
 
 ## v0.24.0 — 2026-11-12
 
