@@ -1,6 +1,7 @@
 package org.acme.rest;
 
 import org.acme.ai.ChatAssistant;
+import dev.langchain4j.guardrail.InputGuardrailException;
 import io.smallrye.common.annotation.RunOnVirtualThread;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.BadRequestException;
@@ -9,6 +10,7 @@ import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
+import org.jboss.logging.Logger;
 
 /*
  * REST edge for the ChatAssistant AI service (pairs with AiService.java.template).
@@ -23,6 +25,11 @@ import jakarta.ws.rs.core.MediaType;
  * Validation at the edge: blank or over-long input is rejected before any model call. Keep the
  * limit in step with PromptInjectionGuard.MAX_INPUT_CHARS (Guardrails.java.template). Anything
  * that escapes becomes an RFC 9457 problem response when quarkus-http-problem is present.
+ *
+ * Guardrail rejections: when PromptInjectionGuard refuses the caller's text the AI service
+ * throws InputGuardrailException. That is the caller's error, so it leaves here as a 400 with a
+ * message written in this class. The exception's own message names the guard class, so it is
+ * not passed on; left uncaught it would be a 500.
  */
 @Path("/chat")
 public class ChatResource {
@@ -33,7 +40,12 @@ public class ChatResource {
     /** Response body. */
     public record ChatResponse(String answer) {}
 
+    private static final Logger LOG = Logger.getLogger(ChatResource.class);
+
     private static final int MAX_PROBLEM_CHARS = 4_000;
+
+    private static final String REJECTED_BY_GUARDRAIL =
+            "problem was rejected: it contains text this endpoint does not accept";
 
     @Inject
     ChatAssistant assistant;
@@ -49,6 +61,12 @@ public class ChatResource {
         if (request.problem().length() > MAX_PROBLEM_CHARS) {
             throw new BadRequestException("problem exceeds " + MAX_PROBLEM_CHARS + " characters");
         }
-        return new ChatResponse(assistant.answer(request.problem()));
+        try {
+            return new ChatResponse(assistant.answer(request.problem()));
+        } catch (InputGuardrailException rejected) {
+            // A rejection, not a failure: log the guard's reason (it holds no caller text).
+            LOG.infof("Chat input rejected by the input guardrail: %s", rejected.getMessage());
+            throw new BadRequestException(REJECTED_BY_GUARDRAIL);
+        }
     }
 }

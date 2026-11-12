@@ -202,6 +202,7 @@ package org.acme.workflow;
 
 import org.acme.dto.ProgressUpdate;
 import org.acme.dto.TriageReport;
+import dev.langchain4j.guardrail.InputGuardrailException;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.subscription.MultiEmitter;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -247,12 +248,28 @@ public class TriageBridge {
             emitter.emit(ProgressUpdate.done(report));
             emitter.complete();
         } catch (Exception e) {
-            // Log in full, expose nothing: emitter.fail(e) would reach the client through
-            // @OnError carrying the exception message (class names, endpoints, prompt fragments).
-            LOG.error("Triage failed", e);
+            // Expose nothing: emitter.fail(e) would reach the client through @OnError carrying
+            // the exception message (class names, endpoints, prompt fragments).
+            InputGuardrailException rejection = guardrailRejection(e);
+            if (rejection != null) {
+                // The guard refused the ticket: a rejection, not a server failure.
+                LOG.infof("Ticket rejected by the input guardrail: %s", rejection.getMessage());
+            } else {
+                LOG.error("Triage failed", e);
+            }
             emitter.emit(ProgressUpdate.failed());
             emitter.complete();
         }
+    }
+
+    /** The workflow wraps an agent's exception, so the guard's rejection sits in the cause chain. */
+    private static InputGuardrailException guardrailRejection(Throwable failure) {
+        for (Throwable t = failure; t != null; t = t.getCause()) {
+            if (t instanceof InputGuardrailException rejection) {
+                return rejection;
+            }
+        }
+        return null;
     }
 }
 

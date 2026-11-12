@@ -1,12 +1,14 @@
 package org.acme.guardrails;
 
 import dev.langchain4j.data.message.AiMessage;
-import dev.langchain4j.data.message.UserMessage;
 import dev.langchain4j.guardrail.InputGuardrail;
+import dev.langchain4j.guardrail.InputGuardrailRequest;
 import dev.langchain4j.guardrail.InputGuardrailResult;
 import dev.langchain4j.guardrail.OutputGuardrail;
 import dev.langchain4j.guardrail.OutputGuardrailResult;
 import jakarta.enterprise.context.ApplicationScoped;
+import java.util.List;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 /*
@@ -26,6 +28,7 @@ import java.util.regex.Pattern;
 @ApplicationScoped
 public class PromptInjectionGuard implements InputGuardrail {
 
+    /** Limit on the caller's text alone; the REST and WebSocket edges use the same number. */
     private static final int MAX_INPUT_CHARS = 4_000;
 
     /**
@@ -37,20 +40,42 @@ public class PromptInjectionGuard implements InputGuardrail {
     private static final Pattern DELIMITER_MARKUP =
             Pattern.compile("</?(ticket|problem|request|question|text)>", Pattern.CASE_INSENSITIVE);
 
+    /**
+     * Checks what the caller supplied, not the prompt rendered around it. The rendered user
+     * message already holds the delimiters the template itself wrote (and, with RAG, retrieved
+     * documents), so checking it would reject every call. The caller's text arrives as the
+     * template variables: the values bound to {problem}, {ticket}, {question}, ...
+     */
     @Override
-    public InputGuardrailResult validate(UserMessage userMessage) {
-        String text = userMessage.singleText();
-        if (text.length() > MAX_INPUT_CHARS) {
-            return failure("Input exceeds the " + MAX_INPUT_CHARS + "-character limit.");
-        }
-        if (DELIMITER_MARKUP.matcher(text).find()) {
-            return failure("Input rejected: it contains reserved delimiter markup.");
-        }
-        // Honest heuristic — real projects tune this (allow-lists, a classifier model, ...).
-        if (text.toLowerCase().contains("ignore previous instructions")) {
-            return failure("Input rejected: possible prompt-injection marker.");
+    public InputGuardrailResult validate(InputGuardrailRequest request) {
+        for (String text : callerSuppliedTexts(request)) {
+            if (text.length() > MAX_INPUT_CHARS) {
+                return failure("Input exceeds the " + MAX_INPUT_CHARS + "-character limit.");
+            }
+            if (DELIMITER_MARKUP.matcher(text).find()) {
+                return failure("Input rejected: it contains reserved delimiter markup.");
+            }
+            // Honest heuristic — real projects tune this (allow-lists, a classifier model, ...).
+            if (text.toLowerCase().contains("ignore previous instructions")) {
+                return failure("Input rejected: possible prompt-injection marker.");
+            }
         }
         return success();
+    }
+
+    /**
+     * Every template variable as text (one parameter can appear under more than one key;
+     * checking each value covers them all). A value that is not a String, such as a record or
+     * a list, is checked in the form the template renders it. Only a method with no template
+     * variables at all falls back to the user message: it has no delimiters of its own, so the
+     * whole message is the caller's text.
+     */
+    private static List<String> callerSuppliedTexts(InputGuardrailRequest request) {
+        Map<String, Object> variables = request.requestParams().variables();
+        if (variables == null || variables.isEmpty()) {
+            return List.of(request.userMessage().singleText());
+        }
+        return variables.values().stream().map(String::valueOf).toList();
     }
 }
 
