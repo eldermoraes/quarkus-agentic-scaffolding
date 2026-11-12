@@ -46,6 +46,8 @@ starts and answers requests**. Run it before shipping a release, and whenever yo
    - copy `McpServer.java.template` → `mcp/TriageMcpServer.java`
    - copy `RagSetup.java.template` → `rag/RagAssistant.java`
    - copy `AiServiceTest.java.template` → `src/test/java/org/acme/ai/ChatAssistantTest.java`
+   - copy `ApplicationIT.java.template` → `src/test/java/org/acme/ApplicationIT.java` (a native
+     integration test: the failsafe plugin runs it under `mvn verify -Dnative`, `mvn test` does not)
    - copy `application.properties.template` → `resources/application.properties`
    - split `Agent.java.template` into its per-file sections (each block is headed by a
      `/* ===== File: <path> ===== */` marker) under `dto/`, `ai/`, `workflow/`, `web/`.
@@ -151,6 +153,32 @@ priority level outside the three allowed values is treated like an incomplete an
 triage's ticket does not reach the model requests of the next. It does **not** prove anything
 about answer quality or a real model's behavior (tool calling, structured output from a live
 model): the fake answers with fixed text.
+
+## Native check (manual, before each release)
+
+The boot test runs on the JVM, and a native executable fails differently: GraalVM keeps only the
+reflection that is registered, and a missing registration shows only when that code path first
+runs (the generated project from v0.24.0 started natively, then failed on its first WebSocket
+message and its first triage, #152). No CI job builds natively yet: a native build takes 5 to 8
+minutes and about 4 GB of memory, and the Linux build that a scheduled job would run has not been
+verified. Until it is, run this check by hand before each release and whenever the Agent
+template, its DTOs or the WebSocket change. It needs GraalVM for JDK 25 as the JDK
+(`native-image` on the path).
+
+1. Generate the project: `ci/build-from-templates.sh --compile-only <platform>`.
+2. Leave Easy RAG out until it builds natively (#153): remove the
+   `quarkus-langchain4j-easy-rag` and `langchain4j-embeddings-bge-small-en-v15-q` dependencies, the
+   RAG keys in `application.properties` and `src/test/java/org/acme/boot/EntryServicesBootTest.java`
+   (it asserts on retrieval).
+3. In the generated project run `mvn verify -Dnative`. It builds the executable and the failsafe
+   plugin of the `native` profile runs `ApplicationIT` (from `ApplicationIT.java.template`)
+   against it: the executable starts and serves its OpenAPI document. The run must end with
+   `Tests run: 1, Failures: 0` for `ApplicationIT` and `BUILD SUCCESS`.
+4. Drive the workflow: start `target/*-runner` with the three models' base URLs
+   (`quarkus.langchain4j.ollama.base-url`, `.main.base-url`, `.smaller.base-url`) pointed at a
+   stand-in for the Ollama chat API that answers a JSON-schema request with every property filled
+   (as `FakeOllama` does), send `{"ticket": "..."}` to `/ws/triage`, and expect a `STARTED`
+   update followed by `DONE` with a complete report.
 
 ## Last validated
 

@@ -192,6 +192,14 @@ shows how to put the WebSocket behind the application's access layer.
 Requires the `quarkus-langchain4j-agentic` extension. Call `quarkus_skills` for it before writing
 the workflow.
 
+For the native build, the template carries `@RegisterForReflection` on `TicketInput` and on the
+five agent and workflow interfaces: the agentic runtime finds their methods by reflection and the
+WebSocket codec constructs the message record by reflection. Five native builds, each without
+some of them, showed every one needed: one without `TicketInput` and `TriageAgent` (the WebSocket
+failed on `TicketInput`, a direct triage call on `TriageAgent`), one without `WorkersParallel`,
+one without the three AI services (it failed on `CategoryAnalyzer`, the first looked up), one
+without `PriorityAnalyzer` and one without `Synthesizer`. Give every agent, workflow and WebSocket message type you add the same annotation.
+
 ## 9. RAG pipeline scaffolding
 
 Use `templates/RagSetup.java.template`: `quarkus-langchain4j-easy-rag` plus the in-process
@@ -281,3 +289,12 @@ test (live Ollama, `temperature=0`) and an **AI-quality evaluation** example (`S
 `@EvaluationTest` with semantic-similarity or AI-judge strategies), backed by
 `quarkus-langchain4j-testing-evaluation-junit5` — already listed, test-scoped, in
 `templates/pom.xml.template` (the platform BOM manages its version).
+
+Add `templates/ApplicationIT.java.template` as `src/test/java/<root>/ApplicationIT.java`: a
+`@QuarkusIntegrationTest` that the generated `native` profile runs through the failsafe plugin
+(`mvn verify -Dnative`). It checks that the native executable starts and serves the OpenAPI
+document, which calls no model, so it needs no running Ollama. `mvn test` does not run it (the
+`IT` suffix keeps it out of surefire). A native image fails on a missing reflection registration
+only when that code path runs, so a project that ships natively also drives its model-calling
+endpoints against a stand-in for the model once; the Agent template's `@RegisterForReflection`
+annotations are what that run showed the workflow needs (§8).

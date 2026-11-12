@@ -591,6 +591,7 @@ instruction files once at startup.
     │       ├── application.properties.template
     │       ├── AiService.java.template
     │       ├── AiServiceTest.java.template
+    │       ├── ApplicationIT.java.template
     │       ├── RestResource.java.template
     │       ├── Agent.java.template
     │       ├── McpClient.java.template

@@ -147,6 +147,7 @@ emit the §5.0 finding only and mark the §5 check as subsumed by it — do not 
 | CDI-first wiring | framework objects (retrieval augmentors, memory providers, embedding stores) | produced by `@ApplicationScoped` producer beans and injected; none built by hand in static fields or singletons |
 | `-parameters` retention | compiler config in `pom.xml` | `<parameters>true</parameters>` set |
 | Native profile present | `<profile>` in `pom.xml` | a `native` profile exists |
+| Native reflection registrations | with a `native` profile: records a `@WebSocket` `@OnTextMessage` method takes, and interfaces carrying `@Agent`, `@SequenceAgent` or `@ParallelAgent` methods (a native run showed these need it); expect the same for `@ParallelMapperAgent`, `@SupervisorAgent`, `@LoopAgent` and `@ConditionalAgent` | each carries `@RegisterForReflection` (or is listed in one's `targets`); otherwise the native executable starts and fails on the first message or workflow run |
 | REST + OpenAPI surface | extensions | `quarkus-rest` + `quarkus-rest-jackson`; `quarkus-smallrye-openapi` present |
 | Problem details at the REST edge | `@Path` resources, extensions, `application.properties` | `quarkus-http-problem` present without a `<version>`; `quarkus.http-problem.include-details` not `true` outside `%dev.` |
 | Streaming via WebSockets Next | streaming transport | `quarkus-websockets-next` (no custom SSE/transport) |
@@ -214,7 +215,7 @@ row here and no entry in the list below, so adding a convention means deciding h
 | §3 | Streaming uses WebSockets Next | Streaming via WebSockets Next |
 | §3 | Observability comes from platform extensions, not code | Observability extensions |
 | §3 | Enable parameter-name retention | `-parameters` retention |
-| §3 | Build for both JVM and native | Native profile present; Native integration tests |
+| §3 | Build for both JVM and native | Native profile present; Native integration tests; Native reflection registrations |
 | §3 | Disable Dev Services when an external model endpoint is configured | Dev Services disabled for real endpoint |
 | §4 | Declarative AI services are the default | Declarative AI services |
 | §4 | Tools are CDI beans | Tools as CDI beans |
@@ -248,7 +249,8 @@ goes here as `- §N **Title** — reason`.
   precondition (EOL Quarkus line, unsupported Java release, pre-BOM LangChain4j, missing
   conventions file).
 - **Medium** — drift that will bite later (missing native profile, native profile without
-  integration tests, no observability extensions, prompt or completion tracing outside `%dev.`,
+  integration tests, agent, workflow or WebSocket message types without a reflection
+  registration in a native project, no observability extensions, prompt or completion tracing outside `%dev.`,
   no problem-details extension at a REST edge or `include-details` on in production, an AI
   service without its own `modelName`, an agent method without `@ModelName`, a service that is
   retrieval-augmented without being a RAG service, a deterministic task without `temperature=0`,

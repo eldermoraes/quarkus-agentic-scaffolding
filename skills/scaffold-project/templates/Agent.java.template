@@ -15,6 +15,13 @@
  * and failures reach the client as a generic message while the full detail stays in the
  * server log.
  *
+ * Native builds: the agentic runtime finds each agent and workflow method by reflection, and the
+ * WebSocket's JSON codec constructs TicketInput by reflection; neither extension registers these
+ * types for a native image. Each carries @RegisterForReflection for that reason. Without it the
+ * native executable starts, then the first WebSocket message fails with "Cannot construct
+ * instance of `org.acme.dto.TicketInput`" and the first triage with "No agent method found in
+ * class: ...". Register every agent, workflow and WebSocket message type you add the same way.
+ *
  * This is a multi-file template. Split each section into the file named in its header,
  * under one root package (here org.acme). Replace prompts and types with your domain.
  */
@@ -22,6 +29,9 @@
 /* ===================== File: dto/TicketInput.java ===================== */
 package org.acme.dto;
 
+import io.quarkus.runtime.annotations.RegisterForReflection;
+
+@RegisterForReflection // native: the WebSocket's JSON codec constructs it by reflection
 public record TicketInput(String ticket) {}
 
 /* ===================== File: dto/CategoryReport.java ===================== */
@@ -186,6 +196,7 @@ import dev.langchain4j.service.guardrail.InputGuardrails;
 import dev.langchain4j.service.guardrail.OutputGuardrails;
 import io.quarkiverse.langchain4j.ModelName;
 import io.quarkiverse.langchain4j.RegisterAiService;
+import io.quarkus.runtime.annotations.RegisterForReflection;
 import jakarta.enterprise.context.ApplicationScoped;
 
 /**
@@ -208,6 +219,7 @@ import jakarta.enterprise.context.ApplicationScoped;
  * conversation memory, key it per conversation with a @MemoryId parameter instead.
  */
 @ApplicationScoped
+@RegisterForReflection // native: the agentic runtime finds the @Agent method by reflection
 @RegisterAiService(modelName = "smaller",
         chatMemoryProviderSupplier = RegisterAiService.NoChatMemoryProviderSupplier.class,
         retrievalAugmentor = RegisterAiService.NoRetrievalAugmentorSupplier.class)
@@ -247,10 +259,12 @@ import dev.langchain4j.service.guardrail.InputGuardrails;
 import dev.langchain4j.service.guardrail.OutputGuardrails;
 import io.quarkiverse.langchain4j.ModelName;
 import io.quarkiverse.langchain4j.RegisterAiService;
+import io.quarkus.runtime.annotations.RegisterForReflection;
 import jakarta.enterprise.context.ApplicationScoped;
 
 /** The other entry sub-agent — same customer-authored ticket, same guardrail (see CategoryAnalyzer). */
 @ApplicationScoped
+@RegisterForReflection // native: the agentic runtime finds the @Agent method by reflection
 @RegisterAiService(modelName = "smaller",
         chatMemoryProviderSupplier = RegisterAiService.NoChatMemoryProviderSupplier.class,
         retrievalAugmentor = RegisterAiService.NoRetrievalAugmentorSupplier.class)
@@ -290,6 +304,7 @@ import dev.langchain4j.service.V;
 import dev.langchain4j.service.guardrail.OutputGuardrails;
 import io.quarkiverse.langchain4j.ModelName;
 import io.quarkiverse.langchain4j.RegisterAiService;
+import io.quarkus.runtime.annotations.RegisterForReflection;
 import jakarta.enterprise.context.ApplicationScoped;
 
 /**
@@ -305,6 +320,7 @@ import jakarta.enterprise.context.ApplicationScoped;
  * (an Object parameter is a mismatch too).
  */
 @ApplicationScoped
+@RegisterForReflection // native: the agentic runtime finds the @Agent method by reflection
 @RegisterAiService(modelName = "main",
         chatMemoryProviderSupplier = RegisterAiService.NoChatMemoryProviderSupplier.class,
         retrievalAugmentor = RegisterAiService.NoRetrievalAugmentorSupplier.class)
@@ -340,8 +356,10 @@ import org.acme.ai.CategoryAnalyzer;
 import org.acme.ai.PriorityAnalyzer;
 import dev.langchain4j.agentic.declarative.ParallelAgent;
 import dev.langchain4j.service.V;
+import io.quarkus.runtime.annotations.RegisterForReflection;
 
 /** Runs the two analyzers concurrently (declarative parallelism — no manual threads here). */
+@RegisterForReflection // native: the agentic runtime finds the @ParallelAgent method by reflection
 public interface WorkersParallel {
 
     @ParallelAgent(outputKey = "workers", subAgents = { CategoryAnalyzer.class, PriorityAnalyzer.class })
@@ -360,6 +378,7 @@ import dev.langchain4j.agentic.declarative.Output;
 import dev.langchain4j.agentic.declarative.SequenceAgent;
 import dev.langchain4j.agentic.scope.AgenticScope;
 import dev.langchain4j.service.V;
+import io.quarkus.runtime.annotations.RegisterForReflection;
 
 /**
  * Sequence: parallel analysis -> synthesis. @Output assembles the result from what each agent
@@ -367,6 +386,7 @@ import dev.langchain4j.service.V;
  * empty answer; the null check here is the backstop for an agent that did not run, and makes
  * the bridge report an error instead of DONE.
  */
+@RegisterForReflection // native: the agentic runtime finds the @SequenceAgent method by reflection
 public interface TriageAgent {
 
     @SequenceAgent(outputKey = "triageFinal", subAgents = { WorkersParallel.class, Synthesizer.class })

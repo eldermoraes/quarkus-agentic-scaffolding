@@ -37,7 +37,9 @@
 #     into one file per marker; the destination package dir comes from each section's own
 #     `package` declaration.
 #   - any other *.java.template is a single file named after its public type; types whose
-#     name ends in "Test" land in src/test/java, everything else in src/main/java.
+#     name ends in "Test" (JVM tests, run by `mvn test`) or "IT" (integration tests, run by
+#     the failsafe plugin under `mvn verify -Dnative`; surefire skips them) land in
+#     src/test/java, everything else in src/main/java.
 #   - application.properties.template -> src/main/resources/application.properties.
 #   - pom.xml.template is a dependency reference: every <dependency> in it (comments
 #     stripped) is injected into the generated pom before </dependencies>.
@@ -123,6 +125,10 @@ MARKER = re.compile(r"/\*\s*=+\s*File:\s*(\S+)\s*=+\s*\*/")
 PKG = re.compile(r"^\s*package\s+([\w.]+)\s*;", re.M)
 TYPE = re.compile(r"(?:class|interface|enum|record)\s+(\w+)")
 
+def is_test(type_name):
+    # *Test: JVM tests (surefire, `mvn test`); *IT: integration tests (failsafe, `mvn verify`).
+    return type_name.endswith("Test") or type_name.endswith("IT")
+
 def write(root, pkg, filename, body):
     d = proj / root / pkg.replace(".", "/")
     d.mkdir(parents=True, exist_ok=True)
@@ -138,13 +144,13 @@ for tpl in sorted(templates.glob("*.java.template")):
             if not pkg:
                 sys.exit(f"ERROR: no package declaration in section {relpath} of {tpl.name}")
             name = pathlib.PurePosixPath(relpath).name
-            root = "src/test/java" if name.endswith("Test.java") else "src/main/java"
+            root = "src/test/java" if is_test(name.removesuffix(".java")) else "src/main/java"
             write(root, pkg.group(1), name, body)
     else:
         pkg, typ = PKG.search(text), TYPE.search(text)
         if not (pkg and typ):
             sys.exit(f"ERROR: cannot derive package/type from {tpl.name}")
-        root = "src/test/java" if typ.group(1).endswith("Test") else "src/main/java"
+        root = "src/test/java" if is_test(typ.group(1)) else "src/main/java"
         write(root, pkg.group(1), typ.group(1) + ".java", text)
 
 props = templates / "application.properties.template"
