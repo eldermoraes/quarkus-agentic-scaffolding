@@ -53,6 +53,34 @@ independent maintenance work. Confirm convention or template changes against the
 before encoding library/framework behavior. This maintenance scope does not relax the tooling
 requirements for applications using the scaffolding.
 
+## Agent skills
+
+The maintainer's engineering skills (from `mattpocock/skills`) expect to be told where this
+repo's tracker, labels and domain docs are. Three files under `docs/agents/` hold that:
+
+- **Issue tracker**: GitHub Issues in this repo, with each spec as the first comment of its
+  ticket and security findings kept out of public issues. See
+  [`docs/agents/issue-tracker.md`](docs/agents/issue-tracker.md); `to-tickets`, `to-spec`,
+  `triage`, `code-review` and `wayfinder` use it.
+- **Triage labels**: the default role names (`needs-triage`, `needs-info`, `ready-for-agent`,
+  `ready-for-human`, `wontfix`, plus the categories `bug` and `enhancement`), all existing labels.
+  See [`docs/agents/triage-labels.md`](docs/agents/triage-labels.md); `triage` uses it, and
+  `to-tickets` and `to-spec` apply `ready-for-agent`.
+- **Domain docs**: single-context, with no glossary or ADR directory; the conventions,
+  `CHANGELOG.md` and `docs/` take their place. See [`docs/agents/domain.md`](docs/agents/domain.md);
+  it says where to look instead of the glossary (`CONTEXT.md`) and ADR directory that skills
+  such as `to-spec`, `to-tickets`, `triage`, `diagnosing-bugs` and `tdd` look for.
+
+The setup skill normally puts this block in `CLAUDE.md`. It lives here instead because this
+repo's `CLAUDE.md` is the conventions file shipped to users and must stay identical to
+`AGENTS.md` and the two seeds in `skills/setup-agentic-scaffolding/templates/`
+(`ci/check-conventions-parity.sh`); maintainer tooling does not belong in it.
+
+An agent does not load `CONTRIBUTING.md` on its own, and only `code-review` opens
+`docs/agents/issue-tracker.md` by path. For the other skills, name these files in the request or
+keep this pointer in a personal instruction file that is not committed. Do not let
+`/setup-matt-pocock-skills` write its block into `CLAUDE.md`: the parity check would fail.
+
 ## Proposing a change
 
 1. **Open an issue** describing the change and the evidence behind it.

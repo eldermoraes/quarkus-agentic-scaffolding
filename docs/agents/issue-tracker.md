@@ -19,8 +19,12 @@ once) instead of relying on `gh` to infer the repo from `git remote -v`.
 
 ## Labels
 
-Labels in use (`gh label list`):
+Labels in use (`gh label list`). [`triage-labels.md`](triage-labels.md) maps the triage roles
+of `/triage` to them.
 
+- `needs-triage`: not yet looked at by a maintainer.
+- `needs-info`: waiting on the reporter for more information.
+- `ready-for-human`: specified; needs a human to do or decide it.
 - `ready-for-agent`: specified and ready for an agent to pick up: the ticket has its `/to-spec`
   spec. A ticket filed without a spec does not carry it.
 - `bug`, `enhancement`, `documentation`: the category of the change.
@@ -28,7 +32,7 @@ Labels in use (`gh label list`):
 - `build failed`: opened and closed by a scheduled workflow that tracks a failing template build
   or link check.
 - GitHub's defaults: `duplicate`, `good first issue`, `help wanted`, `invalid`, `question`,
-  `wontfix`.
+  `wontfix` (also the triage role for work that will not be done).
 
 ## Tickets and specs
 
