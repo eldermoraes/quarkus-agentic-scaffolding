@@ -6,7 +6,7 @@ disable-model-invocation: true
 
 # Audit a Quarkus + LangChain4j Project
 
-# Version: 0.24.0
+# Version: 0.25.0
 
 ## Gate: verify the MCP first
 

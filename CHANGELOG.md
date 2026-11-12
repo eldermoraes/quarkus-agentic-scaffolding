@@ -3,7 +3,7 @@
 All notable changes to this artifact are documented here. This project adheres to semantic
 versioning.
 
-## Unreleased
+## v0.25.0 — 2026-11-12
 
 ### Fixed
 
@@ -106,6 +106,8 @@ versioning.
   "Tools are CDI beans" convention and the audit catalog carry the rule. The boot test asserts
   the MCP-client assistant is offered exactly `customerContext`: on platform 3.40.1.2 it failed
   without the setting (`lookupCustomer` also offered, 20 run, 1 failure) and passes with it.
+  Security advisory GHSA-6wp8-5jvx-r9x6 describes the impact and the one property existing
+  projects need (#160).
 
 ## v0.24.0 — 2026-11-12
 
