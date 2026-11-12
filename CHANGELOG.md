@@ -3,7 +3,7 @@
 All notable changes to this artifact are documented here. This project adheres to semantic
 versioning.
 
-## Unreleased
+## v0.24.0 — 2026-11-12
 
 ### Added
 
@@ -242,9 +242,6 @@ versioning.
   (with the line left `off`, the boot test that expects the sample document in the RAG request
   fails). `docs/VALIDATING-TEMPLATES.md`
   adds the Dev MCP test run on a RAG project to the pre-release procedure.
-  rejection into a 400 with a message of its own and logs it as a rejection. A project
-  scaffolded earlier needs the new `PromptInjectionGuard.validate` and the `try`/`catch` in
-  `ChatResource`.
 - The setup skill registered the MCP servers for opencode in a shape opencode ignores (#115). It
   told the agent to reuse the Cursor `command` + `args` entries under opencode's `mcp` key; opencode
   2.2.7 drops those without an error and `opencode mcp list` prints `No MCP servers configured`.
@@ -312,6 +309,21 @@ versioning.
   agent has no chat memory unless every method keys it with a `@MemoryId`, and `audit-project`
   checks it. A boot test triages two tickets in sequence: on platform 3.40.1.2 the first
   ticket's text is in the second's requests without the change, and all 20 tests pass with it.
+  Security advisory GHSA-v7fm-cr4g-fvqr describes the impact and the change existing projects
+  need (#146).
+
+### Dependencies
+
+- Update the template-validation CI baseline from Quarkus 3.39.3 to 3.40.1.2 (#94, #104, and
+  earlier Renovate updates).
+- Update the quarkus-langchain4j release-watcher baseline from 1.13.1 to 1.15.1 (#93, #102, #140).
+- Update the CI JDK baseline from 25.0.4+7 to 25.0.5+8 (#97).
+- Update the Quarkus Agents MCP installation pin from 1.2.7 to 1.2.13 (#96, #101).
+- Update the Context7 MCP installation pin from 4.1.1 to 4.7.0 (#92, #100, #106).
+- Update `DavidAnson/markdownlint-cli2-action` from v24 to v25 (#98) and `actions/setup-java` to
+  v6.2.0 (#145); both are pinned by commit SHA since #120.
+- The Renovate updates to the skill-pilot starter made since v0.23.4 (#95, #99) are reverted: the
+  starter is back at its recorded versions and excluded from dependency updates (#118).
 
 ## v0.23.4 — 2026-09-14
 
