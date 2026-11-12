@@ -7,11 +7,11 @@ and LangChain4j evolve, two things can rot:
    behind, and
 2. a **library API** the templates use (especially the LangChain4j *agentic* annotations) changes.
 
-This page describes how to confirm the templates still produce a **compiling** project. Run it
-before shipping a release, and whenever you touch a template.
+This page describes how to confirm the templates still produce a project that **compiles,
+starts and answers requests**. Run it before shipping a release, and whenever you touch a template.
 
 > Tooling note: per `CLAUDE.md` §1, do Quarkus work through the **Quarkus Agents MCP**, not raw
-> Maven. The MCP procedure below is primary; the static fallback is for environments (e.g. CI)
+> Maven. The MCP procedure below is primary; the scripted boot test is for environments (e.g. CI)
 > where the MCP and a live Ollama are not available.
 
 ## Primary procedure (Quarkus Agents MCP)
@@ -55,23 +55,54 @@ before shipping a release, and whenever you touch a template.
    `quarkus.langchain4j.embedding-model.provider`), so Easy RAG augmentation is satisfied. A clean
    start means augmentation **and** compilation succeeded.
 
-## Static fallback (JDK 25, no Ollama)
+## Scripted boot test (JDK 25, no Ollama)
 
-When you only need to know *"does the template Java still compile against the current extensions?"*
-— which is what catches agentic-API drift — a plain compile is enough and needs no Ollama:
+`ci/build-from-templates.sh` reconstructs the project and boots it with a fake model, so it needs
+neither the MCP nor a live Ollama:
 
-1. Generate the project as above and materialize the templates.
-2. Remove the `quarkus-langchain4j-easy-rag` dependency from the throwaway pom (it would otherwise
-   require an embedding model and a configured path at *augmentation*; `RagAssistant` compiles
-   without it). The easy-rag coordinate itself is already validated by `quarkus_create` resolving it.
-3. Compile with a JDK 25:
+```
+ci/build-from-templates.sh 3.40.1.2          # boot test against a given platform
+ci/build-from-templates.sh                   # boot test against the latest stable platform
+ci/build-from-templates.sh --compile-only    # quick check: stop after mvn test-compile
+```
 
-   ```
-   JAVA_HOME=/path/to/jdk-25 ./mvnw -B -ntp -DskipTests compile
-   ```
+It needs Maven, python3 and a JDK 25. What it does:
 
-   `BUILD SUCCESS` with `javac [... release 25]` over all source files means every import and
-   annotation the templates use still resolves.
+1. Generates the project with the quarkus-maven-plugin (the extension list above, `-DnoCode`) and
+   materializes every template, as in step 3.
+2. Injects the non-extension dependencies from `pom.xml.template`. Easy RAG and the in-process
+   embedding model stay in.
+3. Applies the boot overlay (`ci/boot_overlay.py`): uncomments the template's RAG keys
+   (`easy-rag.path`, `embedding-model.provider`), the `ops` MCP client keys and the MCP server
+   `root-path`, points the `ops` client at the application's own MCP server on the test port, adds
+   a sample document to the RAG folder and copies the test fixtures into `src/test/java`. A key it
+   must uncomment and cannot find stops the run with the key's name, so a template change cannot
+   silently switch off part of the test.
+4. Runs `mvn -B -ntp test`.
+
+The fixtures live in `ci/fixtures/boot-test/`. They are **CI fixtures, not shipped templates**:
+the `scaffold-project` skill never copies them into a user's project.
+
+- `FakeOllama` is a `QuarkusTestResource` that serves the Ollama chat API from a JDK `HttpServer`
+  and points the default, `main` and `smaller` models at it. It answers plain text, or a JSON
+  object filling every property of the schema a record-returning service sends, and records every
+  request. Its recording API — `requests()`, `userTurns(request)`, `reset()` and
+  `answerNextWith(...)` — is the seam for regression tests on model routing, retrieval scoping,
+  output validation and request isolation, so keep it stable.
+- `EntryServicesBootTest` drives the chat REST endpoint, the triage bridge, the RAG assistant and
+  the MCP-client assistant: ordinary input must produce a recorded model request, and input
+  carrying reserved delimiter markup must be rejected with no model request.
+
+The generated pom carries no REST Assured (`-DnoCode` adds no test dependencies beyond
+`quarkus-junit`), so the fixtures call the endpoint with the JDK `HttpClient`.
+
+**What a green run proves.** Against the platform it ran on: every template compiles; Quarkus
+augmentation and startup succeed with Easy RAG ingesting a document through the in-process
+embedding model, the MCP server and the MCP client connected to it; the `ChatAssistantTest` wiring
+smoke test passes; and each entry service passes ordinary input to the model and rejects reserved
+delimiter markup before any model call. It does **not** prove anything about answer quality or a
+real model's behavior (tool calling, structured output from a live model): the fake answers with
+fixed text.
 
 ## Last validated
 
@@ -114,12 +145,11 @@ When you only need to know *"does the template Java still compile against the cu
 ## Automated validation
 
 Two mechanisms run these drift checks for you. Both are **backstops** — the Quarkus Agents MCP is
-**not** available in CI, so CI reconstructs the project statically (it cannot call `quarkus_create`)
+**not** available in CI, so CI generates the project with the Maven plugin (it cannot call `quarkus_create`)
 and the MCP procedure above stays the source of truth.
 
-**Static compile in CI.** `ci/build-from-templates.sh` scripts the **static fallback** above — it
-reconstructs a project from `templates/` and compiles it — and `.github/workflows/validate-templates.yml`
-runs that script two ways:
+**Boot test in CI.** `.github/workflows/validate-templates.yml` runs the **scripted boot test**
+above (`ci/build-from-templates.sh`, without `--compile-only`) two ways:
 
 - on every **push and pull request**, against the versions pinned in `ci/baseline.env`, so builds
   stay reproducible, and
@@ -143,6 +173,7 @@ whether or not anyone has merged it.
 > installed on the repository. Until then `renovate.json` sits inert and no Dependency Dashboard
 > appears.
 
-Treat CI as a backstop, not a replacement: a green run means the Java still **compiles**, not that a
-full Quarkus augmentation (Easy RAG, model wiring) succeeds — that requires the MCP procedure, which
+Treat CI as a backstop, not a replacement: a green run means the generated project starts and its
+entry services handle requests against a fake model (see "What a green run proves" above). Whether
+a live model behaves as the templates expect still needs the MCP procedure with a real Ollama, which
 remains the source of truth.

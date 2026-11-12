@@ -129,6 +129,20 @@ versioning.
   trace. The commented `@Fallback` example now skips `InputGuardrailException`, so a rejection
   is not answered by the fallback. A project scaffolded earlier needs the new
   `PromptInjectionGuard.validate` and the `try`/`catch` in `ChatResource`.
+- Template validation boots the generated project instead of only compiling it (#114). #107,
+  #108 and #109 all passed CI because `ci/build-from-templates.sh` removed Easy RAG and stopped
+  at `mvn test-compile`. The script now keeps Easy RAG, applies a boot overlay
+  (`ci/boot_overlay.py`: enables the RAG and MCP keys, adds a sample document and the CI fixtures
+  in `ci/fixtures/boot-test/`) and runs `mvn test`: Quarkus starts, the wiring smoke test runs,
+  and `EntryServicesBootTest` drives the chat, triage, RAG and MCP-client entry services against
+  `FakeOllama`, a recording stand-in for the Ollama API, checking that ordinary input reaches the
+  model and reserved delimiter markup does not. `--compile-only` keeps the old quick check. A
+  key the overlay cannot find fails the run by name; `ci/test-boot-overlay.sh` (quality
+  workflow) covers that and the rest of the overlay. On platform 3.40.1.2 the run passes
+  10 tests in about 20 seconds with a warm Maven cache; with the #107 Synthesizer types reverted
+  it fails at augmentation, and with the #109 guard reverted 5 of the 9 boot tests fail. The
+  `validate-templates` job is renamed `boot` and gets a 30-minute timeout;
+  `docs/VALIDATING-TEMPLATES.md` says what a green run proves.
 
 ## v0.23.4 — 2026-09-14
 

@@ -67,9 +67,11 @@ real use.
 All scoring is mechanical ([`score.py`](score.py)); no human or LLM judgment.
 
 1. **Compiles.** The runner runs `mvn -B -ntp -DskipTests test-compile` itself, in the produced
-   project, after the agent exits (5-minute limit). This is the same definition of "compiles" that
-   [`ci/build-from-templates.sh`](../../ci/build-from-templates.sh) applies to the templates; the
-   script itself generates projects from templates, so it cannot score an agent's project.
+   project, after the agent exits (5-minute limit). This is the same check that
+   [`ci/build-from-templates.sh`](../../ci/build-from-templates.sh) runs on the templates with
+   `--compile-only`; the script itself generates projects from templates, so it cannot score an
+   agent's project. "Compiles" is not "starts": the metric does not run the tests or boot
+   Quarkus, which the template validation in CI does by default.
 2. **Convention checks.** Presence/absence predicates derived from the conventions in
    [`CLAUDE.md`](../../CLAUDE.md) / [`AGENTS.md`](../../AGENTS.md), equal weight, Java comments and
    commented-out properties excluded. Two bands, reported separately:
