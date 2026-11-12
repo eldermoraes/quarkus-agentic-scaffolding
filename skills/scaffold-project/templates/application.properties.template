@@ -58,6 +58,10 @@ quarkus.langchain4j.devservices.enabled=false
 # extension and an in-process embedding model
 # (langchain4j-embeddings-bge-small-en-v15-q) are on the classpath. Documents in
 # this folder are ingested into an in-memory store on startup.
+# Easy RAG augments EVERY AI service by default: a service that must not see the
+# retrieved documents opts out with @RegisterAiService(retrievalAugmentor =
+# RegisterAiService.NoRetrievalAugmentorSupplier.class), as the templates' non-RAG
+# services do.
 # The embedding provider must be named: the Ollama extension ships an embedding
 # model too, so two providers are present and the application refuses to start
 # until one is selected.

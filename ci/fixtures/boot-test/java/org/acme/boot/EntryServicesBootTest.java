@@ -36,6 +36,9 @@ class EntryServicesBootTest {
 
     private static final Duration TRIAGE_TIMEOUT = Duration.ofSeconds(30);
 
+    /** A sentence of the sample RAG document, ci/fixtures/boot-test/rag/refund-policy.md. */
+    private static final String SAMPLE_DOCUMENT_TEXT = "Refunds are issued within 14 days of purchase";
+
     /** The response-schema properties of each agent's record (CategoryReport, PriorityReport, TriageReport). */
     private static final Set<String> CATEGORY_AGENT = Set.of("category", "reason");
     private static final Set<String> PRIORITY_AGENT = Set.of("level", "reason");
@@ -102,6 +105,36 @@ class EntryServicesBootTest {
         assertAgentModel(CATEGORY_AGENT, FakeOllama.SMALLER_MODEL, 0.0);
         assertAgentModel(PRIORITY_AGENT, FakeOllama.SMALLER_MODEL, 0.0);
         assertAgentModel(SYNTHESIZER, FakeOllama.MAIN_MODEL, 0.7);
+    }
+
+    @Test
+    void ragAssistantReceivesTheRetrievedDocument() {
+        ragAssistant.ask("How long do refunds take?");
+
+        assertTrue(lastUserTurn(FakeOllama.requests().getFirst()).contains(SAMPLE_DOCUMENT_TEXT),
+                () -> "requests: " + FakeOllama.requests());
+    }
+
+    @Test
+    void chatGetsNoRetrievedContent() throws Exception {
+        postChat("How long do refunds take?");
+
+        assertNoRetrievedContent();
+    }
+
+    @Test
+    void opsAssistantGetsNoRetrievedContent() {
+        ticketOpsAssistant.handle("How long do refunds take?");
+
+        assertNoRetrievedContent();
+    }
+
+    @Test
+    void triageAgentsGetNoRetrievedContent() {
+        triage("How long do refunds take for order 1234?");
+
+        assertEquals(3, FakeOllama.requests().size(), () -> "requests: " + FakeOllama.requests());
+        assertNoRetrievedContent();
     }
 
     @Test
@@ -188,6 +221,15 @@ class EntryServicesBootTest {
         Set<String> names = new HashSet<>();
         request.path("format").path("properties").fieldNames().forEachRemaining(names::add);
         return names;
+    }
+
+    /** Easy RAG augments a service by appending retrieved text to the user message it sends. */
+    private static void assertNoRetrievedContent() {
+        List<JsonNode> requests = FakeOllama.requests();
+        assertTrue(!requests.isEmpty(), "no model request recorded");
+        for (JsonNode request : requests) {
+            assertTrue(!lastUserTurn(request).contains(SAMPLE_DOCUMENT_TEXT), () -> "request: " + request);
+        }
     }
 
     private static void assertNoModelCall() {

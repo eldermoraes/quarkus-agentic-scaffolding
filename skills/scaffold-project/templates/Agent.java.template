@@ -75,9 +75,14 @@ import jakarta.enterprise.context.ApplicationScoped;
  * An agent names its model with @ModelName on the agent method: the agentic extension does not
  * apply the registration's modelName to agent calls, which would otherwise reach the default
  * model. The registration keeps its modelName for any non-agent method.
+ *
+ * No retrieval augmentor: with Easy RAG present its augmentor is applied to every AI service
+ * that does not opt out, appending retrieved documents to the prompt after the ticket's closing
+ * delimiter. Classification needs the ticket only; all three agents opt out.
  */
 @ApplicationScoped
-@RegisterAiService(modelName = "smaller")
+@RegisterAiService(modelName = "smaller",
+        retrievalAugmentor = RegisterAiService.NoRetrievalAugmentorSupplier.class)
 @InputGuardrails(PromptInjectionGuard.class)
 public interface CategoryAnalyzer {
 
@@ -107,7 +112,8 @@ import jakarta.enterprise.context.ApplicationScoped;
 
 /** The other entry sub-agent — same customer-authored ticket, same guardrail (see CategoryAnalyzer). */
 @ApplicationScoped
-@RegisterAiService(modelName = "smaller")
+@RegisterAiService(modelName = "smaller",
+        retrievalAugmentor = RegisterAiService.NoRetrievalAugmentorSupplier.class)
 @InputGuardrails(PromptInjectionGuard.class)
 public interface PriorityAnalyzer {
 
@@ -147,7 +153,8 @@ import jakarta.enterprise.context.ApplicationScoped;
  * (an Object parameter is a mismatch too).
  */
 @ApplicationScoped
-@RegisterAiService(modelName = "main")
+@RegisterAiService(modelName = "main",
+        retrievalAugmentor = RegisterAiService.NoRetrievalAugmentorSupplier.class)
 public interface Synthesizer {
 
     @SystemMessage("""
