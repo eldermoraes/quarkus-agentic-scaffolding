@@ -166,6 +166,25 @@ versioning.
   check, per service, whether the request's user message carries the sample document: on
   platform 3.40.1.2 the chat, MCP-client and triage checks fail without the opt-out and all 15
   tests pass with it.
+- Structured output: an incomplete answer was reported as success, and the listed cloud models
+  ignore the schema (#112). The JSON schema sent to the model marked no field required, a model
+  answering `{}` produced records of nulls, and the triage workflow reported DONE. The records the
+  agents in `Agent.java.template` return now mark their fields `@JsonProperty(required = true)`
+  (the schema then lists them as required), and each agent carries an output guardrail,
+  `CompleteAnswerGuard` (`JsonExtractorOutputGuardrail` from `langchain4j-core` 1.19.3, checked
+  with `javap`), that rejects an answer with a missing, null or blank field or an empty list and
+  asks again; after `quarkus.langchain4j.guardrails.max-retries` attempts (the default 3 made
+  three requests per agent) the call fails, and the triage reports ERROR. The Synthesizer now
+  returns a one-field `Recommendation` instead of a whole `TriageReport`, so the model is no
+  longer asked to repeat the two analyses the workflow already holds; the `@Output` assembly
+  builds the report from the three results. Section 4 of `CLAUDE.md`, `AGENTS.md` and both seeds
+  says a record-returning service carries such a guardrail, and `audit-project` checks it. The
+  cloud-model block of the properties baseline notes that `deepseek-v4-pro:cloud` and
+  `gpt-oss:20b-cloud` did not enforce the JSON schema `format` when tested directly against
+  Ollama, while local `qwen3:1.7b` did. Four boot tests cover it (`{}` or null fields once: a
+  second request and DONE; `{}` always: ERROR before the queued answers run out; required fields
+  in every agent's schema): on platform 3.40.1.2 all four fail without the change and the 19
+  tests pass with it.
 
 ## v0.23.4 — 2026-09-14
 

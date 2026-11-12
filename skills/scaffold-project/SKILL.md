@@ -172,7 +172,8 @@ template delegates to the `TicketTools` bean so one implementation backs both. E
 Use `templates/Agent.java.template`. It shows the full declarative agentic shape:
 
 - individual `@Agent` AI services (sub-agents) returning records, each naming its model with
-  `@ModelName` on the agent method (the registration's `modelName` does not reach agent calls);
+  `@ModelName` on the agent method (the registration's `modelName` does not reach agent calls)
+  and checking its answer with an output guardrail (`CompleteAnswerGuard`, §10);
 - an orchestrator interface using `@SequenceAgent` / `@ParallelAgent` (and the
   `@SupervisorAgent` + `@SupervisorRequest` variant for routing) with `@Output` assembling the
   result from the `AgenticScope`;
@@ -215,6 +216,10 @@ assistant (§9). The guard checks the caller's text (the template variables), no
 prompt, which already holds the template's own delimiters. A rejection throws
 `InputGuardrailException`: the REST resource template turns it into a 400, and the triage bridge
 reports its generic error and logs a rejection, not a failure. An output guardrail can force the model to answer again with `reprompt(…)`.
+Every service that returns a record attaches one: the Agent template's `CompleteAnswerGuard`
+rejects an answer that leaves a field missing, null or blank, asks again, and fails the call
+after `quarkus.langchain4j.guardrails.max-retries` attempts, so the triage reports an error
+instead of DONE with null fields. A JSON schema alone does not make a model comply.
 
 ## 11. `application.properties` baseline
 

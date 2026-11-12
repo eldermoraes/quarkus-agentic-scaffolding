@@ -139,6 +139,9 @@ Optional tooling — not covered by the stop rule above:
   hand-rolled executor or coordination glue between AI services.
 - **Structured output via typed return values.** Have services return records or enums to get
   structured results, and set `temperature=0` for classification and other deterministic tasks.
+  A response schema does not make a model comply, so a service that returns a record carries an
+  output guardrail that rejects an answer with missing or empty fields and asks again, instead of
+  passing on a record of nulls.
 - **Name and right-size models.** Configure models by name (`@RegisterAiService(modelName = "…")`
   on services, `@ModelName("…")` on injected models) and use a small, fast, low-temperature model
   for cheap subtasks (classification, query rewriting) and a larger model for the primary task.
