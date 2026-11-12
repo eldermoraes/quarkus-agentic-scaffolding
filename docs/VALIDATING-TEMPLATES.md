@@ -51,9 +51,19 @@ starts and answers requests**. Run it before shipping a release, and whenever yo
 
 4. **Build/run via the MCP.** Start dev mode (`quarkus_start`) with a real Ollama endpoint reachable
    and an in-process embedding model on the classpath (`langchain4j-embeddings-bge-small-en-v15-q`)
-   plus both keys of the RAG block set (`quarkus.langchain4j.easy-rag.path` and
-   `quarkus.langchain4j.embedding-model.provider`), so Easy RAG augmentation is satisfied. A clean
-   start means augmentation **and** compilation succeeded.
+   plus all three keys of the RAG block set (`quarkus.langchain4j.easy-rag.path`,
+   `quarkus.langchain4j.embedding-model.provider` and
+   `%test.quarkus.langchain4j.easy-rag.ingestion-strategy=off`), so Easy RAG augmentation is
+   satisfied. A clean start means augmentation **and** compilation succeeded.
+
+5. **Run the tests through the Dev MCP**, as `scaffold-project` §12 prescribes:
+   `quarkus_callTool` `devui-testing_runTests` with dev mode up. The dev log must show Easy RAG
+   ingesting at startup (the dev-mode JVM has then loaded the embedding model's native library),
+   and the run must report `ChatAssistantTest#aiServiceIsWired()` passing. A failure reading
+   `Native Library … already loaded in another classloader` means the test profile loaded the
+   embedding model a second time inside that JVM (#113). PR CI cannot run this step (no MCP
+   there), so it is part of the pre-release validation together with the scripted boot test
+   below.
 
 ## Scripted boot test (JDK 25, no Ollama)
 
@@ -73,12 +83,14 @@ It needs Maven, python3 and a JDK 25. What it does:
 2. Injects the non-extension dependencies from `pom.xml.template`. Easy RAG and the in-process
    embedding model stay in.
 3. Applies the boot overlay (`ci/boot_overlay.py`): uncomments the template's RAG keys
-   (`easy-rag.path`, `embedding-model.provider`), the `ops` MCP client keys and the MCP server
-   `root-path`, points the `ops` client at the application's own MCP server on the test port, gives
-   the default, `main` and `smaller` models distinct `%test` model ids (`fake-default`,
-   `fake-main`, `fake-smaller`; a model id is fixed at build time, so the test resource cannot
-   set it), adds a sample document to the RAG folder and copies the test fixtures into
-   `src/test/java`. A key it
+   (`easy-rag.path`, `embedding-model.provider`, and the test-profile `ingestion-strategy`, which
+   it then sets back to `on`: the template skips ingestion in tests so continuous testing works,
+   while this test runs in its own JVM and asserts on retrieved passages), the `ops` MCP client
+   keys and the MCP server `root-path`, points the `ops` client at the application's own MCP
+   server on the test port, gives the default, `main` and `smaller` models distinct `%test` model
+   ids (`fake-default`, `fake-main`, `fake-smaller`; a model id is fixed at build time, so the
+   test resource cannot set it), adds a sample document to the RAG folder and copies the test
+   fixtures into `src/test/java`. A key it
    must uncomment and cannot find stops the run with the key's name, so a template change cannot
    silently switch off part of the test.
 4. Runs `mvn -B -ntp test`.

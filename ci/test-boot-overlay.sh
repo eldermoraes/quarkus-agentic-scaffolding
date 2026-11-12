@@ -4,8 +4,9 @@
 # overlay runs on a minimal project holding the real application.properties.template.
 #   1. on the shipped template it enables the RAG, MCP-client and MCP-server keys, each at its
 #      first (primary) occurrence, leaving the commented alternatives alone;
-#   2. it points the "ops" MCP client at the app's own MCP server on the test port and gives
-#      the default, "main" and "smaller" models distinct %test model ids;
+#   2. it points the "ops" MCP client at the app's own MCP server on the test port, gives the
+#      default, "main" and "smaller" models distinct %test model ids, and turns the template's
+#      test-profile Easy RAG ingestion (off, #113) back on for the boot test;
 #   3. it adds the RAG documents under the configured easy-rag.path and the Java fixtures
 #      under src/test/java;
 #   4. a key it must enable that the template no longer has fails the run, naming the key;
@@ -60,6 +61,14 @@ has_line "$PROPS" '%test.quarkus.langchain4j.mcp.ops.url=http://localhost:${quar
 has_line "$PROPS" '%test.quarkus.langchain4j.ollama.chat-model.model-id=fake-default' "default model gets its own test id"
 has_line "$PROPS" '%test.quarkus.langchain4j.ollama.main.chat-model.model-id=fake-main' "main model gets its own test id"
 has_line "$PROPS" '%test.quarkus.langchain4j.ollama.smaller.chat-model.model-id=fake-smaller' "smaller model gets its own test id"
+# The template turns ingestion off in the test profile (#113); the boot test needs it on.
+has_line "$PROPS" '%test.quarkus.langchain4j.easy-rag.ingestion-strategy=on' \
+  "boot test re-enables Easy RAG ingestion in the test profile"
+if grep -qE '^(# *)?%test\.quarkus\.langchain4j\.easy-rag\.ingestion-strategy=off' "$PROPS"; then
+  fail "the template's test-profile ingestion-strategy=off line survived the overlay"
+else
+  pass "no test-profile ingestion-strategy=off line left"
+fi
 active="$(grep -cE '^quarkus\.langchain4j\.embedding-model\.provider=' "$PROPS" || true)"
 if [[ "$active" == 1 ]]; then
   pass "exactly one embedding provider active"
@@ -73,16 +82,19 @@ for f in src/main/resources/rag/refund-policy.md \
 done
 
 # 4. A key the overlay must enable disappears from the template.
-P="$TMP/missing-key"
-new_project "$P"
-grep -v 'quarkus.mcp.server.http.root-path' "$TEMPLATE" >"$P/src/main/resources/application.properties"
-if python3 "$OVERLAY" "$P" "$FIXTURES" >"$TMP/out" 2>&1; then
-  fail "missing key: overlay succeeded"
-elif grep -q 'quarkus.mcp.server.http.root-path' "$TMP/out"; then
-  pass "missing key: failed loudly, naming the key"
-else
-  fail "missing key: failed without naming the key: $(cat "$TMP/out")"
-fi
+for key in quarkus.mcp.server.http.root-path %test.quarkus.langchain4j.easy-rag.ingestion-strategy; do
+  P="$TMP/missing-key"
+  rm -rf "$P"
+  new_project "$P"
+  grep -vF "$key" "$TEMPLATE" >"$P/src/main/resources/application.properties"
+  if python3 "$OVERLAY" "$P" "$FIXTURES" >"$TMP/out" 2>&1; then
+    fail "missing key $key: overlay succeeded"
+  elif grep -qF "$key" "$TMP/out"; then
+    pass "missing key $key: failed loudly, naming the key"
+  else
+    fail "missing key $key: failed without naming the key: $(cat "$TMP/out")"
+  fi
+done
 
 # 5. Easy RAG removed from the pom.
 P="$TMP/no-easy-rag"

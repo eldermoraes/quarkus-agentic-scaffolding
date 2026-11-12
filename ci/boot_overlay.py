@@ -7,7 +7,9 @@ Turns the materialized project into one that `mvn test` can start without a live
      and embedding-provider selection, so it must not be dropped);
   2. uncomments the template's RAG, MCP-client and MCP-server keys in application.properties,
      each at its first commented occurrence (the template's primary choice, not the
-     alternatives listed after it);
+     alternatives listed after it), then sets the RAG block's test-profile
+     ingestion-strategy back to on: the template skips ingestion in tests for continuous
+     testing (#113), while the boot test runs in its own JVM and asserts on retrieval;
   3. copies the sample documents into the folder the uncommented easy-rag.path names;
   4. adds a %test override pointing the "ops" MCP client at the application's own MCP server
      on the Quarkus test port, so the client has a server to connect to;
@@ -28,10 +30,12 @@ import re
 import shutil
 import sys
 
+TEST_INGESTION_KEY = "%test.quarkus.langchain4j.easy-rag.ingestion-strategy"
 # Keys the template ships commented out and the boot test needs active, in template order.
 KEYS_TO_ENABLE = (
     "quarkus.langchain4j.easy-rag.path",
     "quarkus.langchain4j.embedding-model.provider",
+    TEST_INGESTION_KEY,
     "quarkus.langchain4j.mcp.ops.transport-type",
     "quarkus.langchain4j.mcp.ops.url",
     "quarkus.mcp.server.http.root-path",
@@ -87,6 +91,19 @@ def main(argv):
              + ", ".join(missing)
              + "; the boot overlay must enable it. Update KEYS_TO_ENABLE in ci/boot_overlay.py "
                "together with the template.")
+
+    # The template skips ingestion in the test profile so continuous testing inside the
+    # dev-mode JVM does not load the embedding model's native library twice (#113). The boot
+    # test runs under `mvn test` in a JVM of its own and asserts on retrieved passages, so it
+    # turns ingestion back on, in place.
+    template_line = f"\n{TEST_INGESTION_KEY}={values[TEST_INGESTION_KEY]}\n"
+    if template_line not in text:
+        fail(f"cannot turn ingestion back on: no line {template_line.strip()!r} in "
+             f"{props_path} after enabling the keys")
+    text = text.replace(template_line,
+                        f"\n# Boot test: ingestion back on (see ci/boot_overlay.py).\n"
+                        f"{TEST_INGESTION_KEY}=on\n", 1)
+    values[TEST_INGESTION_KEY] = "on"
 
     mcp_root = values["quarkus.mcp.server.http.root-path"]
     text = text.rstrip("\n") + (
