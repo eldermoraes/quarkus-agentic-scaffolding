@@ -208,7 +208,10 @@ Use `templates/Guardrails.java.template`: `PromptInjectionGuard` (an `InputGuard
 output guardrail example, attached with `@InputGuardrails(…)` / `@OutputGuardrails(…)`. Wire
 `PromptInjectionGuard` onto every entry method that receives externally originated text: the
 entry agents in the Agent template (§8), the AI service (§4), the MCP client (§6), and the RAG
-assistant (§9). An output guardrail can force the model to answer again with `reprompt(…)`.
+assistant (§9). The guard checks the caller's text (the template variables), not the rendered
+prompt, which already holds the template's own delimiters. A rejection throws
+`InputGuardrailException`: the REST resource template turns it into a 400, and the triage bridge
+reports its generic error and logs a rejection, not a failure. An output guardrail can force the model to answer again with `reprompt(…)`.
 
 ## 11. `application.properties` baseline
 

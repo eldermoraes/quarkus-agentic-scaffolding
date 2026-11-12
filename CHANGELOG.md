@@ -116,6 +116,19 @@ versioning.
   embeddings as the commented alternative; `RagSetup.java.template`, `scaffold-project` §9 and
   §11 and `docs/VALIDATING-TEMPLATES.md` describe the same two-key setup. CI did not see it
   because the validation build removes Easy RAG before compiling.
+- `PromptInjectionGuard` rejected every prompt the templates send (#109). It inspected the
+  rendered user message, which already contains the `<problem>`, `<ticket>`, `<question>` and
+  `<request>` delimiters the templates add, so each call failed with "Input rejected: it contains
+  reserved delimiter markup": `POST /chat` answered 500 and the triage socket its generic error,
+  with no model request made. The guard now validates the caller-supplied template variables
+  (falling back to the user message for a method without any), so ordinary input passes, a
+  smuggled closing tag is still rejected, and the 4,000-character limit measures the caller's
+  text alone, as the REST and WebSocket edges do. `RestResource.java.template` turns a guard
+  rejection into a 400 with a message of its own and logs it as a rejection; the triage bridge
+  keeps its generic client error and logs a rejection at info instead of an error with a stack
+  trace. The commented `@Fallback` example now skips `InputGuardrailException`, so a rejection
+  is not answered by the fallback. A project scaffolded earlier needs the new
+  `PromptInjectionGuard.validate` and the `try`/`catch` in `ChatResource`.
 
 ## v0.23.4 — 2026-09-14
 
