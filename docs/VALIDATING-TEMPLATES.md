@@ -3,7 +3,8 @@
 The templates in `skills/scaffold-project/templates/` are the product. As Quarkus
 and LangChain4j evolve, two things can rot:
 
-1. the pinned **platform version** in `pom.xml.template` falls behind, and
+1. the **platform version** the templates were last built against (`ci/baseline.env`) falls
+   behind, and
 2. a **library API** the templates use (especially the LangChain4j *agentic* annotations) changes.
 
 This page describes how to confirm the templates still produce a **compiling** project. Run it
@@ -29,13 +30,21 @@ before shipping a release, and whenever you touch a template.
    owns the shell. Instead, confirm the generated `pom.xml` imports both `quarkus-bom` and
    `quarkus-langchain4j-bom` under `io.quarkus.platform`, and that the extension list above still
    resolves. Then confirm the **non-extension** deps in `pom.xml.template`
-   (`langchain4j-embeddings-bge-small-en-v15-q`, `langchain4j-document-parser-apache-pdfbox`) still
-   resolve via the BOM with no explicit `<version>`.
+   (`langchain4j-embeddings-bge-small-en-v15-q`, `langchain4j-document-parser-apache-pdfbox`, and
+   the test-scoped `quarkus-langchain4j-testing-evaluation-junit5`) still resolve via the BOM with
+   no explicit `<version>`.
 
-3. **Materialize the templates** into `src/main/java/org/acme/` and `src/main/resources/`:
+3. **Materialize the templates** into `src/main/java/org/acme/` and `src/main/resources/` (the
+   same mapping `ci/build-from-templates.sh` applies; the templates import each other, so a
+   partial set does not compile):
    - copy `AiService.java.template` → `ai/ChatAssistant.java`
    - copy `RestResource.java.template` → `rest/ChatResource.java`
+   - copy `Tools.java.template` → `tools/TicketTools.java`
+   - copy `Guardrails.java.template` → `guardrails/PromptInjectionGuard.java`
+   - copy `McpClient.java.template` → `ai/TicketOpsAssistant.java`
+   - copy `McpServer.java.template` → `mcp/TriageMcpServer.java`
    - copy `RagSetup.java.template` → `rag/RagAssistant.java`
+   - copy `AiServiceTest.java.template` → `src/test/java/org/acme/ai/ChatAssistantTest.java`
    - copy `application.properties.template` → `resources/application.properties`
    - split `Agent.java.template` into its per-file sections (each block is headed by a
      `/* ===== File: <path> ===== */` marker) under `dto/`, `ai/`, `workflow/`, `web/`.
@@ -114,18 +123,20 @@ runs that script two ways:
 - on every **push and pull request**, against the versions pinned in `ci/baseline.env`, so builds
   stay reproducible, and
 - on a **weekly cron (Mondays, 05:00 UTC)**, against the **live latest stable** Quarkus platform
-  (the highest `x.y.z` in Maven Central's metadata; Alpha/Beta/CR pre-releases are skipped), so a
+  (the highest purely numeric version in Maven Central's metadata, platform respins such as
+  `3.40.1.1` included; Alpha/Beta/CR pre-releases are skipped), so a
   new release that breaks the templates is caught even when nothing in the repo changed.
 
 A failing scheduled run opens a tracking issue (labeled `build failed`), or comments on the
-existing one; close it manually once a later run is green.
+existing one; the next green scheduled run closes it automatically.
 
 **Release watching (Renovate).** `renovate.json` watches the entries in `ci/baseline.env` and
-surfaces new releases on the repo's **Dependency Dashboard** issue for approval — it raises no
-automatic PRs. It tracks the Quarkus platform (`quarkus-bom`, via Maven Central), the
-`quarkus-langchain4j` BOM, and new OpenJDK GA releases (via the `java-version` datasource). Ticking a
-dashboard checkbox is what turns a noticed release into a bump; independently, the weekly cron above
-catches breakage whether or not anyone has ticked it.
+opens a PR for each new release (`dependencyDashboardApproval` is `false`); the repo's
+**Dependency Dashboard** issue lists what is open or pending. It tracks the Quarkus platform (`quarkus-bom`, via Maven Central), the
+`quarkus-langchain4j` BOM, and new OpenJDK GA releases (via the `java-version` datasource), plus
+the pinned MCP versions in the setup skill, the README and `gemini-extension.json`. Merging the PR
+is what turns a noticed release into a bump; independently, the weekly cron above catches breakage
+whether or not anyone has merged it.
 
 > **Activation is a user action.** Renovate only runs once the **Mend Renovate GitHub App** is
 > installed on the repository. Until then `renovate.json` sits inert and no Dependency Dashboard

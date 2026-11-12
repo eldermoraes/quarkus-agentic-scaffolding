@@ -505,7 +505,7 @@ Two more things worth knowing:
 - **`CLAUDE.md` is often not in git.** Do not count on `git checkout` to undo this — that is what
   the backup in step 1 is for.
 
-Step 4 uses `grep -q '[^[:space:]]'` rather than a size test on purpose: a file containing only the
+Step 4b uses `grep -q '[^[:space:]]'` rather than a size test on purpose: a file containing only the
 block reduces to exactly 0 bytes, but a block with a blank line on each side leaves a 2-byte
 whitespace-only file. Interior blank lines double up after removal; that is cosmetic, and yours to
 tidy.
@@ -534,9 +534,14 @@ instruction files once at startup.
 ├── CLAUDE.md                 # Always-on project conventions (drop into your project root)
 ├── AGENTS.md                 # Codex/Bob equivalent of the always-on project conventions
 ├── CONTRIBUTING.md           # How to propose changes
+├── SECURITY.md               # Trust boundary of the skills; how to report a vulnerability
 ├── CHANGELOG.md              # Release history
 ├── LICENSE                   # Apache-2.0
 ├── .gitignore
+├── renovate.json             # Release watcher: platform baseline and the pinned MCP versions
+├── .github/                  # CI: quality gates, template validation, ecosystem watcher, release
+├── ci/                       # Scripts and tests behind those workflows (see CONTRIBUTING.md)
+├── evals/                    # Skill-effectiveness eval and the earlier Codex pilot, with results
 ├── .claude-plugin/           # Claude installable-plugin + marketplace manifests
 │   ├── plugin.json
 │   └── marketplace.json
@@ -552,10 +557,16 @@ instruction files once at startup.
 │   ├── install-bob-skill.sh    # Fallback: copy the skills into a project's (or global) .bob/skills/
 │   └── uninstall-bob-skill.sh  # The mirror: remove them again (see Uninstall)
 ├── docs/
-│   └── VALIDATING-TEMPLATES.md   # How to verify the templates still build
+│   ├── VALIDATING-TEMPLATES.md   # How to verify the templates still build
+│   ├── AGENTIC-COMPENSATION.md   # Decision record: why compensation is not a default convention
+│   ├── ANTHROPIC-SUBMISSION.md   # Community-marketplace submission kit
+│   ├── EVOLUTION-PLAN.md         # Frontier audit and action plan (2026-07-10)
+│   └── FLOW-REDESIGN-PLAN.md     # Three-skill flow redesign plan (2026-07-21)
 └── skills/
     ├── setup-agentic-scaffolding/   # User-invoked: prerequisites (toolchain, MCP, conventions)
     │   ├── SKILL.md
+    │   ├── references/
+    │   │   └── bob-mcp.md               # Bob MCP registration procedure
     │   └── templates/
     │       ├── conventions-CLAUDE.md    # Byte-for-byte seed copy of root CLAUDE.md
     │       └── conventions-AGENTS.md    # Byte-for-byte seed copy of root AGENTS.md

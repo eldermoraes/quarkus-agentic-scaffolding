@@ -1,8 +1,8 @@
 # Bob MCP registration
 
 Bob 2.0.0 ships `bob mcp add|add-json|list|remove`, so prefer the CLI over hand-writing JSON — it
-writes the file Bob actually reads and `bob mcp list` is a real verification. Four things to know:
-three the CLI enforces, one Bob's loader does.
+writes the file Bob actually reads and `bob mcp list` is a real verification. Five things to know:
+three the CLI enforces, two Bob's loader does.
 
 - **Probe for the legacy file BEFORE the first `add` — this ordering is load-bearing.** Bob migrates
   `~/.bob/settings/mcp_settings.json` into `mcp.json` **only when `mcp.json` does not yet exist**.
