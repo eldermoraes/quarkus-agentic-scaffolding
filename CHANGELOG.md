@@ -99,6 +99,14 @@ versioning.
   wording and a section reference in `setup-agentic-scaffolding`, and the commented `@Skills`
   example in `AiService.java.template`, which now names its model. `.gitignore` covers
   `.DS_Store` and JVM crash logs.
+- `Agent.java.template` did not start (#107). The Synthesizer agent took the two upstream
+  analyses as `Object` parameters, and the agentic extension rejects that at build time
+  (`Parameter no.0 of method 'synthesize' ... was expected to be of type
+  'org.acme.dto.CategoryReport'`), in every extension version checked back to 1.9.2. Dev mode and
+  `mvn test` failed, while `mvn test-compile` (the only thing CI ran) passed. The parameters are
+  now typed as `CategoryReport` and `PriorityReport`. A project scaffolded from the earlier
+  template needs the same change in `Synthesizer.java` to start: the two parameter types and
+  their imports.
 
 ## v0.23.4 — 2026-09-14
 
