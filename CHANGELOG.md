@@ -241,6 +241,18 @@ versioning.
   rather than extending it, the `config:recommended` defaults are restated. A local
   `renovate --platform=local --dry-run=extract` (44.198.0) finds the same package files as before
   except the starter POM, so `ci/baseline.env` and the MCP pins stay tracked.
+- `scripts/install-bob-skill.sh` overwrote a skill of the user's own that had the same
+  directory name (#119). With a user-authored `audit-project` (its own `SKILL.md`, a
+  `templates/` file and a `references/` file) in `.bob/skills/`, the installer replaced the
+  `SKILL.md`, deleted both folders and printed "Installed 'audit-project'"; it also wrote through
+  a symlinked skill directory into its target. The installer now applies the uninstaller's
+  ownership rule: an existing directory is refreshed (stale supporting files still removed) only
+  when its `SKILL.md` declares our name, while a foreign or manifest-less directory or a symlink
+  is skipped with a warning, the other skills are still installed, and the exit status is 1. The
+  rule is one `declared_skill_name` function copied into both scripts, so each still runs on its
+  own, and the new `ci/test-install-bob-skill.sh` (wired into the quality workflow) fails if the
+  copies differ. That test failed 14 assertions against the old installer and passes on macOS
+  bash 3.2 with BSD tools and on Ubuntu 24.04.
 
 ## v0.23.4 — 2026-09-14
 

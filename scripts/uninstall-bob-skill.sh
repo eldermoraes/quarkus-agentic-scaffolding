@@ -42,6 +42,19 @@ Usage:
 EOF
 }
 
+# BEGIN ownership rule — kept identical in install-bob-skill.sh and uninstall-bob-skill.sh
+# (ci/test-install-bob-skill.sh compares the two copies). Each script carries its own copy so it
+# still runs on its own. Prints the name that $1/SKILL.md declares in its front matter, or
+# nothing when there is no readable SKILL.md. Reading through a symlink is fine: read-only.
+declared_skill_name() {
+  if [[ -f "$1/SKILL.md" && -r "$1/SKILL.md" ]]; then
+    awk '/^name:/ {
+      sub(/^name:[[:space:]]*/, ""); sub(/[[:space:]]+$/, ""); print; exit
+    }' "$1/SKILL.md" | tr -d '\r'
+  fi
+}
+# END ownership rule
+
 case "${1:-}" in
   -h|--help) usage; exit 0 ;;
   --global)  BASE="$HOME" ;;
@@ -63,13 +76,7 @@ for SKILL_NAME in "${SKILL_NAMES[@]}"; do
     continue
   fi
 
-  # Ownership check. Reading through a symlink is fine - this is read-only.
-  DECLARED=""
-  if [[ -f "$DEST/SKILL.md" ]]; then
-    DECLARED="$(awk '/^name:/ {
-      sub(/^name:[[:space:]]*/, ""); sub(/[[:space:]]+$/, ""); print; exit
-    }' "$DEST/SKILL.md" | tr -d '\r')"
-  fi
+  DECLARED="$(declared_skill_name "$DEST")"
   if [[ "$DECLARED" != "$SKILL_NAME" ]]; then
     echo "Skipped '$SKILL_NAME': SKILL.md declares '${DECLARED:-<none>}', not ours — left in place" >&2
     continue
