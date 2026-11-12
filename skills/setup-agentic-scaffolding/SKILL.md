@@ -142,10 +142,10 @@ secrets by design (see the context7 note above), so "exact" is literal: what you
 | Gemini CLI | `gemini mcp add -s project quarkus-agent jbang --java 21+ io.quarkus:quarkus-agent-mcp:1.2.13:runner` · `gemini mcp add -s project context7 npx -y @upstash/context7-mcp@4.5.1` (project scope — `gemini mcp add` defaults to `--scope project`; replace `-s project` with `-s user` to register them for every project) — **or** install this repo's Gemini extension, which already declares both servers | `gemini mcp list` | No — restart |
 | Cursor | Write `.cursor/mcp.json` with both servers (`mcpServers` map, same command/args) | Settings → MCP shows both; user **toggles them on** | GUI enable |
 | GitHub Copilot CLI | `copilot mcp add quarkus-agent -- jbang --java 21+ io.quarkus:quarkus-agent-mcp:1.2.13:runner` · `copilot mcp add context7 -- npx -y @upstash/context7-mcp@4.5.1` | `copilot mcp list` | **Yes** — live immediately |
-| opencode | Write `opencode.json` `mcp` key with both servers | `/mcp` in session | **Yes** — hot reload |
+| opencode | Write `opencode.json` `mcp` key with both servers, in opencode's own `type: local` shape (below) | `opencode mcp list` in the project directory shows both `connected`; the first call after a change may print `No MCP servers configured`, so run it once more — a second such line means the entry was ignored | **Yes** — hot reload |
 | Bob (read §5.1 first) | `bob mcp add -s global quarkus-agent jbang -- --java 21+ io.quarkus:quarkus-agent-mcp:1.2.13:runner` · `bob mcp add -s global context7 npx -- -y @upstash/context7-mcp@4.5.1` — the `--` is mandatory, and `-s global` is machine-wide: state that to the user and offer `-s workspace` to stack-mixers (both §5.1) | `bob mcp list` shows both, `stdio`, `global` (or `workspace`) | **Yes** — Bob restarts changed servers |
 
-The `.cursor/mcp.json`, `opencode.json`, and `.bob/mcp.json` map has the same shape everywhere:
+The `.cursor/mcp.json` and `.bob/mcp.json` map has the same shape everywhere:
 
 ```json
 {
@@ -156,8 +156,24 @@ The `.cursor/mcp.json`, `opencode.json`, and `.bob/mcp.json` map has the same sh
 }
 ```
 
-(opencode uses the top-level `mcp` key rather than `mcpServers`; keep the two server entries the
-same. Bob is not in that list — its paths and its CLI are §5.1.)
+(Bob is not in that list — its paths and its CLI are §5.1.)
+
+**opencode reads a different entry shape — never reuse the one above.** Its servers sit under the
+top-level `mcp` key, and each local server is `"type": "local"` with the launcher and all of its
+arguments in one `command` array. An entry in the `command` + `args` shape above is dropped without
+an error: opencode loads no MCP section and `opencode mcp list` prints `No MCP servers configured`.
+
+```json
+{
+  "mcp": {
+    "quarkus-agent": { "type": "local", "command": ["jbang", "--java", "21+", "io.quarkus:quarkus-agent-mcp:1.2.13:runner"] },
+    "context7":      { "type": "local", "command": ["npx", "-y", "@upstash/context7-mcp@4.5.1"] }
+  }
+}
+```
+
+`opencode mcp list` prints each server's status, not its command; read the stored command back
+from `opencode debug config`, which shows the resolved `command` array of every entry.
 
 **Every config-file registration is a read-modify-write with an approved diff.** For
 `.cursor/mcp.json`, `opencode.json`, `.bob/mcp.json`, or any hand-written entry: read the existing

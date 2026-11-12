@@ -202,6 +202,19 @@ versioning.
   (with the line left `off`, the boot test that expects the sample document in the RAG request
   fails). `docs/VALIDATING-TEMPLATES.md`
   adds the Dev MCP test run on a RAG project to the pre-release procedure.
+  rejection into a 400 with a message of its own and logs it as a rejection. A project
+  scaffolded earlier needs the new `PromptInjectionGuard.validate` and the `try`/`catch` in
+  `ChatResource`.
+- The setup skill registered the MCP servers for opencode in a shape opencode ignores (#115). It
+  told the agent to reuse the Cursor `command` + `args` entries under opencode's `mcp` key; opencode
+  2.2.7 drops those without an error and `opencode mcp list` prints `No MCP servers configured`.
+  §5 now carries opencode's own example (`"type": "local"` with the launcher, `--java 21+` and the
+  pinned coordinate in one `command` array), checked by writing that block into a fresh project
+  and running `opencode mcp list`, which showed both servers `connected`. The verify column names
+  `opencode mcp list` and allows one retry, because its first call after a change printed
+  `No MCP servers configured` for the valid entry too, and `opencode debug config` reads the stored
+  command back. `ci/test_mcp_opencode_form.py` shows that the command consistency check counts the
+  opencode form and fails it without the Java pin, and that both Renovate managers match its pins.
 
 ## v0.23.4 — 2026-09-14
 
