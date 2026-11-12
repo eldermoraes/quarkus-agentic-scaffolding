@@ -3,15 +3,18 @@ on:
   push:
     branches: [main]
     paths: ['skills/**', 'ci/**', '.github/actions/**', '.github/workflows/validate-templates.yml']
+  # No paths filter on pull requests: `boot` is a required status check on main, and a required
+  # check that never starts blocks the pull request. Pushes to main keep the filter; nothing
+  # waits on a push run, and its change was booted on the pull request that brought it in.
   pull_request:
-    paths: ['skills/**', 'ci/**', '.github/actions/**', '.github/workflows/validate-templates.yml']
   schedule:
     - cron: '0 5 * * 1'   # weekly, Monday 05:00 UTC: validate against LIVE latest platform
   workflow_dispatch:
 
-# Each job declares what it needs. `issues: write` goes only to the jobs that open or close a
-# tracking issue through the local issue-by-title action; the third-party link checker runs
-# without it.
+# Each job declares what it needs. The jobs that run third-party code (the boot test builds and
+# runs the generated project with Maven; the link check runs lychee) hold `contents: read` only.
+# `issues: write` goes only to the report jobs, which run the local issue-by-title action on
+# scheduled runs to open or close a tracking issue.
 permissions:
   contents: read
 
@@ -20,12 +23,14 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      issues: write
     # Generating the project, resolving dependencies on a cold cache and starting Quarkus for
     # the tests fit well inside this; a hung boot or test fails the job instead of idling.
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # Nothing in this job pushes; keep the token out of .git/config while Maven runs.
+          persist-credentials: false
       - name: Load baseline versions
         run: grep -v '^#' ci/baseline.env >> "$GITHUB_ENV"
       - uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6.1.0
@@ -47,14 +52,26 @@ jobs:
           else
             ci/build-from-templates.sh "$QUARKUS_PLATFORM_VERSION"
           fi
+
+  # Reports the boot test's outcome from a separate job, so the generated project's build never
+  # runs with a token that can write issues.
+  boot-report:
+    needs: boot
+    if: always() && github.event_name == 'schedule'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Track failure in an issue
-        if: failure() && github.event_name == 'schedule'
+        if: needs.boot.result == 'failure'
         uses: ./.github/actions/issue-by-title
         with:
           title: Template build failed on scheduled run
           token: ${{ secrets.GITHUB_TOKEN }}
       - name: Close the tracking issue once the run recovers
-        if: success() && github.event_name == 'schedule'
+        if: needs.boot.result == 'success'
         uses: ./.github/actions/issue-by-title
         with:
           title: Template build failed on scheduled run
