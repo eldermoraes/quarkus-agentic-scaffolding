@@ -135,7 +135,12 @@ Optional tooling — not covered by the stop rule above:
   memory. Prefer this over manual `ChatModel` wiring unless there is a documented reason.
 - **Tools are CDI beans.** Expose actions to a model with `@Tool` methods on `@ApplicationScoped`
   beans, wired via `@RegisterAiService(tools = …)` or `@ToolBox` — never hand-rolled JSON function
-  dispatch. Tool methods doing I/O follow the §2 virtual-thread rules.
+  dispatch. Tool methods doing I/O follow the §2 virtual-thread rules. A project with an MCP
+  server sets `quarkus.mcp.server.support-langchain4j-annotations=false`: the MCP server extension
+  (`mcp-server-http` or `mcp-server-stdio`) otherwise publishes every LangChain4j `@Tool` to its
+  clients, so a tool meant for the
+  application's own model is offered over MCP only through an MCP `@Tool`
+  (`io.quarkiverse.mcp.server`) that delegates to it.
 - **Multi-agent workflows are composed declaratively.** Build agentic workflows from
   `@RegisterAiService` agents annotated with `@Agent(name, description, outputKey)` and orchestrate
   them with the LangChain4j Agentic annotations — `@SequenceAgent`, `@ParallelAgent`,

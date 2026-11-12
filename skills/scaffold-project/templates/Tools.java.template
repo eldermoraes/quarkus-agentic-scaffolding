@@ -12,6 +12,13 @@ import jakarta.enterprise.context.ApplicationScoped;
  *   - globally, for every method of an AI service:  @RegisterAiService(tools = TicketTools.class)
  *   - per AI-service method:                         @ToolBox(TicketTools.class)
  *
+ * Exposure: this dev.langchain4j @Tool reaches only the AI services wired to it. An MCP server
+ *   in the same application (mcp-server-http or mcp-server-stdio) would also publish it to
+ *   every MCP client unless quarkus.mcp.server.support-langchain4j-annotations=false: the
+ *   properties baseline carries that line, commented, in its MCP server block, to uncomment
+ *   with the block. To offer one of these methods over MCP, add an MCP @Tool that delegates to
+ *   it (McpServer.java.template).
+ *
  * Blocking: tools run blocking by default. Annotate a method to change that —
  *   @Blocking (caller thread), @NonBlocking (event loop; for Uni/CompletionStage returns), or
  *   @RunOnVirtualThread for blocking I/O (DB/REST) so it stays off the event loop

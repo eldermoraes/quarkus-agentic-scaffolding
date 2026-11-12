@@ -165,8 +165,13 @@ to offer them to any MCP client over Streamable HTTP at `/mcp`
 (`quarkus.mcp.server.http.root-path`). Requires the `mcp-server-http` extension
 (`io.quarkiverse.mcp`); use `mcp-server-stdio` instead when a desktop client spawns the app as
 a subprocess. Do not confuse the two `@Tool` annotations: `io.quarkiverse.mcp.server.Tool` offers a method to remote
-MCP clients, while `dev.langchain4j.agent.tool.Tool` (§5) offers it to your own model — the
-template delegates to the `TicketTools` bean so one implementation backs both. Enable
+MCP clients, while `dev.langchain4j.agent.tool.Tool` (§5) offers it to your own model. Either
+server extension (`mcp-server-http` or `mcp-server-stdio`) also publishes every LangChain4j
+`@Tool` over MCP unless `quarkus.mcp.server.support-langchain4j-annotations=false` (build time).
+The baseline's MCP server block carries that line commented, so uncomment it with the rest of
+the block: `/mcp` then serves only MCP `@Tool` methods. To offer a
+LangChain4j tool over MCP, opt in per method as the template does — an MCP `@Tool` that
+delegates to the `TicketTools` bean, so one implementation backs both. Enable
 `quarkus.mcp.server.traffic-logging.enabled=true` to watch the JSON-RPC exchanges in dev.
 
 ## 8. Agent scaffolding
@@ -263,7 +268,7 @@ model for cheap subtasks, generous timeouts, request/response logging (dev mode 
 classpath path, valid for the packaged application) and how to point it at an external folder,
 the embedding-provider selection, and a test-profile setting that skips ingestion in tests (§9,
 §12). A commented MCP client block
-declares the named `ops` client used in §6. A commented MCP server block sets the Streamable HTTP path and traffic logging for §7. A commented
+declares the named `ops` client used in §6. A commented MCP server block sets the Streamable HTTP path and traffic logging for §7 and carries the line that keeps LangChain4j tools off the MCP server (it must be uncommented with the block; its header says that an MCP server extension without it publishes every LangChain4j tool). A commented
 Security block sketches the production OIDC settings and the HTTP authorization policy covering
 the WebSocket and MCP paths (§8). A commented observability block wires OTLP trace export and
 prompt/completion capture. Every key that records user content is `%dev.`-scoped, so uncommenting

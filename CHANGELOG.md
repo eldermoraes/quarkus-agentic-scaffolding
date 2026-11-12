@@ -93,6 +93,19 @@ versioning.
   and that the AWT error is macOS-only is inferred from its message: nothing ran on Linux. With
   the shipped profile part and no script override, `--native` ran surefire 26/26 and failsafe
   `Tests run: 3, Failures: 0`, the executable logging `Ingested 1 files`.
+- The scaffolded MCP server publishes only its own tools. The MCP server extensions
+  (`mcp-server-http`, `mcp-server-stdio`) also offer every LangChain4j `@Tool` method to MCP
+  clients while `quarkus.mcp.server.support-langchain4j-annotations` keeps its default `true`
+  (build-time setting, `quarkus-mcp-server-core` 2.0.4 config metadata), so a tool meant for the
+  application's own model was callable over `/mcp`. The commented MCP server block of
+  `application.properties.template` now carries
+  `quarkus.mcp.server.support-langchain4j-annotations=false`, to be uncommented with the rest
+  of the block, and its header warns that adding an MCP server extension without that line
+  publishes every LangChain4j tool. `McpServer.java.template` and `Tools.java.template`
+  describe what each `@Tool` exposes and how to opt in (an MCP `@Tool` that delegates); the
+  "Tools are CDI beans" convention and the audit catalog carry the rule. The boot test asserts
+  the MCP-client assistant is offered exactly `customerContext`: on platform 3.40.1.2 it failed
+  without the setting (`lookupCustomer` also offered, 20 run, 1 failure) and passes with it.
 
 ## v0.24.0 — 2026-11-12
 
