@@ -11,6 +11,14 @@
  * one, as in the commented examples, or a fake chat endpoint the test points the model's
  * base-url at (the scaffolding's own CI drives every entry service that way).
  *
+ * RAG projects: run through the Dev MCP (devui-testing_runTests), this test starts inside the
+ * dev-mode JVM, which already loaded the in-process embedding model's native tokenizer library
+ * during startup ingestion. A second load from the test classloader fails with
+ * "UnsatisfiedLinkError: Native Library ... already loaded in another classloader", so keep
+ * %test.quarkus.langchain4j.easy-rag.ingestion-strategy=off from the RAG block of
+ * application.properties uncommented: the test application then never loads the model. Do not
+ * call a RAG-augmented service here; retrieval loads the model and fails the same way.
+ *
  * Only quarkus-junit is required on the test classpath for the active test to compile and run.
  * The commented model-dependent and evaluation examples additionally need a live Ollama and,
  * for evals, the quarkus-langchain4j-testing-evaluation-junit5 dependency (already added,

@@ -59,7 +59,7 @@ quarkus.langchain4j.devservices.enabled=false
 # ============================================================================
 
 # ============================================================================
-# RAG (Easy RAG) — uncomment BOTH keys when the quarkus-langchain4j-easy-rag
+# RAG (Easy RAG) — uncomment ALL THREE keys when the quarkus-langchain4j-easy-rag
 # extension and an in-process embedding model
 # (langchain4j-embeddings-bge-small-en-v15-q) are on the classpath. Documents in
 # this folder are ingested into an in-memory store on startup.
@@ -70,9 +70,18 @@ quarkus.langchain4j.devservices.enabled=false
 # The embedding provider must be named: the Ollama extension ships an embedding
 # model too, so two providers are present and the application refuses to start
 # until one is selected.
+# The %test line skips ingestion in tests, so the test application does not load
+# the in-process model at startup. Continuous testing (Dev UI / the Dev MCP's
+# devui-testing_runTests) runs the tests inside the dev-mode JVM, where dev mode
+# has already loaded the model's native tokenizer library; a second load from the
+# test classloader fails with "UnsatisfiedLinkError: Native Library ... already
+# loaded in another classloader". The store stays empty in tests. A test that
+# needs retrieved passages must turn ingestion back on, so it cannot run through
+# continuous testing; it runs in a JVM of its own (`mvn test`, e.g. in CI).
 # ============================================================================
 # quarkus.langchain4j.easy-rag.path=src/main/resources/rag
 # quarkus.langchain4j.embedding-model.provider=dev.langchain4j.model.embedding.onnx.bgesmallenv15q.BgeSmallEnV15QuantizedEmbeddingModel
+# %test.quarkus.langchain4j.easy-rag.ingestion-strategy=off
 ## Alternative: embed through Ollama instead of in-process (pull an embedding model
 ## first and set quarkus.langchain4j.ollama.embedding-model.model-id to it):
 # quarkus.langchain4j.embedding-model.provider=ollama
