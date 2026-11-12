@@ -41,6 +41,7 @@ KEYS_TO_ENABLE = (
     "quarkus.langchain4j.mcp.ops.transport-type",
     "quarkus.langchain4j.mcp.ops.url",
     "quarkus.mcp.server.http.root-path",
+    "quarkus.mcp.server.support-langchain4j-annotations",
 )
 # Distinct model ids per configured model; FakeOllama.java names the same values.
 TEST_MODEL_IDS = (

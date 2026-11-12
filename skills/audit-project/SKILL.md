@@ -160,6 +160,7 @@ emit the §5.0 finding only and mark the §5 check as subsumed by it — do not 
 |---|---|---|
 | Declarative AI services | AI-service classes | `@RegisterAiService` interfaces, **not** manual `ChatModel` wiring |
 | Tools as CDI beans | tool dispatch | `@Tool` methods on `@ApplicationScoped` beans, **not** hand-rolled JSON function dispatch |
+| MCP server publishes only MCP tools | `mcp-server-http` / `mcp-server-stdio` with LangChain4j `@Tool` methods (`dev.langchain4j.agent.tool`) in the project | `application.properties` sets `quarkus.mcp.server.support-langchain4j-annotations=false` unscoped (the key is fixed at build time, and a `%dev.`-only setting leaves the production build publishing every LangChain4j tool); unset or `true`, the extension also publishes every LangChain4j tool to MCP clients |
 | Declarative agentic composition | multi-agent orchestration | `@Agent` + `@SequenceAgent` / `@ParallelAgent` / `@SupervisorAgent` / `@Output`, **no** hand-rolled executor glue |
 | Agents name their model | `@Agent` methods on `@RegisterAiService` interfaces | each `@Agent` method carries `@ModelName("…")` (`io.quarkiverse.langchain4j`); a `modelName` on the registration alone does not reach agent calls, which then go to the default model |
 | Retrieval scoped to RAG services | `@RegisterAiService` interfaces when Easy RAG or a `RetrievalAugmentor` bean is present | every service that is not meant to answer from retrieved documents declares `retrievalAugmentor = RegisterAiService.NoRetrievalAugmentorSupplier.class`; without it the augmentor appends retrieved text to that service's prompts |
@@ -219,7 +220,7 @@ row here and no entry in the list below, so adding a convention means deciding h
 | §3 | Build for both JVM and native | Native profile present; Native integration tests; Native reflection registrations |
 | §3 | Disable Dev Services when an external model endpoint is configured | Dev Services disabled for real endpoint |
 | §4 | Declarative AI services are the default | Declarative AI services |
-| §4 | Tools are CDI beans | Tools as CDI beans |
+| §4 | Tools are CDI beans | Tools as CDI beans; MCP server publishes only MCP tools |
 | §4 | Multi-agent workflows are composed declaratively | Declarative agentic composition |
 | §4 | Structured output via typed return values | Typed output, zero temperature; Record results are validated |
 | §4 | Name and right-size models | Named models; Agents name their model |

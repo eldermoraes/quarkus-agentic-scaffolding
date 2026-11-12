@@ -57,6 +57,8 @@ has_line "$PROPS" '# quarkus.langchain4j.embedding-model.provider=ollama' "Ollam
 has_line "$PROPS" 'quarkus.langchain4j.mcp.ops.transport-type=streamable-http' "MCP client transport enabled"
 has_line "$PROPS" '# quarkus.langchain4j.mcp.ops.transport-type=stdio' "stdio alternative stays commented"
 has_line "$PROPS" 'quarkus.mcp.server.http.root-path=/mcp' "MCP server root-path enabled"
+has_line "$PROPS" 'quarkus.mcp.server.support-langchain4j-annotations=false' \
+  "MCP server keeps LangChain4j tools unpublished"
 # The ${...} is a Quarkus property expression, matched literally, so no shell expansion.
 # shellcheck disable=SC2016
 has_line "$PROPS" '%test.quarkus.langchain4j.mcp.ops.url=http://localhost:${quarkus.http.test-port:8081}/mcp' \
@@ -85,7 +87,8 @@ for f in src/main/resources/rag/refund-policy.md \
 done
 
 # 4. A key the overlay must enable disappears from the template.
-for key in quarkus.mcp.server.http.root-path %test.quarkus.langchain4j.easy-rag.ingestion-strategy; do
+for key in quarkus.mcp.server.http.root-path quarkus.mcp.server.support-langchain4j-annotations \
+           %test.quarkus.langchain4j.easy-rag.ingestion-strategy; do
   P="$TMP/missing-key"
   rm -rf "$P"
   new_project "$P"

@@ -330,10 +330,15 @@ class EntryServicesBootTest {
         ticketOpsAssistant.handle("Close ticket 42.");
 
         assertSingleRequestCarrying("Close ticket 42.");
-        // The tools offered to the model come from the application's own MCP server, so a
-        // non-empty list proves the MCP client connected to it.
-        assertTrue(FakeOllama.requests().getFirst().path("tools").size() > 0,
-                () -> "request: " + FakeOllama.requests().getFirst());
+        // The tools offered to the model come from the application's own MCP server, so they
+        // are that server's tool list: exactly the methods annotated with the MCP @Tool. A
+        // LangChain4j @Tool (TicketTools.lookupCustomer) appearing here means the server
+        // publishes the model's internal tools to every MCP client.
+        JsonNode request = FakeOllama.requests().getFirst();
+        Set<String> offered = new HashSet<>();
+        request.path("tools")
+                .forEach(tool -> offered.add(tool.path("function").path("name").asText()));
+        assertEquals(Set.of("customerContext"), offered, () -> "request: " + request);
     }
 
     @Test

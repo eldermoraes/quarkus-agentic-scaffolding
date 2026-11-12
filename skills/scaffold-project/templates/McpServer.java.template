@@ -19,8 +19,16 @@ import jakarta.inject.Inject;
  *
  * Two different @Tool annotations exist in this stack — do not mix them up:
  *   io.quarkiverse.mcp.server.Tool   offers a method to REMOTE MCP clients (this file);
- *   dev.langchain4j.agent.tool.Tool  offers a method to YOUR OWN model (Tools.java.template).
- * Here the MCP tool delegates to the same TicketTools bean, so one implementation backs both.
+ *   dev.langchain4j.agent.tool.Tool  offers a method to the application's own AI services
+ *                                    (Tools.java.template).
+ * The MCP server extension (mcp-server-http or mcp-server-stdio) also publishes every
+ * dev.langchain4j @Tool method as an MCP tool unless
+ * quarkus.mcp.server.support-langchain4j-annotations=false. The properties baseline carries
+ * that line, commented, in its MCP server block: uncomment it with the rest of the block
+ * (build-time setting, unscoped). With it, the server serves only the methods in this file.
+ * To offer a LangChain4j tool over MCP, opt in per method as below: an MCP @Tool that
+ * delegates to the TicketTools bean, so one implementation backs both. Setting the property
+ * to true instead publishes ALL LangChain4j tools of the application.
  *
  * The declaring type is turned into a CDI bean automatically; @Inject works as usual.
  * @Prompt and @Resource (same package) expose reusable prompts and data the same way.
