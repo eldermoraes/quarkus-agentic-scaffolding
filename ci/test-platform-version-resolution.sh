@@ -4,11 +4,12 @@
 # The weekly validate-templates run (schedule, no argument) used to take Maven's <latest>
 # hint verbatim. On 2026-10-05 that hint was 4.0.0.Beta1, a Quarkus 4 pre-release whose
 # platform has no langchain4j-mcp, and the run failed (#79). The script now reads every
-# <version>, drops pre-releases and keeps the highest x.y.z. These fixtures pin that:
+# <version>, drops pre-releases and keeps the highest stable version. These fixtures pin that:
 #   1. a pre-release at the top of the list (and in <latest>/<release>) is skipped;
 #   2. ordering is numeric, not lexical (3.40.1 > 3.9.9, 3.10.0 > 3.9.0);
 #   3. every pre-release qualifier is dropped, in any letter case;
-#   4. metadata with no stable version at all fails loudly instead of printing nothing.
+#   4. metadata with no stable version at all fails loudly instead of printing nothing;
+#   5. a platform respin (x.y.z.n, e.g. 3.40.1.2) is stable and outranks its x.y.z base.
 #
 # Fixtures are fed through PLATFORM_METADATA_URL with a file:// URL, so no network is used.
 set -euo pipefail
@@ -85,6 +86,12 @@ expect_resolves "$TMP/qualifiers.xml" 3.40.1 "Alpha/Beta/CR/RC/M/SNAPSHOT all ig
 # 4. No stable version: must fail, not print an empty version.
 write_metadata "$TMP/no-stable.xml" 4.0.0.Beta1 4.0.0.Alpha1 4.0.0.Beta1
 expect_fails "$TMP/no-stable.xml" "metadata without any stable version"
+
+# 5. Platform respins: the 2026-11 shape, where the resolver used to drop 3.40.1.1 and
+# 3.40.1.2 as "not x.y.z" and validated 3.40.1, older than the baseline in ci/baseline.env.
+write_metadata "$TMP/respin.xml" 4.0.0.CR1 \
+  3.40.0.CR1 3.40.1.1 3.40.1.2 3.40.1 3.40.1.10 4.0.0.CR1
+expect_resolves "$TMP/respin.xml" 3.40.1.10 "platform respins (x.y.z.n) count as stable"
 
 if [[ "$failures" == 0 ]]; then
   echo 'OK: latest-stable platform resolution behaves as documented on all fixtures'

@@ -37,7 +37,9 @@ if [ -z "$latest" ]; then
   exit 1
 fi
 
-minor_of() { printf '%s' "${1%.*}"; }
+# First two fields only: the platform baseline may be a respin (3.40.1.1), whose minor line is
+# still 3.40.
+minor_of() { printf '%s' "$1" | cut -d. -f1,2; }
 baseline_minor=$(minor_of "$baseline")
 latest_minor=$(minor_of "$latest")
 

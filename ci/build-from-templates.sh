@@ -12,7 +12,8 @@
 #     Maven's <latest>/<release> hints are ignored on purpose: they point at pre-releases too
 #     (2026-10-05: 4.0.0.Beta1, whose platform has no langchain4j-mcp, failed the weekly run).
 #     Instead every <version> is read, pre-releases (Alpha/Beta/CR/RC/M/SNAPSHOT — anything not
-#     x.y.z) are dropped and the highest remaining version wins.
+#     purely numeric) are dropped and the highest remaining version wins. Platform respins
+#     carry a fourth numeric field (3.40.1.1) and are stable releases, so they count.
 #   --resolve-only: print the resolved stable version and exit, generating nothing (used by
 #     ci/test-platform-version-resolution.sh and handy for a quick manual check).
 # Env: WORKDIR (optional) — where the throwaway project is generated.
@@ -40,13 +41,13 @@ EXTENSIONS="rest,rest-jackson,smallrye-openapi,websockets-next,langchain4j-ollam
 PLATFORM_METADATA_URL="${PLATFORM_METADATA_URL:-https://repo1.maven.org/maven2/io/quarkus/platform/quarkus-bom/maven-metadata.xml}"
 
 # Sort version strings ascending. GNU sort has -V (the Ubuntu runner); macOS/BSD sort
-# does not, so fall back to a numeric sort on the three dot-separated fields (enough,
-# because only x.y.z strings ever reach this function).
+# does not, so fall back to a numeric sort on the four dot-separated fields (enough,
+# because only x.y.z and x.y.z.n strings ever reach this function).
 sort_versions() {
   if sort -V </dev/null >/dev/null 2>&1; then
     sort -V
   else
-    sort -t. -k1,1n -k2,2n -k3,3n
+    sort -t. -k1,1n -k2,2n -k3,3n -k4,4n
   fi
 }
 
@@ -58,11 +59,12 @@ resolve_latest_stable_platform() {
   metadata="$(curl -fsSL "$PLATFORM_METADATA_URL")" || {
     echo "ERROR: could not fetch $PLATFORM_METADATA_URL" >&2; return 1; }
   versions="$(printf '%s\n' "$metadata" | grep -o '<version>[^<]*</version>' | sed 's/<[^>]*>//g')"
-  # Stable = plain x.y.z. This drops Alpha, Beta, CR, RC, M and SNAPSHOT qualifiers in any
-  # letter case, since every one of them adds a suffix beyond the third numeric field.
-  stable="$(printf '%s\n' "$versions" | grep -E '^[0-9]+\.[0-9]+\.[0-9]+$' || true)"
+  # Stable = purely numeric: x.y.z, or x.y.z.n for a platform respin (3.40.1.1). This drops
+  # Alpha, Beta, CR, RC, M and SNAPSHOT qualifiers in any letter case, since every one of
+  # them adds a non-numeric suffix.
+  stable="$(printf '%s\n' "$versions" | grep -E '^[0-9]+\.[0-9]+\.[0-9]+(\.[0-9]+)?$' || true)"
   chosen="$(printf '%s\n' "$stable" | sort_versions | tail -n 1)"
-  [[ -n "$chosen" ]] || { echo "ERROR: no stable (x.y.z) version in $PLATFORM_METADATA_URL" >&2; return 1; }
+  [[ -n "$chosen" ]] || { echo "ERROR: no stable (x.y.z or x.y.z.n) version in $PLATFORM_METADATA_URL" >&2; return 1; }
   hinted="$(printf '%s\n' "$metadata" | sed -n 's:.*<latest>\(.*\)</latest>.*:\1:p' | head -n 1)"
   if [[ -n "$hinted" && "$hinted" != "$chosen" ]]; then
     echo "==> Resolved latest stable platform $chosen (metadata <latest> is $hinted; pre-release ignored)" >&2

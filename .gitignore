@@ -7,6 +7,9 @@ docs/superpowers/
 .idea/
 .vscode/
 *.iml
+.DS_Store
+# JVM crash logs
+hs_err_pid*.log
 
 # Personal, local-only notes - never committed
 ANALYSIS.md

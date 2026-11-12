@@ -86,6 +86,19 @@ versioning.
   `--resolve-only` flag and `ci/test-platform-version-resolution.sh`, a fixture test (wired
   into the quality workflow) covering a Beta at the top of the list, numeric ordering, every
   qualifier and metadata with no stable version.
+- Count platform respins as stable in that resolution. The filter kept only `x.y.z`, so it
+  dropped `3.40.1.1` and `3.40.1.2` and the weekly "live latest" run validated `3.40.1`, older
+  than the `3.40.1.1` baseline that PR builds already use. `ci/build-from-templates.sh` now
+  accepts a fourth numeric field, with a fixture for it in
+  `ci/test-platform-version-resolution.sh`; `ci/check-upstream-release.sh` takes the minor line
+  from the first two fields, so a four-field baseline no longer compares as `3.40.1`.
+- Documentation that had drifted from the code: `docs/VALIDATING-TEMPLATES.md` (Renovate opens
+  PRs, a recovered scheduled run closes its tracking issue, the materialize list covers every
+  template, `pom.xml.template` pins no platform version), the README file tree and its step
+  reference in the uninstall notes, the bullet count in the Bob MCP reference, the superpowers
+  wording and a section reference in `setup-agentic-scaffolding`, and the commented `@Skills`
+  example in `AiService.java.template`, which now names its model. `.gitignore` covers
+  `.DS_Store` and JVM crash logs.
 
 ## v0.23.4 — 2026-09-14
 

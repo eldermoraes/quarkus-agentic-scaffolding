@@ -59,7 +59,7 @@ touching anything.
 
 | Tool | Probe | Why it is needed | If missing (present, then confirm) |
 |---|---|---|---|
-| JDK 25+ / GraalVM | `java -version` | Language baseline (§2); GraalVM adds native builds | Install a JDK 25 (Temurin/GraalVM) **through a package manager** — `sdk install java` (SDKMAN) or the Homebrew / Chocolatey / Scoop equivalent; recommend GraalVM for native |
+| JDK 25+ / GraalVM | `java -version` | Language baseline (conventions §2); GraalVM adds native builds | Install a JDK 25 (Temurin/GraalVM) **through a package manager** — `sdk install java` (SDKMAN) or the Homebrew / Chocolatey / Scoop equivalent; recommend GraalVM for native |
 | JBang | `jbang --version` | Launches the Quarkus Agents MCP server (§5) | Install JBang **through a package manager** — `sdk install jbang` (SDKMAN), `brew install jbang` (Homebrew), `choco install jbang` / `scoop install jbang` (Windows) |
 | Container runtime | `docker version` / `podman version` | Quarkus Dev Services (model containers, stores) | Install Docker Desktop or Podman **through a package manager** (Homebrew, Chocolatey, Scoop) |
 | Maven / Quarkus CLI | `mvn -version` / `quarkus --version` | Build tool (the generated project ships `mvnw`, so this is optional) | Optional — recommend the Quarkus CLI only if the user wants it |
@@ -220,7 +220,7 @@ wrote `AGENTS.md` (Phase C) ends in a conversation that has not read it. Close w
 
 ## 6. Superpowers (detect and guide — never auto-install)
 
-`superpowers` skills are used wherever applicable in this stack, but they are a **third-party
+`superpowers` skills are optional in this stack (conventions §1) and they are a **third-party
 plugin** — this skill **detects** them and **presents install commands for the user to run**; it
 **never auto-installs** them.
 

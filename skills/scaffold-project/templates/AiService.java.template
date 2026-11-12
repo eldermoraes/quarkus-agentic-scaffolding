@@ -93,7 +93,7 @@ public interface ChatAssistant {
     //
     //   import io.quarkiverse.langchain4j.skills.Skills;
     //
-    //   @RegisterAiService
+    //   @RegisterAiService(modelName = "main")
     //   @Skills                       // every discovered skill
     //   public interface ChatAssistant { ... }
     //
