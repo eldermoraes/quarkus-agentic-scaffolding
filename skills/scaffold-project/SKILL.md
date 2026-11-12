@@ -4,7 +4,7 @@ description: Scaffold Quarkus + LangChain4j projects end-to-end and add agentic 
 ---
 
 # Quarkus + LangChain4j Scaffolding
-# Version: 0.23.4
+# Version: 0.24.0
 
 **Prerequisites.** Invoke this skill as `/scaffold-project`, or as
 `/quarkus-agentic-scaffolding:scaffold-project` when it is installed as a plugin; it also triggers
