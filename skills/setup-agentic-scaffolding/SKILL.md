@@ -145,7 +145,7 @@ secrets by design (see the context7 note above), so "exact" is literal: what you
 | opencode | Write `opencode.json` `mcp` key with both servers, in opencode's own `type: local` shape (below) | `opencode mcp list` in the project directory shows both `connected`; the first call after a change may print `No MCP servers configured`, so run it once more — a second such line means the entry was ignored | **Yes** — hot reload |
 | Bob (read §5.1 first) | `bob mcp add -s global quarkus-agent jbang -- --java 21+ io.quarkus:quarkus-agent-mcp:1.2.13:runner` · `bob mcp add -s global context7 npx -- -y @upstash/context7-mcp@4.5.1` — the `--` is mandatory, and `-s global` is machine-wide: state that to the user and offer `-s workspace` to stack-mixers (both §5.1) | `bob mcp list` shows both, `stdio`, `global` (or `workspace`) | **Yes** — Bob restarts changed servers |
 
-The `.cursor/mcp.json` and `.bob/mcp.json` map has the same shape everywhere:
+Cursor's `.cursor/mcp.json` and Bob's `mcp.json` share this `mcpServers` shape:
 
 ```json
 {
@@ -156,7 +156,10 @@ The `.cursor/mcp.json` and `.bob/mcp.json` map has the same shape everywhere:
 }
 ```
 
-(Bob is not in that list — its paths and its CLI are §5.1.)
+For Bob the shape is the same; what differs is where the file lives and how it is written. Bob
+has a project file (`<project>/.bob/mcp.json`) and a global one (`~/.bob/settings/mcp.json`), and
+registration goes through `bob mcp add` first, with a hand-written entry only when no `bob` CLI is
+on PATH — both in §5.1.
 
 **opencode reads a different entry shape — never reuse the one above.** Its servers sit under the
 top-level `mcp` key, and each local server is `"type": "local"` with the launcher and all of its

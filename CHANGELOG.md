@@ -215,6 +215,12 @@ versioning.
   `No MCP servers configured` for the valid entry too, and `opencode debug config` reads the stored
   command back. `ci/test_mcp_opencode_form.py` shows that the command consistency check counts the
   opencode form and fails it without the Java pin, and that both Renovate managers match its pins.
+- The setup skill said both that Bob's MCP file has the shared `mcpServers` shape and, in the note
+  under the example, that "Bob is not in that list" (#116). §5 now states once that Cursor's and
+  Bob's files share the shape, as the workspace seed in the Bob reference does, and that what
+  differs for Bob is where the file lives (project and global) and how it is written (`bob mcp add`
+  first, a hand-written entry only without the CLI), with the pointer to §5.1 kept. Text-only fix,
+  checked against `references/bob-mcp.md`; not verified against a running Bob.
 
 ## v0.23.4 — 2026-09-14
 
