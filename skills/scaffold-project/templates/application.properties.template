@@ -53,12 +53,19 @@ quarkus.langchain4j.devservices.enabled=false
 # ============================================================================
 
 # ============================================================================
-# RAG (Easy RAG) — uncomment when the quarkus-langchain4j-easy-rag extension and
-# an in-process embedding model (langchain4j-embeddings-bge-small-en-v15-q) are on
-# the classpath. Documents in this folder are ingested into an in-memory store on
-# startup; the in-process embedding model is detected automatically (no config).
+# RAG (Easy RAG) — uncomment BOTH keys when the quarkus-langchain4j-easy-rag
+# extension and an in-process embedding model
+# (langchain4j-embeddings-bge-small-en-v15-q) are on the classpath. Documents in
+# this folder are ingested into an in-memory store on startup.
+# The embedding provider must be named: the Ollama extension ships an embedding
+# model too, so two providers are present and the application refuses to start
+# until one is selected.
 # ============================================================================
 # quarkus.langchain4j.easy-rag.path=src/main/resources/rag
+# quarkus.langchain4j.embedding-model.provider=dev.langchain4j.model.embedding.onnx.bgesmallenv15q.BgeSmallEnV15QuantizedEmbeddingModel
+## Alternative: embed through Ollama instead of in-process (pull an embedding model
+## first and set quarkus.langchain4j.ollama.embedding-model.model-id to it):
+# quarkus.langchain4j.embedding-model.provider=ollama
 
 # ============================================================================
 # MCP client — uncomment when the langchain4j-mcp extension is present. Declares
