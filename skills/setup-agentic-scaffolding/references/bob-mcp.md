@@ -22,7 +22,7 @@ three the CLI enforces, two Bob's loader does.
   unpinned `quarkus-agent` command nor the `context7` entry every version bump leaves behind. Use
   `bob mcp add-json`, which overwrites in place — still the CLI, so the file Bob reads stays the
   one being written. One form per server:
-  `bob mcp add-json -s <scope> quarkus-agent '{"command":"jbang","args":["--java","21+","io.quarkus:quarkus-agent-mcp:1.2.13:runner"]}'`
+  `bob mcp add-json -s <scope> quarkus-agent '{"command":"jbang","args":["--java","21+","io.quarkus:quarkus-agent-mcp:1.2.15:runner"]}'`
   · `bob mcp add-json -s <scope> context7 '{"command":"npx","args":["-y","@upstash/context7-mcp@4.7.0"]}'`.
   Show the user the current entry and confirm before overwriting; `bob mcp remove` then `add`
   works too, but loses the entry if the add fails.
